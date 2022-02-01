@@ -11,36 +11,36 @@ let common_config = {
         use: 'ts-loader',
         exclude: [
           /node_modules/,
-           path.join(__dirname, 'dist')
+          path.join(__dirname, 'dist')
         ]
       }
     ]
   },
   resolve: {
     extensions: [ '.tsx', '.ts', '.js' ]
-  },
+  }
 }
 
 module.exports = [
   Object.assign({}, common_config, {
     target: 'electron-main',
     entry: {
-      main: './src/main/index.ts',
+      main: './src/main/index.ts'
     },
     output: {
       filename: 'index.js',
       path: path.join(__dirname, 'dist/main')
-    },
+    }
   }),
   Object.assign({}, common_config, {
     target: 'electron-renderer',
     entry: {
-      renderer: './src/renderer/index.ts',
+      renderer: './src/renderer/index.ts'
     },
     output: {
       filename: 'index.js',
       path: path.join(__dirname, 'dist/renderer')
     },
-    plugins: [new HtmlWebpackPlugin()]
+    plugins: [ new HtmlWebpackPlugin() ]
   })
 ]
