@@ -1,3 +1,4 @@
+const HtmlWebpackPlugin = require('html-webpack-plugin')
 const path = require('path')
 
 let common_config = {
@@ -27,7 +28,7 @@ module.exports = [
       main: './src/main/index.ts',
     },
     output: {
-      filename: 'index.cjs',
+      filename: 'index.js',
       path: path.join(__dirname, 'dist/main')
     },
   }),
@@ -37,9 +38,9 @@ module.exports = [
       renderer: './src/renderer/index.ts',
     },
     output: {
-      filename: 'index.cjs',
-      path: path.join(__dirname, 'dist/renderer'),
-      asyncChunks: true
+      filename: 'index.js',
+      path: path.join(__dirname, 'dist/renderer')
     },
+    plugins: [new HtmlWebpackPlugin()]
   })
 ]
