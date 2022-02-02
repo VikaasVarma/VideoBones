@@ -1,0 +1,19 @@
+{
+  "appId": "app.videobones.editor",
+  "mac": {
+    "category": "public.app-category.video"
+  },
+  "files": [
+    "./build/main/**"
+  ],
+  "extraResources": [
+    "./assets/**",
+    {
+      "from": "./build/renderer",
+      "to": "renderer/"
+    }
+  ],
+  "directories": {
+    "buildResources": "assets"
+  }
+}
