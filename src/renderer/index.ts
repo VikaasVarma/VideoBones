@@ -1,1 +1,1 @@
-document.body.textContent = 'test'
+import './styles/reset.sass'
