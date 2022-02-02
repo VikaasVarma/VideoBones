@@ -11,6 +11,7 @@ let common_config = {
         use: 'ts-loader',
         exclude: [
           /node_modules/,
+          path.join(__dirname, 'build'),
           path.join(__dirname, 'dist')
         ]
       },
@@ -19,6 +20,7 @@ let common_config = {
         use: ['style-loader', 'css-loader', 'sass-loader'],
         exclude: [
           /node_modules/,
+          path.join(__dirname, 'build'),
           path.join(__dirname, 'dist')
         ]
       },
@@ -41,7 +43,7 @@ module.exports = [
     },
     output: {
       filename: 'index.js',
-      path: path.join(__dirname, 'dist/main')
+      path: path.join(__dirname, 'build/main')
     }
   }),
   Object.assign({}, common_config, {
@@ -51,7 +53,7 @@ module.exports = [
     },
     output: {
       filename: 'index.js',
-      path: path.join(__dirname, 'dist/renderer')
+      path: path.join(__dirname, 'build/renderer')
     },
     plugins: [ new HtmlWebpackPlugin() ]
   })

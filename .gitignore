@@ -1,4 +1,7 @@
 node_modules/
-.DS_Store
-*.log
+build/
 dist/
+
+.DS_Store
+
+*.log
