@@ -1,11 +1,18 @@
 {
   "name": "video-bones",
   "version": "1.0.0",
-  "description": "",
+  "description": "A simple-to-use video editor",
+  "main": "build/main/index.js",
   "scripts": {
-    "start": "electron dist/main/index.js",
-    "clean": "rimraf dist",
-    "build": "npm run clean && webpack --config webpack.config.js",
+    "start": "electron .",
+    "clean": "rimraf build dist",
+    "dev": "npm run bundle -- --watch",
+    "bundle": "webpack --config webpack.config.js",
+    "dist": "npm run dist:windows && npm run dist:mac && npm run dist:linux",
+    "dist:windows": "electron-builder --windows --config electron-builder.json",
+    "dist:mac": "electron-builder --macos --config electron-builder.json",
+    "dist:linux": "electron-builder --linux --config electron-builder.json",
+    "build": "npm run clean && NODE_ENV=production npm run bundle && npm run dist",
     "lint": "npm run lint:js && npm run lint:css",
     "lint:fix": "npm run lint:js -- --fix && npm run lint:css -- --fix",
     "lint:css": "stylelint --aei \"src/**/*.{css,scss,sass}\"",
@@ -23,13 +30,14 @@
   },
   "homepage": "https://github.com/VikaasVarma/VideoBones#readme",
   "dependencies": {
-    "electron": "^17.0.0"
   },
   "devDependencies": {
     "@types/node": "^17.0.14",
     "@typescript-eslint/eslint-plugin": "^5.10.2",
     "@typescript-eslint/parser": "^5.10.2",
     "css-loader": "^6.5.1",
+    "electron": "^17.0.0",
+    "electron-builder": "^22.14.5",
     "eslint": "^8.8.0",
     "html-webpack-plugin": "^5.5.0",
     "rimraf": "^3.0.2",
@@ -43,5 +51,6 @@
     "typescript": "^4.5.5",
     "webpack": "^5.68.0",
     "webpack-cli": "^4.9.2"
-  }
+  },
+  "private": true
 }

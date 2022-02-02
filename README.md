@@ -8,11 +8,15 @@ Stable downloads can be obtained from the Releases page [ TODO ].
 
 Requirements: node 16.13.0+ (Download LTS from https://nodejs.org, check version with `node -v`) and npm 8.1.0+ which should be bundled
 
-After cloning the repository, run `npm ci` to install the dependencies. Run `npm run build` to build the app and `npm start` to start the electron runtime.
+After cloning the repository, run `npm install` to install the dependencies. 
+
+You may wish to install electron globally: `npm i -g electron` to reduce disk usage.
+
+Run `npm run dev` to build the app and `npm start` to start the electron runtime.
 
 ## Building
 
-[ TODO ]
+Run `npm ci` to install the frozen dependencies, and `npm run build`. Appedn `:windows` `:mac` or `:linux` to build only for that platform.
 
 ## Contributing
 

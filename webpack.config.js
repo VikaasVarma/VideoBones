@@ -2,8 +2,12 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 const path = require('path')
 
 let common_config = {
-  mode: process.env.NODE_ENV || 'development',
+  devServer: {
+    hot: true,
+    static: './build'
+  },
   devtool: 'inline-source-map',
+  mode: process.env.NODE_ENV || 'development',
   module: {
     rules: [
       {
@@ -29,6 +33,9 @@ let common_config = {
         type: 'asset/resource'
       }
     ]
+  },
+  optimization: {
+    usedExports: true
   },
   resolve: {
     extensions: [ '.tsx', '.ts', '.js' ]
