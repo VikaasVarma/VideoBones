@@ -13,6 +13,18 @@ let common_config = {
           /node_modules/,
           path.join(__dirname, 'dist')
         ]
+      },
+      {
+        test: /\.s(c|a)ss$/,
+        use: ['style-loader', 'css-loader', 'sass-loader'],
+        exclude: [
+          /node_modules/,
+          path.join(__dirname, 'dist')
+        ]
+      },
+      {
+        test: /\.(png|svg|woff2?|ttf)$/,
+        type: 'asset/resource'
       }
     ]
   },
