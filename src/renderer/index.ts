@@ -1,1 +1,1 @@
-import './styles/reset.sass'
+import './styles/reset.scss'
