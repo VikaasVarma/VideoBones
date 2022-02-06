@@ -16,33 +16,28 @@
     "lint": "npm run lint:js && npm run lint:css",
     "lint:fix": "npm run lint:js -- --fix && npm run lint:css -- --fix",
     "lint:css": "stylelint --aei \"src/**/*.{css,scss,sass}\"",
-    "electron:build": "vue-cli-service electron:build",
-    "electron:serve": "vue-cli-service electron:serve",
-    "postinstall": "electron-builder install-app-deps",
-    "postuninstall": "electron-builder install-app-deps",
     "lint:js": "eslint --ext .js,.ts,.tsx,.json src"
-    },
-    "repository": {
-      "type": "git",
-      "url": "git+https://github.com/VikaasVarma/VideoBones.git"
-    },
-    "keywords": [],
-    "author": "",  
-    "license": "ISC",
-    "bugs": {
-      "url": "https://github.com/VikaasVarma/VideoBones/issues"
-    },
-    "homepage": "https://github.com/VikaasVarma/VideoBones#readme",
-    "dependencies": {
-    },
-    "devDependencies": {
-      "@types/node": "^17.0.14",
-      "@typescript-eslint/eslint-plugin": "^5.10.2",
-      "@typescript-eslint/parser": "^5.10.2",
-      "css-loader": "^6.5.1",
-      "electron": "^17.0.0",
-      "electron-builder": "^22.14.5",
-    "electron-devtools-installer": "^3.1.0",
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/VikaasVarma/VideoBones.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/VikaasVarma/VideoBones/issues"
+  },
+  "homepage": "https://github.com/VikaasVarma/VideoBones#readme",
+  "dependencies": {
+  },
+  "devDependencies": {
+    "@types/node": "^17.0.14",
+    "@typescript-eslint/eslint-plugin": "^5.10.2",
+    "@typescript-eslint/parser": "^5.10.2",
+    "css-loader": "^6.5.1",
+    "electron": "^17.0.0",
+    "electron-builder": "^22.14.5",
     "eslint": "^8.8.0",
     "html-webpack-plugin": "^5.5.0",
     "rimraf": "^3.0.2",
@@ -54,8 +49,6 @@
     "stylelint-scss": "^4.1.0",
     "ts-loader": "^9.2.6",
     "typescript": "^4.5.5",
-    "vue": "^2.6.14",
-    "vue-cli-plugin-electron-builder": "~2.1.1",
     "webpack": "^5.68.0",
     "webpack-cli": "^4.9.2"
   },

@@ -1,5 +1,4 @@
 import { app, BrowserWindow } from 'electron'
-import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
 import path from 'path'
 
 function createWindow () {
@@ -11,15 +10,10 @@ function createWindow () {
     }
   })
 
-  mainWindow.loadFile(path.join('build', 'renderer', 'index.html'))
+  mainWindow.loadFile(path.join('..', 'renderer', 'index.html'))
   // mainWindow.webContents.openDevTools()
 }
-app.whenReady().then(async () => {
-  try {
-    await installExtension(VUEJS_DEVTOOLS)
-  } catch (e:any) {
-    console.error('Vue Devtools failed to install:', e.toString())
-  }
+app.whenReady().then(() => {
   createWindow()
 
   app.on('activate', function () {
