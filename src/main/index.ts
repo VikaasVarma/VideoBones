@@ -10,8 +10,8 @@ function createWindow () {
     }
   })
 
-  mainWindow.loadFile(path.join('..', 'renderer', 'index.html'))
-  // mainWindow.webContents.openDevTools()
+  mainWindow.loadFile(path.join('build', 'renderer', 'index.html'))
+  mainWindow.webContents.openDevTools()
 }
 app.whenReady().then(() => {
   createWindow()

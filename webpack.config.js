@@ -38,6 +38,9 @@ let common_config = {
     usedExports: true
   },
   resolve: {
+    alias: {
+      vue: 'vue/dist/vue.js'
+    },
     extensions: [ '.tsx', '.ts', '.js' ]
   }
 }

@@ -30,6 +30,7 @@
   },
   "homepage": "https://github.com/VikaasVarma/VideoBones#readme",
   "dependencies": {
+    "vue": "^2.6.14"
   },
   "devDependencies": {
     "@types/node": "^17.0.14",
