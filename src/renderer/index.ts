@@ -4,5 +4,3 @@ import App from './App.vue'
 import Recording from './Recording.vue'
 
 createApp(Recording).mount('#app')
-
-createApp(App).mount('#app');
