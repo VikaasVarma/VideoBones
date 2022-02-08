@@ -1,5 +1,7 @@
 import './styles/reset.scss'
 import { createApp } from 'vue'
 import App from './App.vue'
-createApp(App).mount('#app')
+import Recording from './Recording.vue'
+
+createApp(Recording).mount('#app')
 
