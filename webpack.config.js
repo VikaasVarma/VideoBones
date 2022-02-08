@@ -1,5 +1,6 @@
-const HtmlWebpackPlugin = require('html-webpack-plugin')
-const path = require('path')
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const path = require('path');
+const { VueLoaderPlugin } = require('vue-loader');
 
 let common_config = {
   devServer: {
@@ -21,7 +22,7 @@ let common_config = {
       },
       {
         test: /\.s(c|a)ss$/,
-        use: ['style-loader', 'css-loader', 'sass-loader'],
+        use: [ 'style-loader', 'css-loader', 'sass-loader' ],
         exclude: [
           /node_modules/,
           path.join(__dirname, 'build'),
@@ -43,9 +44,7 @@ let common_config = {
     },
     extensions: [ '.vue', '.tsx', '.ts', '.js' ]
   }
-}
-
-const { VueLoaderPlugin } = require('vue-loader')
+};
 
 module.exports = [
   Object.assign({}, common_config, {
@@ -76,8 +75,8 @@ module.exports = [
         {
           test: /\.ts$/,
           loader: 'ts-loader',
-          options : {
-            appendTsSuffixTo: [/\.vue$/]
+          options: {
+            appendTsSuffixTo: [ /\.vue$/ ]
           }
         },
         {
@@ -93,6 +92,7 @@ module.exports = [
     plugins: [ new VueLoaderPlugin(), new HtmlWebpackPlugin({
       inject: false,
       templateContent: ({htmlWebpackPlugin}) => `<html><head>${htmlWebpackPlugin.tags.headTags}</head><body><div id="app"></div>${htmlWebpackPlugin.tags.bodyTags}</body></html>`
-    }) ]
+    })
+    ]
   })
-]
+];
