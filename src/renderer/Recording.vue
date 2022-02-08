@@ -1,6 +1,10 @@
 <template>
-  <div>Recording</div>
-  <div class="button-primary">Click me!</div>
+
+  <div class="container">
+    <div class="button-secondary">Recording</div>
+    <div class="button-primary">Click me!</div>
+  </div>
+
 </template>
 
 <script lang="ts">

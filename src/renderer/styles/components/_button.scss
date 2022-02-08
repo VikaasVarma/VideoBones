@@ -1,10 +1,5 @@
-// Note - using american colour spelling. Sorry );
-$color-background: #282C33;
-$color-middleground: #404451;
-$color-outline: #30333C;
 $color-button: #8367C7;
 $color-highlight: #00FF2A;
-
 
 .button-primary {
     font-family: OpenSans;
@@ -29,7 +24,7 @@ $color-highlight: #00FF2A;
 
 
 
-.button-seconday {
+.button-secondary {
     @extend .button-primary;
     background-color: $color-middleground;
 }
