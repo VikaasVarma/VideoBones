@@ -75,7 +75,10 @@ module.exports = [
         },
         {
           test: /\.ts$/,
-          loader: 'ts-loader'
+          loader: 'ts-loader',
+          options : {
+            appendTsSuffixTo: [/\.vue$/]
+          }
         },
         {
           test: /\.scss$/,
@@ -87,6 +90,9 @@ module.exports = [
         }
       ]
     },
-    plugins: [ new VueLoaderPlugin(), new HtmlWebpackPlugin() ]
+    plugins: [ new VueLoaderPlugin(), new HtmlWebpackPlugin({
+      inject: false,
+      templateContent: ({htmlWebpackPlugin}) => `<html><head>${htmlWebpackPlugin.tags.headTags}</head><body><div id="app"></div>${htmlWebpackPlugin.tags.bodyTags}</body></html>`
+    }) ]
   })
 ]

@@ -1,11 +1,14 @@
 <template>
-  <h1>sdfghdfh</h1>
+  <h1 style="color: red;">Working!</h1>
+  <div>Working W!!!</div>
 </template>
 
 <script lang="ts">
-export default {
+import { defineComponent } from 'vue';
 
-}
+export default defineComponent({
+    name: "a",
+});
 </script>
 
 <style>

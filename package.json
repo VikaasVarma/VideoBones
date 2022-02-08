@@ -30,7 +30,6 @@
   },
   "homepage": "https://github.com/VikaasVarma/VideoBones#readme",
   "dependencies": {
-    "@vue/compiler-sfc": "^3.2.30",
     "vue": "^3.2.29",
     "vue-style-loader": "^4.1.3"
   },
