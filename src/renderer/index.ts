@@ -5,3 +5,4 @@ import Recording from './Recording.vue'
 
 createApp(Recording).mount('#app')
 
+createApp(App).mount('#app');
