@@ -39,11 +39,13 @@ let common_config = {
   },
   resolve: {
     alias: {
-      vue: 'vue/dist/vue.js'
+      'vue': '@vue/runtime-dom'
     },
-    extensions: [ '.tsx', '.ts', '.js' ]
+    extensions: [ '.vue', '.tsx', '.ts', '.js' ]
   }
 }
+
+const { VueLoaderPlugin } = require('vue-loader')
 
 module.exports = [
   Object.assign({}, common_config, {
@@ -65,6 +67,26 @@ module.exports = [
       filename: 'index.js',
       path: path.join(__dirname, 'build/renderer')
     },
-    plugins: [ new HtmlWebpackPlugin() ]
+    module: {
+      rules: [
+        {
+          test: /\.vue$/,
+          loader: 'vue-loader'
+        },
+        {
+          test: /\.ts$/,
+          loader: 'ts-loader'
+        },
+        {
+          test: /\.scss$/,
+          use: [
+            'vue-style-loader',
+            'css-loader',
+            'sass-loader'
+          ]
+        }
+      ]
+    },
+    plugins: [ new VueLoaderPlugin(), new HtmlWebpackPlugin() ]
   })
 ]
