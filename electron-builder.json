@@ -15,5 +15,9 @@
   ],
   "directories": {
     "buildResources": "assets"
-  }
+  },
+  "asar": true,
+  "asarUnpack": [
+    "./renderer"
+  ]
 }

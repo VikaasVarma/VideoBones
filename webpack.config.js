@@ -38,9 +38,14 @@ let common_config = {
     usedExports: true
   },
   resolve: {
-    extensions: [ '.tsx', '.ts', '.js' ]
+    alias: {
+      'vue': '@vue/runtime-dom'
+    },
+    extensions: [ '.vue', '.tsx', '.ts', '.js' ]
   }
 }
+
+const { VueLoaderPlugin } = require('vue-loader')
 
 module.exports = [
   Object.assign({}, common_config, {
@@ -62,6 +67,32 @@ module.exports = [
       filename: 'index.js',
       path: path.join(__dirname, 'build/renderer')
     },
-    plugins: [ new HtmlWebpackPlugin() ]
+    module: {
+      rules: [
+        {
+          test: /\.vue$/,
+          loader: 'vue-loader'
+        },
+        {
+          test: /\.ts$/,
+          loader: 'ts-loader',
+          options : {
+            appendTsSuffixTo: [/\.vue$/]
+          }
+        },
+        {
+          test: /\.scss$/,
+          use: [
+            'vue-style-loader',
+            'css-loader',
+            'sass-loader'
+          ]
+        }
+      ]
+    },
+    plugins: [ new VueLoaderPlugin(), new HtmlWebpackPlugin({
+      inject: false,
+      templateContent: ({htmlWebpackPlugin}) => `<html><head>${htmlWebpackPlugin.tags.headTags}</head><body><div id="app"></div>${htmlWebpackPlugin.tags.bodyTags}</body></html>`
+    }) ]
   })
 ]
