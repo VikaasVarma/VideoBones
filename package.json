@@ -30,6 +30,8 @@
   },
   "homepage": "https://github.com/VikaasVarma/VideoBones#readme",
   "dependencies": {
+    "ffmpeg-static": "^4.4.1",
+    "shaka-player": "^3.3.1",
     "vue": "^3.2.29"
   },
   "devDependencies": {
