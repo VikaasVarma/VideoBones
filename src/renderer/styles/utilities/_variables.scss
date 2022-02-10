@@ -2,3 +2,7 @@
 $color-background: #282C33;
 $color-middleground: #404451;
 $color-outline: #30333C;
+// Controls size of the elements relative to the figma design size done both to
+// allow changes when figma sizes are changed and to make elements bigger 
+// and easier to inspect during development
+$scaling-factor: 0.7;

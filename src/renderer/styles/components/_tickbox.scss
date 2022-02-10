@@ -1,0 +1,49 @@
+
+$color_tickbox: #404451;
+
+.tickbox-container {
+    width: 100%;
+    display: block;
+
+    > * {
+        display: inline;
+    }
+
+    > h2, h3, h4 {
+        font-size: $scaling-factor*28px;
+        color: white;
+        width: 80%;
+    }
+
+    .tickbox {
+        // Remove base tickbox styling
+        appearance: none;
+
+        background-color: $color_tickbox;
+        
+        display: inline-block;
+        padding: 9px;
+        height: $scaling-factor*26px;
+        vertical-align: bottom;
+        position: relative;
+        margin: 0 1rem 0.3rem 0;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05), inset 0px -15px 10px -12px rgba(0,0,0,0.05);
+    
+
+        &:checked {
+            &:after{
+                color: white;
+                content: 'x';
+                font-weight: bold;
+                font-size: 18px;
+                font-family: OpenSans;
+
+                position: absolute;
+                top: 0px;
+                left: 4.5px;
+                line-height: 14px;
+            }
+        }   
+    }
+}
+

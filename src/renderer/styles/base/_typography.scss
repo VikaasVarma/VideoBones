@@ -3,4 +3,6 @@
     src: url('../../../assets/fonts/OpenSans/OpenSans-Regular.ttf');
 };
 
-
+body > * {
+    font-family: OpenSans;
+}

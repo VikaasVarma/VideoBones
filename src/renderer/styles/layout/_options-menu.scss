@@ -1,0 +1,22 @@
+
+.options-menu {
+    background-color: $color-outline;
+    width: fit-content;
+    height: fit-content;
+
+    $pad: 16px;
+    padding: $pad $pad $pad $pad;
+
+
+    &-title {
+        text-transform: uppercase;
+        color: white;
+        margin-bottom: 15px;
+    }
+
+    >* {
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
+
+}
