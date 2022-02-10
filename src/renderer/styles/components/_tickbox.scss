@@ -29,6 +29,9 @@ $color_tickbox: #404451;
         margin: 0 1rem 0.3rem 0;
         box-shadow: 0 1px 2px rgba(0,0,0,0.05), inset 0px -15px 10px -12px rgba(0,0,0,0.05);
     
+        &:hover {
+            cursor: pointer;
+        }
 
         &:checked {
             &:after{
