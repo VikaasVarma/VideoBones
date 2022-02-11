@@ -1,74 +1,139 @@
-import { throws } from 'assert'
-import exp from 'constants'
 import { app } from 'electron'
 
-import { existsSync, readFileSync } from 'fs'
+import { existsSync, read, readFileSync } from 'fs'
 import * as fs from 'fs/promises'
 
 import path from 'path'
-import { json } from 'stream/consumers'
 
 import { Config, ConfigBuilder, isConfig } from './config'
-
-
-/**
- * The file in which project handles are persisted.
- */
-const projectHandlesFile = path.join(app.getPath("userData"), "handles.json")
-
-// TODO: find a better way to init this
-//        also, find out if promises resolve before exit, or find out how to make sure they do (so we dont lose a write on exit if still trying)
-/**
- * Initially load the handles, or empty list if not present.
- */
-var handles = existsSync(projectHandlesFile) ? JSON.parse(readFileSync(projectHandlesFile).toString()) :
-                                                  []
-
-/**
- * Keeps track of the last write promise active on the handles file.
- * 
- * Allows us to chain future writes to the handles file after this promise is resolved.
- */
-var currentHandlesFileWritePromise: Promise<void> = Promise.resolve();
 
 /**
  * Holds information on a project the app currently knows about / tracks.
  */
 class ProjectHandle {
   projectPath: string
+  projectName: string
 
-  getProjectName(): string {
-    return path.basename(this.projectPath)
+  constructor(projectPath: string, projectName: string) {
+    this.projectPath = projectPath
+    this.projectName = projectName
   }
 
-  constructor(projectPath: string) {
-    this.projectPath = projectPath
+  static copy(other: ProjectHandle) {
+    return new ProjectHandle(other.projectPath, other.projectName)
   }
 
   equals(other: ProjectHandle): boolean {
-    return this.projectPath == other.projectPath
+    return this.projectPath === other.projectPath
+  }
+
+  /**
+   * User-defined type guard for project handles.
+   */
+  static isProjectHandle(h: any): h is ProjectHandle {
+    return 'projectPath' in h && typeof h.projectPath === 'string'
+    && 'projectName' in h && typeof h.projectName === 'string'
+  }
+}
+
+/**
+ * The file in which project handles are persisted.
+ */
+const projectHandlesFile = path.join(app.getPath('userData'), 'handles.json')
+
+// TODO: find out if promises resolve before exit,
+//        or find out how to make sure they do (so we dont lose a write on exit if still unresolved)
+/**
+ * Keeps track of the last write promise active on the handles file.
+ *
+ * Allows us to chain future writes to the handles file after this promise is resolved.
+ */
+let currentHandlesFileWritePromise: Promise<void> = Promise.resolve()
+
+// TODO: find a better way to init this
+/**
+ * Holds the list of handles in memory.
+ *
+ * Is just a wrapper for a JSON array of handles, with automatic writeback on update.
+ * Read in at startup (or initialised to empty list if file not present).
+ */
+const handles = {
+  array: existsSync(projectHandlesFile)
+    ? (() => {
+      const json = JSON.parse(readFileSync(projectHandlesFile).toString())
+      const out: Array<ProjectHandle> = []
+      json.forEach((e: any) => {
+        if (ProjectHandle.isProjectHandle(e)) {
+          out.push(ProjectHandle.copy(e))
+        } else {
+          console.log(`Found malformed project handle: ${e}`)
+        }
+      })
+      return out
+    })()
+    : [],
+  write: function () {
+    const doWrite = () => {
+      return fs.writeFile(projectHandlesFile, JSON.stringify(this.array))
+    }
+    currentHandlesFileWritePromise = currentHandlesFileWritePromise.then(
+      doWrite,
+      reason => {
+        console.log(`Previous handles write failed, reason: ${reason}`)
+        return doWrite()
+      }
+    )
+  },
+  push: function(handle: ProjectHandle) {
+    this.array.push(handle)
+    this.write()
+  },
+  remove: function(handle: ProjectHandle) {
+    const indexToRemove = this.array.findIndex((e: any) => {
+      if (ProjectHandle.isProjectHandle(e)) {
+        return handle.equals(e)
+      } else {
+        // there is a malformed entry, ignore it
+        return false
+      }
+    })
+
+    if (indexToRemove === -1) return
+
+    // remove the handle from the handles array
+    this.array.splice(indexToRemove, 1)
+
+    this.write()
   }
 }
 
 /**
  * Creates resources for a new project.
- * 
+ *
  * Makes project directory structure, adds project to tracked projects, writes an initial config.
- * 
+ *
  * @param parentDirectory The parent directory for the project
  * @param projectName The name of the project
- * @returns The project handle
+ * @returns A promise which resolves to the new project's handle
  */
-export function createProject(parentDirectory: string, projectName: string): ProjectHandle {
-  const projectDirectory = createProjectDirectory(parentDirectory, projectName)
-
-  const project = trackProject(projectDirectory)
+function createProject(parentDirectory: string, projectName: string): Promise<ProjectHandle> {
+  const projectDirectoryPromise = createProjectDirectory(parentDirectory, projectName)
 
   const config = new ConfigBuilder(projectName).value(10).build()
 
-  writeProjectConfig(project, config)
+  const projectHandlePromise = projectDirectoryPromise.then(projectDir => {
+    return writeDirectoryConfig(projectDir, config)
+      .then(() => {
+        return trackProject(projectDir)
+      }, reason => {
+        throw Error(`Failed to write initial config, reason: ${reason}`)
+      })
+      .catch(reason => {
+        throw Error(`Failed to track new project, reason: ${reason}`)
+      })
+  })
 
-  return project
+  return projectHandlePromise
 }
 
 /**
@@ -77,90 +142,131 @@ export function createProject(parentDirectory: string, projectName: string): Pro
  * @param parentDirectory The parent of the new project directory
  * @param projectName The name of the new project
  *
- * @returns The full path to the project directory
+ * @returns A promise which resolves to the full project path once the directories have been created.
  */
-function createProjectDirectory(parentDirectory: string, projectName: string): string {
+function createProjectDirectory(parentDirectory: string, projectName: string): Promise<string> {
 
   const projectDirectory = path.format({ dir: parentDirectory, base: projectName })
 
-  if (existsSync(projectDirectory)) throw new Error(`Project directory already exists: ${projectDirectory}`)
+  if (existsSync(projectDirectory)) {
+    throw Error(`Project directory already exists: ${projectDirectory}`)
+  }
 
   // create project directory structure
-  fs.mkdir(projectDirectory)
-  .then(() => { return fs.mkdir(path.join(projectDirectory, "recordings"))})
-  .catch(reason => {throw new Error(`Failed to create project directory, reason: ${reason}`)})
-
-  return projectDirectory
+  // chain promises so subdirs are only created once their parents are avaliable
+  return fs.mkdir(projectDirectory)
+    .then(() => {
+      return fs.mkdir(path.join(projectDirectory, 'recordings'))
+    })
+    .then(() => {
+      return projectDirectory
+    })
+    .catch(reason => {
+      throw new Error(`Failed to create project directory, reason: ${reason}`)
+    })
 }
 
 /**
- * Async writes a full project config, overwritting if present.
- * 
+ * Asynchronously writes a full project config to a directory, overwriting if present.
+ *
+ * @param directory The directory to write this config to
+ * @param cfg The config object to write
+ */
+function writeDirectoryConfig(directory: string, cfg: Config): Promise<void> {
+  return fs.writeFile(path.join(directory, '.bones'), JSON.stringify(cfg))
+    .catch(reason => {
+      throw Error(`Failed to write project config, reason: ${reason}`)
+    })
+}
+
+/**
+ * Asynchronously writes a full project config, overwritting if present.
+ *
  * @param project The project to write this config to
  * @param cfg The config object to write
  */
-function writeProjectConfig(project: ProjectHandle, cfg: Config): void {
-  fs.writeFile(path.join(project.projectPath, ".bones"), JSON.stringify(cfg))
-  .catch(reason => {throw new Error(`Failed to write project config, reason: ${reason}`)})
+function writeProjectConfig(project: ProjectHandle, cfg: Config): Promise<void> {
+  return writeDirectoryConfig(project.projectPath, cfg)
 }
 
 /**
- * Async read in the config file from a project.
- * 
+ * Read in a config file from a directory.
+ *
+ * @param project The directory to read the config from
+ * @returns An promise which resolves to an object representing the config
+ */
+function readDirectoryConfig(directory: string): Promise<Config> {
+  const configPath = path.join(directory, '.bones')
+
+  // just check the config file exists first
+  if (!existsSync(configPath)) {
+    throw Error(`No existing config in directory ${directory}.`)
+  }
+
+  // async read the config file in
+  return fs.readFile(configPath)
+    .then(buf => {
+      const cfg: Config = JSON.parse(buf.toString())
+
+      // ensure the config is properly formatted
+      if (isConfig(cfg)) {
+        return cfg
+      } else {
+        throw Error(`Config is not correctly formatted: ${cfg}.`)
+      }
+
+      // TODO: add config version check and version updating if needed
+    })
+}
+
+/**
+ * Read in the config file from a project.
+ *
  * @param project The project to read the config from
  * @returns An promise which resolves to an object representing the project config
  */
 function readProjectConfig(project: ProjectHandle): Promise<Config> {
-  const configPath = path.join(project.projectPath, ".bones")
+  try {
+    return readDirectoryConfig(project.projectPath)
+  } catch {
+    Error(`Error reading config in project ${project.projectName} at ${project.projectPath}.`)
+  }
+}
 
-  // just check the config file exists first
-  if (!existsSync(configPath)) { throw Error(`No existing config in project ${project.getProjectName()} at ${project.projectPath}.`) }
+/**
+ * Adds a new project to the list of projects we know about, and creates a project handle for it  .
+ *
+ * @param projectDirectory The directory of the project to add
+ * @returns The project handle for the newly tracked project
+ */
+function trackProject(projectDirectory: string): Promise<ProjectHandle> {
 
-  // async read the config fiel in
-  return fs.readFile(configPath)
-  .then(buf => {
-    var cfg: Config = JSON.parse(buf.toString())
+  const cfgPromise = readDirectoryConfig(projectDirectory)
 
-    if (isConfig(cfg)) {
-      return Promise.resolve(cfg)
-    } else {
-      return Promise.reject(`Config is not correctly formatted: ${cfg}.`)
-    }
+  return cfgPromise.then(config => {
+    const projectHandle = new ProjectHandle(projectDirectory, config.projectName)
+    handles.push(projectHandle)
+    return projectHandle
   })
 }
 
 /**
- * Adds a new project to the list of projects we know about.
- * 
- * @param projectDirectory The directory of the project to add
- * @returns The project handle for the newly tracked project
- */
-function trackProject(projectDirectory: string): ProjectHandle {
-  var projectHandle = new ProjectHandle(projectDirectory);
-
-  handles.push(projectHandle)
-
-  // write this update to file, chaining it to previous promises
-  var doWrite = () => fs.writeFile(projectHandlesFile, handles)
-  currentHandlesFileWritePromise = currentHandlesFileWritePromise.then(doWrite, doWrite)
-
-  return projectHandle
-}
-
-/**
  * Removes a project handle from the list of projects we know about.
- * 
+ *
  * @param projectHandle The handle to remove
  */
 function untrackProject(projectHandle: ProjectHandle): void {
-  var indexToRemove = handles.findIndex(e => projectHandle.equals(e))
+  handles.remove(projectHandle)
+}
 
-  if (indexToRemove == -1) return
+/**
+ * Get a readonly view of the tracked project handles list.
+ */
+function getTrackedProjects(): Readonly<Array<ProjectHandle>> {
+  return handles.array
+}
 
-  // remove the handle from the handles array
-  handles.splice(indexToRemove, 1)
-
-  // write this update to file, chaining it to previous promises
-  var doWrite = () => fs.writeFile(projectHandlesFile, handles)
-  currentHandlesFileWritePromise = currentHandlesFileWritePromise.then(doWrite, doWrite)
+export {
+  ProjectHandle, createProject,
+  trackProject, untrackProject, getTrackedProjects
 }

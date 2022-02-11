@@ -3,26 +3,27 @@
  */
 export interface Config {
   /**
-   * Holds a simple version tag for the project.
+   * Holds a simple version tag for the project config.
    *
    * Am keeping this in case we need to do versioning on configs down the line,
    * can use this to do things like update the .bones file structure from earlier versions.
    */
   version: number;
+
   projectName: string;
   value?: number;
 }
 
 /**
  * User-defined type guard for Config type.
- * 
+ *
  * Narrows type of o to Config if true.
- * 
+ *
  * @returns True if o is a valid Config object
  */
 export function isConfig(o: any): o is Config {
-  return  "projectName" in o && typeof o.projectName == "string" &&
-          ("value" in o ? typeof o.value == "number" : true)
+  return  'projectName' in o && typeof o.projectName === 'string'
+          && ('value' in o ? typeof o.value === 'number' : true)
 }
 
 export class ConfigBuilder {
@@ -32,7 +33,7 @@ export class ConfigBuilder {
   constructor(projectName: string) {
     this._config = {
       version: 1,
-      projectName: projectName,
+      projectName: projectName
     }
   }
 

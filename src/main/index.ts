@@ -1,10 +1,7 @@
 import { app, BrowserWindow } from 'electron'
 import path from 'path'
 
-import * as storage from './projects'
-
 function createWindow () {
-  storage.createProject('D:\\', 'testProj')
 
   const mainWindow = new BrowserWindow({
     width: 800,
