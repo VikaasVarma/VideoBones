@@ -50,7 +50,6 @@ const webpack = require('webpack')
 
 
 
-
 module.exports = [
   Object.assign({}, common_config, {
     target: 'electron-main',
@@ -91,6 +90,10 @@ module.exports = [
             'css-loader',
             'sass-loader'
           ]
+        },
+        {
+          test: /\.(jpe?g|png|gif|svg)$/, 
+          loader: 'file-loader'
         }
       ]
     },
