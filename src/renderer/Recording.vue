@@ -1,12 +1,12 @@
 <template>
 
   <div style="margin: auto; width: 50%;">
-    <div class="options-menu">
-      <h3 class="options-menu-title">TRACKS</h3>
+    <div class="vertical-options-menu">
+      <h3 class="vertical-options-menu-title">TRACKS</h3>
 
       <div class="button-secondary">Recording</div>
       <div class="button-primary">Click me!</div>
-      <hr class="border-line">
+      <hr class="horizontal-border-line">
       <div class="tickbox-container">
         <input type="checkbox" class="tickbox"/>
         <h2>Trombone Melody</h2>

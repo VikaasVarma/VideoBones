@@ -1,8 +1,8 @@
 <template>
 
 
-  <h1 class="page-title" style="margin-top: 10%;">VIDEO BONES</h1>
-  <menu class="horizontal-options-menu" style="margin-top: 50px">
+  <h1 class="page-title" style="margin-top: 10%; margin-bottom: 5%;">VIDEO BONES</h1>
+  <menu class="horizontal-options-menu">
 
     <div>
       <div class="image-container">

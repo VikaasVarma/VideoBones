@@ -3,5 +3,6 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import Recording from './Recording.vue'
 import OnOpenPage from './pages/OnOpenPage.vue'
+import CreateNewProjectPage from './pages/CreateNewProjectPage.vue'
 
-createApp(OnOpenPage).mount('#app')
+createApp(CreateNewProjectPage).mount('#app')
