@@ -3,6 +3,10 @@
     src: url('../../../assets/fonts/OpenSans/OpenSans-Regular.ttf');
 };
 
-body > * {
-    font-family: OpenSans;
+.page-title {
+    color: white;
+    font-weight: 800;
+    width: fit-content;
+    margin: auto;
 }
+

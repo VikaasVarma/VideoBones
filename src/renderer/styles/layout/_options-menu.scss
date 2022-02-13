@@ -20,3 +20,36 @@
     }
 
 }
+
+.horizontal-options-menu {
+    background-color: $color-outline;
+    width: fit-content;
+    height: fit-content;
+    
+    margin: auto;
+
+    $pad: 25px;
+    padding: $pad $pad $pad $pad;
+    border-radius: 15px;
+
+    :not(:last-child) {
+        margin-right: 25px;
+    }
+
+    &>div {
+        display: inline-block;
+        height: 0.3*270px;
+        
+        &>h2,h3 {
+            text-align: center;
+            color: white;
+        }
+
+        &>img {
+            height: 100%;
+        }
+    }
+    
+}
+
+

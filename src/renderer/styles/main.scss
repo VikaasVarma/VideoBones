@@ -1,11 +1,13 @@
-@import 'base/typography.scss';
+@import 'base/typography';
 
 @import 'utilities/variables';
+
+@import 'themes/theme';
 
 @import 'layout/container';
 @import 'layout/options-menu';
 
-@import 'components/buttons.scss';
-@import 'components/tickbox.scss';
-@import 'components/border-lines.scss';
+@import 'components/buttons';
+@import 'components/tickbox';
+@import 'components/border-lines';
 

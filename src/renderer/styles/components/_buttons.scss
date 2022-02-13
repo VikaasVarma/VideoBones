@@ -17,17 +17,27 @@ $color-highlight: #00FF2A;
     width: $scaling-factor * 369px;
     height: $scaling-factor * 67px;
 
-
     border-radius: $scaling-factor * 10px;
     filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));
+    
+    &:hover {
+        cursor: pointer;
+    }
 }
 
 .button-secondary {
     @extend .button-primary;
 
+    margin: auto;
+    width: fit-content;
     color: white;
     opacity: 50%;
     filter: none;
     background-color: inherit;
+
+    &:hover {
+        cursor: pointer;
+        text-decoration: underline;
+    }
 
 }
