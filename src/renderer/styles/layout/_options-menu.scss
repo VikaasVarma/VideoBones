@@ -24,30 +24,62 @@
 .horizontal-options-menu {
     background-color: $color-outline;
     width: fit-content;
-    height: fit-content;
-    
+    height: 40%;
+    display: flex;    
     margin: auto;
 
-    $pad: 25px;
-    padding: $pad $pad $pad $pad;
+    padding: 25px;
     border-radius: 15px;
 
-    :not(:last-child) {
-        margin-right: 25px;
-    }
+    // :not(:last-of-type){
+    //     margin-right: 15px;
+    // }
 
     &>div {
-        display: inline-block;
-        height: 0.3*270px;
+
+        &:first-of-type {
+            margin-left: 25px;
+        }
         
-        &>h2,h3 {
-            text-align: center;
-            color: white;
+        &:last-of-type {
+            margin-right: 25px;
         }
 
-        &>img {
-            height: 100%;
+        margin-top: 8%;        
+        height: fit-content;
+        
+        &>h1, h2, h3 {
+            text-align: center;
+            color: white;
+            font-size: medium;
+            font-weight: normal;
+            
+            width: 80%;
+            margin: auto;
         }
+        
+        .image-container{
+            margin-bottom: 10px;
+            border-radius: 15px;
+            background-color: $color-middleground;
+            padding: 15px 0 15px 0;
+            height: 125px;
+
+            position: relative;
+
+            &>img {
+                height: 0.22*270px;
+                max-height: 100%;
+                max-width: 100%;
+                width: auto;
+                position: absolute;
+                top: 0;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                margin: auto;
+            }
+        } 
     }
     
 }

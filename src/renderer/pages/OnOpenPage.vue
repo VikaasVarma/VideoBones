@@ -3,14 +3,23 @@
 
   <h1 class="page-title" style="margin-top: 10%;">VIDEO BONES</h1>
   <menu class="horizontal-options-menu" style="margin-top: 50px">
-    <div>
-      <img src="../../../assets/images/folderIcon.png">
-      <h3 class="page-title">OPEN FILE</h3>
-    </div>
 
     <div>
-      <img src="../../../assets/images/addIcon.png">
-      <h3>ADD ELEMENT</h3>
+      <div class="image-container">
+        <img src="../../../assets/images/addIcon.png">
+      </div>
+      
+      <h3>Create New Project</h3>
+    </div>
+
+    <hr class="vertical-border-line">
+
+    <div>
+      <div class="image-container">
+        <img src="../../../assets/images/folderIcon.png">
+      </div>
+
+      <h3>Open Existing Project</h3>
     </div>
     
   </menu>
