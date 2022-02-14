@@ -8,6 +8,11 @@ import path from 'path'
 import { Config, ConfigBuilder, isConfig } from './config'
 
 /**
+ * Module constant specifying the project subdirectory for recordings.
+ */
+const recordingsDirectoryName = 'recordings'
+
+/**
  * Holds information on a project the app currently knows about / tracks.
  */
 class ProjectHandle {
@@ -156,7 +161,7 @@ function createProjectDirectory(parentDirectory: string, projectName: string): P
   // chain promises so subdirs are only created once their parents are avaliable
   return fs.mkdir(projectDirectory)
     .then(() => {
-      return fs.mkdir(path.join(projectDirectory, 'recordings'))
+      return fs.mkdir(path.join(projectDirectory, recordingsDirectoryName))
     })
     .then(() => {
       return projectDirectory
@@ -226,11 +231,9 @@ function readDirectoryConfig(directory: string): Promise<Config> {
  * @returns An promise which resolves to an object representing the project config
  */
 function readProjectConfig(project: ProjectHandle): Promise<Config> {
-  try {
-    return readDirectoryConfig(project.projectPath)
-  } catch {
-    Error(`Error reading config in project ${project.projectName} at ${project.projectPath}.`)
-  }
+  return readDirectoryConfig(project.projectPath).catch(reason => {
+    throw Error(`Error reading config in project ${project.projectName}: ${e}`)
+  })
 }
 
 /**
@@ -266,7 +269,66 @@ function getTrackedProjects(): Readonly<Array<ProjectHandle>> {
   return handles.array
 }
 
+/**
+ * Get path to the project's recordings directory.
+ *
+ * All recordings made within the project should be stored here, then added to the project with addProjectRecording.
+ */
+function getProjectRecordingsDirectory(projectHandle: ProjectHandle) {
+  return path.join(projectHandle.projectPath, recordingsDirectoryName)
+}
+
+/**
+ * Adds a recording file path to the list of files used in the project.
+ *
+ * Creation of recordings should be handled elsewhere,
+ * and resulting files stored in the directory returned by getProjectRecordingsDirectory.
+ *
+ * @param projectHandle The project to add the file to
+ * @param recordingRelativePath The path to the recording, relative to project root
+ */
+function addProjectRecording(projectHandle: ProjectHandle, recordingRelativePath: string): void {
+  readProjectConfig(projectHandle)
+    .then(config => {
+      if (typeof config.recordings === 'undefined') {
+        config.recordings = []
+      }
+
+      config.recordings.push(recordingRelativePath)
+
+      return writeProjectConfig(projectHandle, config).catch(reason => {
+        throw Error(`Failed to write config after adding recording, reason: ${reason}`)
+      })
+    })
+}
+
+/**
+ * Remove a recording file from the list of files used in the project.
+ *
+ * Note this does not delete the underlying file, it simply makes the project 'forget' about it.
+ * File deletion should be handled elsewhere.
+ *
+ * @param projectHandle The project to remove the file from
+ * @param recordingIndex The index of the recodring file to remove
+ */
+function removeProjectRecording(projectHandle: ProjectHandle, recordingIndex: number): void {
+  readProjectConfig(projectHandle)
+    .then(config => {
+      if (typeof config.recordings === 'undefined') {
+        return
+      }
+
+      config.recordings.splice(recordingIndex, 1)
+
+      return writeProjectConfig(projectHandle, config).catch(reason => {
+        throw Error(`Failed to write config after removing recording, reason: ${reason}`)
+      })
+    })
+}
+
 export {
   ProjectHandle, createProject,
-  trackProject, untrackProject, getTrackedProjects
+  trackProject, untrackProject, getTrackedProjects,
+  writeProjectConfig, readProjectConfig,
+  getProjectRecordingsDirectory, addProjectRecording, removeProjectRecording
 }

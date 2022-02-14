@@ -11,7 +11,11 @@ export interface Config {
   version: number;
 
   projectName: string;
-  value?: number;
+
+  /**
+   * Relative paths to recordings from project root.
+   */
+  recordings?: Array<string>;
 }
 
 /**
@@ -23,7 +27,7 @@ export interface Config {
  */
 export function isConfig(o: any): o is Config {
   return  'projectName' in o && typeof o.projectName === 'string'
-          && ('value' in o ? typeof o.value === 'number' : true)
+          && 'recordings' in o && o.recordings.constructor === Array
 }
 
 export class ConfigBuilder {
@@ -38,8 +42,8 @@ export class ConfigBuilder {
   }
 
   // setters for optional members
-  value(value: number): ConfigBuilder {
-    this._config.value = value
+  recordings(recordings: []): ConfigBuilder {
+    this._config.recordings = recordings
     return this
   }
 
