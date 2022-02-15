@@ -1,5 +1,4 @@
-<template>
-
+<template id="OnOpenPage">
 
   <h1 class="page-title" style="margin-top: 10%; margin-bottom: 5%;">VIDEO BONES</h1>
   <menu class="horizontal-options-menu">
@@ -33,6 +32,7 @@ export default defineComponent({
 });
 </script>
 
-<style src="../styles/main.scss">
+<style lang="scss">
+  @import "../styles/main.scss";
 </style>
 

@@ -34,10 +34,11 @@ $color-highlight: #00FF2A;
     opacity: 50%;
     filter: none;
     background-color: inherit;
+    text-decoration: underline;
 
     &:hover {
         cursor: pointer;
-        text-decoration: underline;
+        color: rgba(255, 255, 255, 0.4);
     }
 
 }

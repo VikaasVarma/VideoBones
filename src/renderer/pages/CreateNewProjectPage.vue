@@ -1,4 +1,4 @@
-<template>
+<template id="CreateNewProject">
     <h1 class="page-title" style="margin-top: 10%; margin-bottom: 5%;">VIDEO BONES</h1>
 
     <menu class="options-menu" style="margin: auto;">
@@ -34,6 +34,7 @@ export default defineComponent({
 });
 </script>
 
-<style src="../styles/main.scss">
+<style lang="scss">
+  @import "../styles/main.scss";
 </style>
 

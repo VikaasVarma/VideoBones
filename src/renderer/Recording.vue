@@ -34,7 +34,8 @@ export default defineComponent({
 });
 </script>
 
-<style src="./styles/main.scss">
+<style lang="scss">
+  @import "../styles/main.scss";
   div {
     margin-left: 30px;
   }
