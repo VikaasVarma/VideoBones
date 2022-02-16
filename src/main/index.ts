@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow, Config } from 'electron'
 import path from 'path'
 
 function createWindow () {
