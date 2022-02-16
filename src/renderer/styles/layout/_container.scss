@@ -18,3 +18,25 @@
     grid-row-gap: 20px;
     
 }
+
+.image-container{
+    height: 100%;
+    display: inline-block;
+    background-color: inherit;
+    border: none;
+    margin-right: 13px;
+
+    &:hover {
+        cursor: pointer;
+    }
+} 
+
+.horizontal-spacer {
+
+    display: grid;
+
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr;
+
+    width: 100%;
+}

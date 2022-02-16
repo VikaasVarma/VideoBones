@@ -9,15 +9,39 @@
                 <source>
             </video>
 
-            <div></div>
+            <div id="video-controls" class="horizontal-spacer">
+                <button class="image-container">
+                    <img src="../../../assets/images/playButton.svg">
+                </button>
 
+                <button class="image-container">
+                    <img src="../../../assets/images/stopButton.svg">
+                </button>
+
+                <div class="timeline">
+                    
+                </div>
+            
+            </div>
+
+            
         </div>
 
-        <menu class="vertical-options-menu">
 
-            <div style="">
+        <menu class="vertical-options-menu">
+            
+            <div>
+                <h2 class="section-title">Video Effects</h2>
+                <div class="tickbox-container">
+                    <input type="checkbox" class="tickbox"/>
+                    <h3>Something Else</h3>
+                </div>
+
             </div>
-            <div style="">
+
+
+            <div>
+                <h2 class="section-title">Rerecord Sections</h2>
             </div>
 
         </menu>
