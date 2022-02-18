@@ -4,9 +4,9 @@
   <menu class="horizontal-options-menu">
 
     <div>
-      <div class="image-container">
+      <button class="image-container">
         <img src="../../../assets/images/addIcon.png">
-      </div>
+      </button>
       
       <h3>Create New Project</h3>
     </div>
@@ -14,9 +14,9 @@
     <hr class="vertical-border-line">
 
     <div>
-      <div class="image-container">
+      <button @click="onClick" class="image-container">
         <img src="../../../assets/images/folderIcon.png">
-      </div>
+      </button>
 
       <h3>Open Existing Project</h3>
     </div>
@@ -29,7 +29,17 @@ import { defineComponent } from 'vue';
 
 export default defineComponent({
     name: "OnOpenPage",
+    setup() {
+      function onClick() {
+        console.log("working")
+      }
+
+      return { onClick }
+
+    }
 });
+
+
 </script>
 
 <style lang="scss">

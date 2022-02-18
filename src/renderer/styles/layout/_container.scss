@@ -26,10 +26,34 @@
     border: none;
     margin-right: 13px;
 
+    margin-bottom: 10px;
+    border-radius: 15px;
+    padding: 15px 0 15px 0;
+    height: 125px;
+
+    position: relative;
+    background-color: inherit;
+    border: none;
+    width: 100%;
+
     &:hover {
         cursor: pointer;
     }
+
+    &>img {
+
+        height: 0.3*270px;
+        max-height: 100%;
+        max-width: 100%;
+        width: auto;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        margin: auto;
+    }
 } 
+
 
 .horizontal-spacer {
 

@@ -81,30 +81,6 @@
             margin: auto;
         }
         
-        .image-container{
-            margin-bottom: 10px;
-            border-radius: 15px;
-            padding: 15px 0 15px 0;
-            height: 125px;
-
-            position: relative;
-            background-color: inherit;
-            border: none;
-
-            &>img {
-
-                height: 0.22*270px;
-                max-height: 100%;
-                max-width: 100%;
-                width: auto;
-                position: absolute;
-                top: 0;
-                bottom: 0;
-                left: 0;
-                right: 0;
-                margin: auto;
-            }
-        } 
     }
     
 }
