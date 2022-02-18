@@ -1,5 +1,5 @@
 <template>
-  <recording-screen> </recording-screen>
+  <div>App</div>
 </template>
 
 <script lang="ts">
