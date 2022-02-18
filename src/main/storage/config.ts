@@ -163,14 +163,19 @@ function initialiseProjectConfig(projectDirectory: string, projectName: string):
  * Initialises the config module to work on a project.
  *
  * A project which is 'open' can have writes happening to it at any time, so use closeProject() before quitting pls.
+ * Closes a current open project if there is one.
  *
  * @param projectHandle The project to open
  * @returns A promise which resolves when the project has been opened for this module.
  */
 function openProject(projectHandle: ProjectHandle): Promise<void> {
-  const config = readProjectConfig(projectHandle)
+  const closePromise = closeProject()
 
-  return config.then(config => {
+  const configPromise = closePromise.then(() => { 
+    return readProjectConfig(projectHandle)
+  })
+
+  return configPromise.then(config => {
     currentOpenProject = new OpenProjectData(projectHandle, config)
   })
 }
@@ -203,6 +208,17 @@ function getRecordingsDirectory() {
   }
 
   return getProjectRecordingsDirectory(currentOpenProject.projectHandle)
+}
+
+/**
+ * Get a readonly list of all the recordings associated with the currently open project.
+ */
+function getRecordingsList(): Readonly<Array<string>> {
+  if (currentOpenProject === null) {
+    throw Error('No open project when calling getRecordingsList.')
+  }
+
+  return currentOpenProject.projectConfig.recordings
 }
 
 /**
@@ -291,6 +307,6 @@ export {
   Config as internal_Config, isConfig as internal_isConfig,
 
   openProject, closeProject,
-  getRecordingsDirectory, addRecording, removeRecording,
+  getRecordingsDirectory, getRecordingsList, addRecording, removeRecording,
   getOption, setOption, removeOption
 }
