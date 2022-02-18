@@ -3,15 +3,17 @@ import path from 'path';
 
 function createWindow () {
   const mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 1920,
+    height: 1080,
     webPreferences: {
       // preload: path.join(__dirname, 'preload.ts')
+      nodeIntegration: true,
+      contextIsolation: false
     }
   });
 
   mainWindow.loadFile(path.join(__dirname, '..', 'renderer', 'index.html'));
-  // mainWindow.webContents.openDevTools()
+  //mainWindow.webContents.openDevTools()
 }
 app.whenReady().then(() => {
   createWindow();

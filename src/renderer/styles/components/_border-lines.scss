@@ -1,0 +1,20 @@
+
+
+.horizontal-border-line {
+    border: 0;
+    width: 100%; 
+    height: 3px;
+    border-top: 3px solid $color-middleground;
+    border-radius: 5px;
+}
+
+.vertical-border-line{
+    border: 0;
+    height: 100%; 
+    width: 2px;
+    border-left: 2px solid $color-middleground;
+    border-radius: 10px;
+
+    margin: 0 8% 0 8%;
+    display: inline-block;
+}

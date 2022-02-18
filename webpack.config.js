@@ -86,6 +86,10 @@ module.exports = [
             'css-loader',
             'sass-loader'
           ]
+        },
+        {
+          test: /\.(jpe?g|png|gif|svg)$/, 
+          loader: 'file-loader'
         }
       ]
     },
