@@ -5,7 +5,7 @@
     <select class=dropdown ref=audioDevices> </select>
 
     <button class="image-container">
-        <img src="../../../assets/images/record.png">
+        <img src="../../../assets/images/record.svg">
     </button>
 
     <select class=dropdown ref=videoDevices> </select>
