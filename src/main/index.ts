@@ -7,11 +7,13 @@ function createWindow () {
     height: 1080,
     webPreferences: {
       // preload: path.join(__dirname, 'preload.ts')
+      nodeIntegration: true,
+      contextIsolation: false
     }
   });
 
   mainWindow.loadFile(path.join(__dirname, '..', 'renderer', 'index.html'));
-  mainWindow.webContents.openDevTools()
+  //mainWindow.webContents.openDevTools()
 }
 app.whenReady().then(() => {
   createWindow();

@@ -1,11 +1,11 @@
 <template>
-  <video ref=videoPreview> </video>
+  <video ref=videoPreview style="transform:scaleX(-1)"> </video>
 
   <div class="horizontal-spacer">
     <select class=dropdown ref=audioDevices @change="onAudioChange($event)"> </select>
 
-    <button class="image-container">
-        
+    <button class="image-container" @click="recordOnClick()">
+      <img src="../../../assets/images/record.svg">
     </button>
 
     <select class=dropdown ref=videoDevices @change="onVideoChange($event)"> </select>
@@ -13,8 +13,8 @@
 </template>
 
 <script lang="ts">
-import path from 'path'
 import * as fs from 'fs'
+import path from 'path'
 import { defineComponent } from 'vue'
 
 export default defineComponent({
@@ -27,6 +27,7 @@ export default defineComponent({
       audioRecorder: new MediaRecorder(new MediaStream(), undefined),
       videoChunks: <Blob[]> [],
       audioChunks: <Blob[]> [],
+      recording: false,
     }
   },
   methods: {
@@ -80,6 +81,27 @@ export default defineComponent({
           this.audioRecorder.onstop = this.download
         })
     },
+    recordOnClick() {
+      const audioDevices = <HTMLSelectElement> this.$refs.audioDevices;
+      const videoDevices = <HTMLSelectElement> this.$refs.videoDevices;
+
+      this.recording = !this.recording
+      if (this.recording) {
+        this.videoRecorder.start();
+        this.audioRecorder.start();
+
+        // Hide change device menus
+        audioDevices.style.display = "none";
+        videoDevices.style.display = "none";
+
+      } else {
+        this.videoRecorder.stop();
+        this.audioRecorder.stop();
+
+        audioDevices.style.display = "block";
+        videoDevices.style.display = "block";
+      }
+    },
     handleDataAvailable(event: BlobEvent, type: string) {
       if (event.data.size > 0) {
         if (type === 'video') {
@@ -120,7 +142,6 @@ export default defineComponent({
         devices.forEach(device => {
           if (device.kind.toString() === 'audioinput') {
             if (device.deviceId !== 'default' && device.deviceId !== 'communications') {
-              console.log(device.label)
               audioDevices.options[audioDevices.options.length] = new Option(device.label, device.deviceId);
             }
           } else if (device.kind.toString() === 'videoinput') {

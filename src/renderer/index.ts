@@ -7,4 +7,4 @@ import OnOpenPage from './pages/OnOpenPage.vue'
 import CreateNewProjectPage from './pages/CreateNewProjectPage.vue'
 import SingleVideoEditorPage from './pages/SingleVideoEditorPage.vue'
 
-createApp(RecordingScreen).mount('#app')
+createApp(App).mount('#app')
