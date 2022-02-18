@@ -11,7 +11,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { Player } from 'shaka-player';
+import * as shaka from 'shaka-player';
 
 export default defineComponent({
   props: {
@@ -26,12 +26,21 @@ export default defineComponent({
     }
   },
   mounted() {
-    const player = new Player(this.$refs.videoPlayer as HTMLMediaElement);
-    player.configure({});
+    const player = new shaka.Player(this.$refs.videoPlayer as HTMLMediaElement);
+    player.configure({streaming: {
+    lowLatencyMode: true,
+    inaccurateManifestTolerance: 0,
+    rebufferingGoal: 0.01,
+  },
+  manifest:{
+    dash:{
+      ignoreMinBufferTime: true,
+    }
+  }});
     player
       .load(this.manifestUrl)
       .then(() => {
-        console.log(player.getPlaybackRate());
+        (<HTMLMediaElement>this.$refs.videoPlayer).play();
       })
       .catch(this.onError);
   },
