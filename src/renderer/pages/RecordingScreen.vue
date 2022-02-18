@@ -1,7 +1,15 @@
 <template>
-  <video ref=videoPreview style="width:90%; height:90%"> </video>
-  <select class=dropdown style="width:30%; position:fixed; left:5%" ref=audioDevices> </select>
-  <select class=dropdown style="width:30%; position:fixed; right:5%" ref=videoDevices> </select>
+  <video ref=videoPreview> </video>
+
+  <div class="horizontal-spacer">
+    <select class=dropdown ref=audioDevices> </select>
+
+    <button class="image-container">
+        <img src="../../../assets/images/record.png">
+    </button>
+
+    <select class=dropdown ref=videoDevices> </select>
+  </div>
 </template>
 
 <script lang="ts">
@@ -48,4 +56,5 @@ export default defineComponent({
 
 <style lang="scss">
   @import "../styles/main.scss";
+  @import "../styles/pages/recording-page.scss"
 </style>

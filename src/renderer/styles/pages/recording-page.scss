@@ -1,0 +1,20 @@
+video {
+    width:90%;
+    height:80%;
+}
+
+.horizontal-spacer {
+    margin-top: 15px;
+    height: 15%;
+    padding: 0 40px 0 40px;
+    grid-column-gap: 40px;
+    grid-template-columns: 2fr 1fr 2fr;
+}
+
+.image-container {
+    height: fit-content;
+    &>img {
+        height: 50px;
+        display: inline;
+    }
+}
