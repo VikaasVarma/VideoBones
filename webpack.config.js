@@ -46,6 +46,10 @@ let common_config = {
   }
 };
 
+const { VueLoaderPlugin } = require('vue-loader')
+const webpack = require('webpack')
+
+
 module.exports = [
   Object.assign({}, common_config, {
     target: 'electron-main',
@@ -86,13 +90,31 @@ module.exports = [
             'css-loader',
             'sass-loader'
           ]
+        },
+        {
+          test: /\.(jpe?g|png|gif|svg)$/, 
+          loader: 'file-loader'
         }
       ]
     },
     plugins: [ new VueLoaderPlugin(), new HtmlWebpackPlugin({
       inject: false,
-      templateContent: ({htmlWebpackPlugin}) => `<html><head>${htmlWebpackPlugin.tags.headTags}</head><body><div id="app"></div>${htmlWebpackPlugin.tags.bodyTags}</body></html>`
-    })
-    ]
+      templateContent: ({htmlWebpackPlugin}) => `
+      <html>
+        <head>
+          <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline';">
+          ${htmlWebpackPlugin.tags.headTags}
+        </head>
+        <body>
+          <div id="app">
+          </div>
+          ${htmlWebpackPlugin.tags.bodyTags}
+          </body>
+        </html>`
+    }),
+    new webpack.DefinePlugin({
+      __VUE_PROD_DEVTOOLS__ : process.env.NODE_ENV === 'production',
+      __VUE_OPTIONS_API__ : false
+    }) ]
   })
 ];

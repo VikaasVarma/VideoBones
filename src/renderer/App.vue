@@ -1,6 +1,5 @@
 <template>
-  <h1 style="color: red;">Working!</h1>
-  <div>Working W!!!</div>
+  <div>App</div>
 </template>
 
 <script lang="ts">
