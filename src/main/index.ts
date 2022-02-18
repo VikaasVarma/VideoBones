@@ -1,5 +1,6 @@
 import { app, BrowserWindow } from 'electron';
 import path from 'path';
+import { server } from './render/preview';
 
 function createWindow () {
   const mainWindow = new BrowserWindow({
@@ -23,10 +24,13 @@ app.whenReady().then(() => {
       createWindow();
     }
   });
+
+  server.listen(8080);
 });
 
 app.on('window-all-closed', function () {
   if (process.platform !== 'darwin') {
     app.quit();
   }
+  server.close();
 });
