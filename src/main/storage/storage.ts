@@ -28,7 +28,13 @@ export function getProjectRecordingsDirectory(projectHandle: ProjectHandle) {
  * @returns A promise which resolves when the write is complete
  */
 export function writeDirectoryConfig(directory: string, cfg: Config): Promise<void> {
-  return fs.writeFile(path.join(directory, '.bones'), JSON.stringify(cfg)).catch(reason => {
+  const file = path.join(directory, '.bones')
+
+  return fs.truncate(file, 0)
+  .then(() => {
+    return fs.writeFile(file, JSON.stringify(cfg))
+  })
+  .catch(reason => {
     throw Error(`Failed to write project config, reason: ${reason}`)
   })
 }

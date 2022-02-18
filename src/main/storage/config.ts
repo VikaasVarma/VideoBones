@@ -111,17 +111,17 @@ class OpenProjectData {
   }
 
   getConfigOption(option: string): any{
-    return option in this.projectConfig.options ? this.projectConfig.options.option : null
+    return option in this.projectConfig.options ? this.projectConfig.options[option] : null
   }
 
   setConfigOption(option: string, value: any): void {
-    this.projectConfig.options.option = value
+    this.projectConfig.options[option] = value
 
     this.writeConfig()
   }
 
   removeConfigOption(option: string): void {
-    this.projectConfig.options.option = undefined
+    delete this.projectConfig.options[option]
 
     this.writeConfig()
   }
