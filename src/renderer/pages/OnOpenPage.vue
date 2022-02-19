@@ -14,7 +14,7 @@
     <hr class="vertical-border-line">
 
     <div>
-      <button @click="onClick" class="image-container">
+      <button @click="folderIconClicked()" class="image-container">
         <img src="../../../assets/images/folderIcon.png">
       </button>
 
@@ -25,18 +25,21 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent } from 'vue'
 
 export default defineComponent({
     name: "OnOpenPage",
-    setup() {
-      function onClick() {
-        console.log("working")
+    setup(props, context) {
+
+      const folderIconClicked = () => {
+        context.emit("update")
+        console.log("This got called")
       }
 
-      return { onClick }
+      return { folderIconClicked }
 
-    }
+    },
+    emits: ["update"], 
 });
 
 
