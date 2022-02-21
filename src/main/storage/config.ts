@@ -1,6 +1,8 @@
+import { FileHandle } from 'fs/promises'
+import path from 'path'
 import { ProjectHandle } from './projects'
 
-import { getProjectRecordingsDirectory, readProjectConfig, writeDirectoryConfig, writeProjectConfig } from './storage'
+import { getProjectRecordingsDirectory, readProjectConfig, writeDirectoryConfig, writeProjectConfig, cleanProjectTempDirectory, getProjectTempDirectory, createProjectRecordingFile } from './storage'
 
 /**
  * Holds data from .bones project config files.
@@ -177,6 +179,8 @@ function openProject(projectHandle: ProjectHandle): Promise<void> {
 
   return configPromise.then(config => {
     currentOpenProject = new OpenProjectData(projectHandle, config)
+
+    tempCleanupLoop(projectHandle, 60000, Promise.resolve())
   })
 }
 
@@ -195,6 +199,40 @@ function closeProject(): Promise<void> {
   return closePromise.then(() => {
     return
   })
+}
+
+/**
+ * Starts an async loop which cleans the temp directory repeatedly after set timeouts.
+ * 
+ * Stops on the iteration after the project is closed (or a different one is opened).
+ * 
+ * @param projectHandle The project to clean the temp directory of
+ * @param timeout The timeout between cleanups
+ * @param prevPromise The promise from the previous cleanup
+ */
+function tempCleanupLoop(projectHandle: ProjectHandle, timeout: number, prevPromise: Promise<void>) {
+  if (currentOpenProject === null || !projectHandle.equals(currentOpenProject.projectHandle)) {
+    return
+  }
+
+  console.log(`*** Starting project temp direcory cleanup ***`)
+
+  const prom = prevPromise.then(() => { return cleanProjectTempDirectory(projectHandle) } ).then(() => console.log(`*** Finished project temp direcory cleanup ***`))
+
+  setTimeout(tempCleanupLoop, timeout, projectHandle, timeout, prom)
+}
+
+/**
+ * Get the path of the temp directory for the currently open project.
+ * 
+ * This directory is auto cleaned on a timer, with any files which are unused being deleted.
+ */
+function getTempDirectory() {
+  if (currentOpenProject === null) {
+    throw Error("No open project when calling getTempDirectory.");
+  }
+
+  return getProjectTempDirectory(currentOpenProject.projectHandle)
 }
 
 /**
@@ -222,26 +260,37 @@ function getRecordingsList(): Readonly<Array<string>> {
 }
 
 /**
- * Adds a recording file path to the list of files used in the current open project.
+ * Creates a file for a recording and adds it to the list of files used in the current open project.
  *
- * Creation of recordings should be handled elsewhere,
- * and resulting files stored in the directory returned by getProjectRecordingsDirectory.
- *
- * @param recordingRelativePath The path to the recording, relative to project root
+ * @param recordingName The name of the new recording file
+ * @returns An fs.FileHandle to the new recording file
  */
-function addRecording(recordingRelativePath: string): void {
+function addRecording(recordingName: string): Promise<FileHandle> {
   if (currentOpenProject === null) {
     throw Error('No open project when calling addRecording.')
   }
 
-  currentOpenProject.addRecording(recordingRelativePath)
+  currentOpenProject.addRecording(recordingName)
+
+  return createProjectRecordingFile(currentOpenProject.projectHandle, recordingName)
+  .catch(reason => {
+    // if making the file fails, don't actually add to project
+    if (currentOpenProject !== null) {
+      const index = getRecordingsList().findIndex(v => { return v === recordingName })
+      if (index !== null) {
+        removeRecording(index)
+      }
+    }
+
+    throw Error(reason)
+  })
 }
 
 /**
  * Remove a recording file from the list of files used in the current open project.
  *
  * Note this does not delete the underlying file, it simply makes the project 'forget' about it.
- * File deletion should be handled elsewhere.
+ * Maybe this should be done here, not really sure.
  *
  * @param recordingIndex The index of the recording file to remove
  */
@@ -307,6 +356,7 @@ export {
   Config as internal_Config, isConfig as internal_isConfig,
 
   openProject, closeProject,
+  getTempDirectory,
   getRecordingsDirectory, getRecordingsList, addRecording, removeRecording,
   getOption, setOption, removeOption
 }

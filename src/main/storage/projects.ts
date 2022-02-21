@@ -5,7 +5,7 @@ import * as fs from 'fs/promises'
 
 import path from 'path'
 
-import { readDirectoryConfig, recordingsDirectoryName } from './storage'
+import { readDirectoryConfig, recordingsDirectoryName, tempDirectoryName } from './storage'
 import { internal_initialiseProjectConfig as initialiseProjectConfig } from './config'
 
 /**
@@ -153,7 +153,11 @@ function createProjectDirectory(parentDirectory: string, projectName: string): P
   // chain promises so subdirs are only created once their parents are avaliable
   return fs.mkdir(projectDirectory)
     .then(() => {
+      // make subdirs
       return fs.mkdir(path.join(projectDirectory, recordingsDirectoryName))
+        .then(() => {
+          return fs.mkdir(path.join(projectDirectory, tempDirectoryName))
+        })
     })
     .then(() => {
       return projectDirectory

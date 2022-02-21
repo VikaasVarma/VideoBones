@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from 'fs'
+import { existsSync } from 'fs'
 import * as fs from 'fs/promises'
 
 import path from 'path'
@@ -21,6 +21,75 @@ export function getProjectRecordingsDirectory(projectHandle: ProjectHandle) {
 }
 
 /**
+ * Constant specifying the project subdirectory to create for temp files.
+ */
+export const tempDirectoryName = 'tmp'
+
+/**
+ * How long in milliseconds since last modification or access should temp files be cleaned.
+ */
+const tempDeathTimeMs = 60000
+
+/**
+ * Regex to prevent certain files in temp from being removed.
+ * 
+ * Any file in the temp folder with a name matching this regex will never be cleaned up.
+ */
+const tempDeathExclusionRegex = /$^/  // currently matches nothing
+
+export function getProjectTempDirectory(projectHandle: ProjectHandle) {
+  return path.join(projectHandle.projectPath, tempDirectoryName)
+}
+
+/**
+ * Removes all files from project temp directory if they are too old.
+ * 
+ * @param projectHandle Project to clean tmp files from
+ * @returns A promise which resolves when cleanup is done
+ */
+export function cleanProjectTempDirectory(projectHandle: ProjectHandle): Promise<void> {
+  const tmp = getProjectTempDirectory(projectHandle)
+
+  const tempFilesPromise = fs.readdir(tmp)
+
+  return tempFilesPromise.then(files => {
+    let prom = Promise.resolve()
+
+    for(const file of files) {
+      // test for death exclusion
+      if (tempDeathExclusionRegex.test(file)){
+        continue
+      }
+
+      const fullPath = path.join(tmp, file)
+      prom = prom.then(() => {
+        return fs.stat(fullPath)
+      })
+      .then(stats => {
+        const lastAccessed = stats.atime
+        const lastModified = stats.mtime
+
+
+        const elapsed = Math.min(Date.now() - lastAccessed.getTime(), Date.now() - lastModified.getTime())
+
+        if (elapsed > tempDeathTimeMs) {
+          console.log(`Removing ${file}.`)
+          return fs.rm(fullPath)
+        }
+      })
+      .catch(reason => {
+        console.log(`Failed to cleanup temp file '${file}', reason: ${reason}`)
+      })
+    }
+
+    return prom
+  })
+  .catch(reason => {
+    console.log(`Failed to cleanup temp files, reason: ${reason}`)
+  })
+}
+
+/**
  * Asynchronously writes a full project config to a directory, overwriting if present.
  *
  * @param directory The directory to write this config to
@@ -29,13 +98,14 @@ export function getProjectRecordingsDirectory(projectHandle: ProjectHandle) {
  */
 export function writeDirectoryConfig(directory: string, cfg: Config): Promise<void> {
   const file = path.join(directory, '.bones')
+  const cfgString = JSON.stringify(cfg)
 
-  return fs.truncate(file, 0)
+  return fs.writeFile(file, cfgString)
   .then(() => {
-    return fs.writeFile(file, JSON.stringify(cfg))
+    return fs.truncate(file, Buffer.byteLength(cfgString))
   })
   .catch(reason => {
-    throw Error(`Failed to write project config, reason: ${reason}`)
+    throw Error(`Failed to write directory config, reason: ${reason}`)
   })
 }
 
@@ -91,5 +161,21 @@ export function readDirectoryConfig(directory: string): Promise<Config> {
 export function readProjectConfig(projectHandle: ProjectHandle): Promise<Config> {
   return readDirectoryConfig(projectHandle.projectPath).catch(reason => {
     throw Error(`Error reading config in project ${projectHandle.projectName}, reason: ${reason}`)
+  })
+}
+
+/**
+ * Creates a new file for a recording inside the project.
+ * 
+ * @param projectHandle The project to create the recording in
+ * @param name The name of the recording file
+ * @returns A promise resolving to the file handle of the new recording file
+ */
+export function createProjectRecordingFile(projectHandle: ProjectHandle, name:string): Promise<fs.FileHandle> {
+  const fullPath = path.join(getProjectRecordingsDirectory(projectHandle), name)
+
+  return fs.open(fullPath, 'wx')
+  .catch(reason => {
+    throw Error(`Failed to create recording file, reason: ${reason}`)
   })
 }
