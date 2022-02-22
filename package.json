@@ -36,7 +36,7 @@
   },
   "devDependencies": {
     "@types/node": "^17.0.18",
-    "@typescript-eslint/eslint-plugin": "^5.10.2",
+    "@typescript-eslint/eslint-plugin": "^5.12.1",
     "@typescript-eslint/parser": "^5.10.2",
     "css-loader": "^6.6.0",
     "electron": "^17.0.0",
