@@ -28,7 +28,7 @@ export default defineComponent({
         dynamicComponent = "CreateNewProjectPage" 
 
       }
-      return {"dynamicComponent":SingleVideoEditorPage}
+      return {"dynamicComponent":OnOpenPage}
 
       // return {dynamicComponent, onClick, 
               // "OnOpenPage" : OnOpenPage,

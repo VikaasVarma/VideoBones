@@ -47,5 +47,6 @@ export default defineComponent({
 
 <style lang="scss">
   @import "../styles/main.scss";
+  @import "../styles/pages/on-open-page.scss";
 </style>
 
