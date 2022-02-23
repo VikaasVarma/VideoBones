@@ -8,9 +8,9 @@
 
 }
 
-#video-controls {
+.horizontal-spacer {
     grid-template-columns: 1fr 1fr 8fr;
-
+    grid-template-rows: 100%;
 
     margin-top: 10px;
     height: 7%;
@@ -18,10 +18,11 @@
     background-color: inherit;
 
     &>.image-container {
-        display: inline-block;
+        height: 100%;
+        padding: 0;
 
         &>img {
-            height: inherit;
+            height: 100%;
         }
     }
 }
@@ -36,11 +37,6 @@
     grid-column-gap: 20px;
     grid-row-gap: 20px;
     padding: 20px;
-    
-    .horizontal-border-line {
-        height: 2px;
-        border-top: 2px solid $color-middleground;
-    }
     
 }
 
