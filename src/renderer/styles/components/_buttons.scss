@@ -11,7 +11,6 @@ $color-highlight: #00FF2A;
     background-color: $color-button;
     color: white;
     
-    width: fit-content;
     padding-left : 5%;
     padding-right: 5%;
     width: $scaling-factor * 369px;
@@ -29,7 +28,6 @@ $color-highlight: #00FF2A;
     @extend .button-primary;
 
     margin: auto;
-    width: fit-content;
     color: white;
     opacity: 50%;
     filter: none;

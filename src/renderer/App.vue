@@ -28,7 +28,7 @@ export default defineComponent({
         dynamicComponent = "CreateNewProjectPage" 
 
       }
-      return {"dynamicComponent":OnOpenPage}
+      return {"dynamicComponent":CreateNewProjectPage}
 
       // return {dynamicComponent, onClick, 
               // "OnOpenPage" : OnOpenPage,

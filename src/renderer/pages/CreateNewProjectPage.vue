@@ -2,7 +2,8 @@
     <h1 class="page-title" style="margin-top: 10%; margin-bottom: 5%;">VIDEO BONES</h1>
 
     <menu class="options-menu" style="margin: auto;">
-        <div class="named-input-container">
+
+        <div style="grid-column: 1 / 3; grid-row: 1/1;" class="named-input-container">
             <h3>Project Name</h3>
             <input placeholder="Ex: Gangnam Style TikTok" type="text">
         </div>
@@ -16,11 +17,10 @@
             <h3>Audio Input</h3>
             <select name="" id=""></select>
         </div>
-        
-        <div class="button-secondary">Recording</div>
-        <div class="button-primary">Click me!</div>
-
-
+        <div style="grid-column: 1 / 3; grid-row: 3/3;" class="horizontal-spacer">
+            <div class="button-secondary">Recording</div>
+            <div class="button-primary">Click me!</div>
+        </div>
 
     </menu>
 
@@ -36,5 +36,6 @@ export default defineComponent({
 
 <style lang="scss">
   @import "../styles/main.scss";
+  @import "../styles/pages/create-new-project.scss";
 </style>
 
