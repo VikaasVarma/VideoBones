@@ -7,3 +7,5 @@ media/*
 
 *.log
 *-stream*.m4s
+
+.vscode/
