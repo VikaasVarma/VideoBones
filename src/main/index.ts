@@ -1,6 +1,6 @@
-import { app, BrowserWindow, Config } from 'electron'
-import path from 'path'
-import { server } from './render/preview';
+import { app, BrowserWindow } from 'electron';
+import { close, listen } from './render/integratedServer';
+import path from 'path';
 
 function createWindow () {
 
@@ -14,6 +14,7 @@ function createWindow () {
     }
   });
 
+  listen();
   mainWindow.loadFile(path.join(__dirname, '..', 'renderer', 'index.html'));
   //mainWindow.webContents.openDevTools()
 }
@@ -25,13 +26,9 @@ app.whenReady().then(() => {
       createWindow();
     }
   });
-
-  server.listen(8080);
 });
 
 app.on('window-all-closed', function () {
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
-  server.close();
+  app.quit();
+  close();
 });
