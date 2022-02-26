@@ -1,8 +1,9 @@
-import { app, BrowserWindow } from 'electron';
-import path from 'path';
+import { app, BrowserWindow, Config } from 'electron'
+import path from 'path'
 import { server } from './render/preview';
 
 function createWindow () {
+
   const mainWindow = new BrowserWindow({
     width: 1920,
     height: 1080,
