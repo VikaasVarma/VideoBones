@@ -1,5 +1,6 @@
 import { app, BrowserWindow } from 'electron';
 import { close, listen } from './render/integratedServer';
+import { startHandler, stopHandler } from './render/ipcHandler';
 import path from 'path';
 
 function createWindow () {
@@ -14,6 +15,7 @@ function createWindow () {
     }
   });
 
+  startHandler();
   listen();
   mainWindow.loadFile(path.join(__dirname, '..', 'renderer', 'index.html'));
   //mainWindow.webContents.openDevTools()
@@ -29,6 +31,7 @@ app.whenReady().then(() => {
 });
 
 app.on('window-all-closed', function () {
+  stopHandler();
   app.quit();
   close();
 });

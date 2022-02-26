@@ -27,10 +27,14 @@ const server = createServer(async (request, response) => {
 });
 
 export function listen(): void {
-  server.listening && server.close();
+  if (server.listening) {
+    server.close();
+  }
   server.listen(8080);
 }
 
 export function close(): void {
-  server.listening && server.close();
+  if (server.listening) {
+    server.close();
+  }
 }
