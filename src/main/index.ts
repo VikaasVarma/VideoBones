@@ -1,31 +1,37 @@
 import { app, BrowserWindow, Config } from 'electron'
 import path from 'path'
+import { server } from './render/preview';
 
 function createWindow () {
 
   const mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 1920,
+    height: 1080,
     webPreferences: {
       // preload: path.join(__dirname, 'preload.ts')
+      nodeIntegration: true,
+      contextIsolation: false
     }
-  })
+  });
 
-  mainWindow.loadFile(path.join('..', 'renderer', 'index.html'))
-  // mainWindow.webContents.openDevTools()
+  mainWindow.loadFile(path.join(__dirname, '..', 'renderer', 'index.html'));
+  //mainWindow.webContents.openDevTools()
 }
 app.whenReady().then(() => {
-  createWindow()
+  createWindow();
 
   app.on('activate', function () {
     if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow()
+      createWindow();
     }
-  })
-})
+  });
+
+  server.listen(8080);
+});
 
 app.on('window-all-closed', function () {
   if (process.platform !== 'darwin') {
-    app.quit()
+    app.quit();
   }
-})
+  server.close();
+});

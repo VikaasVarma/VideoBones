@@ -1,9 +1,11 @@
 node_modules/
 build/
 dist/
+media/*
 
 .DS_Store
 
 *.log
 
 .vscode/
+*-stream*.m4s

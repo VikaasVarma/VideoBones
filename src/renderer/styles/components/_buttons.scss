@@ -1,0 +1,44 @@
+$color-button: #8367C7;
+$color-highlight: #00FF2A;
+
+.button-primary {
+    font-family: OpenSans;
+    font-size: $scaling-factor * 33px;
+    line-height: $scaling-factor * 67px;
+    text-align: center;
+    
+    text-transform: uppercase;
+    background-color: $color-button;
+    color: white;
+    
+    width: fit-content;
+    padding-left : 5%;
+    padding-right: 5%;
+    width: $scaling-factor * 369px;
+    height: $scaling-factor * 67px;
+
+    border-radius: $scaling-factor * 10px;
+    filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));
+    
+    &:hover {
+        cursor: pointer;
+    }
+}
+
+.button-secondary {
+    @extend .button-primary;
+
+    margin: auto;
+    width: fit-content;
+    color: white;
+    opacity: 50%;
+    filter: none;
+    background-color: inherit;
+    text-decoration: underline;
+
+    &:hover {
+        cursor: pointer;
+        color: rgba(255, 255, 255, 0.4);
+    }
+
+}

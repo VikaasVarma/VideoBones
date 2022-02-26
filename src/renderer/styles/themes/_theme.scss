@@ -1,0 +1,7 @@
+body {
+    background-color: $color-background;
+
+    &>* {
+        font-family: OpenSans;
+    }
+}

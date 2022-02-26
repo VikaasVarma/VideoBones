@@ -1,5 +1,6 @@
-const HtmlWebpackPlugin = require('html-webpack-plugin')
-const path = require('path')
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const path = require('path');
+const { VueLoaderPlugin } = require('vue-loader');
 
 let common_config = {
   devServer: {
@@ -21,7 +22,7 @@ let common_config = {
       },
       {
         test: /\.s(c|a)ss$/,
-        use: ['style-loader', 'css-loader', 'sass-loader'],
+        use: [ 'style-loader', 'css-loader', 'sass-loader' ],
         exclude: [
           /node_modules/,
           path.join(__dirname, 'build'),
@@ -38,9 +39,12 @@ let common_config = {
     usedExports: true
   },
   resolve: {
-    extensions: [ '.tsx', '.ts', '.js' ]
+    alias: {
+      'vue': '@vue/runtime-dom'
+    },
+    extensions: [ '.vue', '.tsx', '.ts', '.js' ]
   }
-}
+};
 
 module.exports = [
   Object.assign({}, common_config, {
@@ -62,6 +66,37 @@ module.exports = [
       filename: 'index.js',
       path: path.join(__dirname, 'build/renderer')
     },
-    plugins: [ new HtmlWebpackPlugin() ]
+    module: {
+      rules: [
+        {
+          test: /\.vue$/,
+          loader: 'vue-loader'
+        },
+        {
+          test: /\.ts$/,
+          loader: 'ts-loader',
+          options: {
+            appendTsSuffixTo: [ /\.vue$/ ]
+          }
+        },
+        {
+          test: /\.scss$/,
+          use: [
+            'vue-style-loader',
+            'css-loader',
+            'sass-loader'
+          ]
+        },
+        {
+          test: /\.(jpe?g|png|gif|svg)$/, 
+          loader: 'file-loader'
+        }
+      ]
+    },
+    plugins: [ new VueLoaderPlugin(), new HtmlWebpackPlugin({
+      inject: false,
+      templateContent: ({htmlWebpackPlugin}) => `<html><head>${htmlWebpackPlugin.tags.headTags}</head><body><div id="app"></div>${htmlWebpackPlugin.tags.bodyTags}</body></html>`
+    })
+    ]
   })
-]
+];

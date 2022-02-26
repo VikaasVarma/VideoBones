@@ -19,6 +19,9 @@ module.exports = {
     }, {
       env: { 'browser': true },
       files: [ 'src/renderer/**' ]
+    }, {
+      env: { 'node': true },
+      files: [ './*.js', './.*.js' ]
     }
   ],
   rules: {
@@ -55,9 +58,9 @@ module.exports = {
     'object-curly-spacing': [ 'warn', 'always' ],
     'operator-linebreak': [ 'warn', 'before' ],
     'quotes': [ 'error', 'single' ],
-    'semi': [ 'error', 'never' ],
+    'semi': [ 'error', 'always' ],
     'sort-imports': [ 'warn', { 'ignoreCase': true }],
     'space-in-parens': [ 'warn', 'never' ],
     'space-infix-ops': [ 'warn' ]
   }
-}
+};
