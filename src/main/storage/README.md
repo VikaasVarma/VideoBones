@@ -2,6 +2,9 @@
 
 The apis provided here make heavy use of promises, it will be easier to use this code if you understand the JS promises stuff.
 
+If you notice any spelling errors
+Fuck off.
+
 ## Modules
 
 ### Storage
@@ -35,7 +38,27 @@ const project: Promise<ProjectHandle> = projects.createProject("{ Parent directo
 
 Returns a promise resolving to a handle for the new project, which is then used to open the project.
 
+#### Add/remove projects
+
+```
+const projectHandlePromise: Promise<ProjectHandle> = projects.trackProject(projectDirectory:string)
+```
+
+This attempts to find a project in projectDirectory. Could be used for locating projects which were removed accidentally, or if the project handles get corrupted, or for sharing projects (A sends B a zip of the project directory, B unzips and runs trackProject). Will fail if the directory is not a valid project for VideoBones.
+
+```
+projects.untrackProject(projectHandle: ProjectHandle)
+```
+
+Removes a project from the list of projects VideoBones knows about. Used to 'delete' a project, but doesnt actually delete the project directory for now.
+
 #### Open a project
+
+```
+const projecList: Readonly<Array<ProjectHandle>> = projects.getTrackedProjects()
+```
+
+Returns the list of handles for created projects.
 
 ```
 const openPromise: Promise<void> = config.openProject("{ Project handle }")
