@@ -23,9 +23,7 @@ function buildArgs({
   videoInputs = [] as VideoInput[]
 }: EngineOptions): string[] {
   // The holy ffmpeg argument builder
-  return videoInputs.map((input: VideoInput) => [ '-ss', (startTime + input.startTime).toString(), '-i', input.file ]).flat(1).concat(
-    audioInputs.map((input:AudioInput) => ['-ss', (startTime + input.startTime).toString(), '-i', input.file]).flat(1).concat(
-    [
+  return videoInputs.map((input: VideoInput) => [ '-ss', (startTime + input.startTime).toString(), '-i', input.file ]).flat(1).concat(audioInputs.map((input:AudioInput) => [ '-ss', (startTime + input.startTime).toString(), '-i', input.file ]).flat(1).concat([
     '-filter_complex',
     [
       videoInputs.map((input: VideoInput, i: number) => `[${i}:v]setpts=PTS-STARTPTS,volume=${input.volume},scale=${input.resolution.width}x${input.resolution.height}[input${i}];`).join(''),
@@ -36,14 +34,12 @@ function buildArgs({
     [
       audioInputs.map((input: AudioInput, i: number) => {
         const i2 = i + videoInputs.length;
-        return `[${i2}:a]setpts=PTS-STARTPTS, volume=${input.volume}[ainput${i}];`
+        return `[${i2}:a]setpts=PTS-STARTPTS, volume=${input.volume}[ainput${i}];`;
       }).join(''),
       audioInputs.map((input:AudioInput, i:number) => {
-        return `[ainput${i}]`
-      }).join('').concat(
-        `amerge=inputs=${audioInputs.length}[aout];`
-      ),
-      ``
+        return `[ainput${i}]`;
+      }).join('').concat(`amerge=inputs=${audioInputs.length}[aout];`),
+      ''
     ].join(''),
     '-map', '[out]',
     '-map', '[aout]',
@@ -67,7 +63,7 @@ function buildArgs({
     '-metadata', 'description="Made with VideoBones"',
     '-stats',
     join(getTempDirectory(), outputType === 'render' ? outputFile : (outputType === 'thumbnail' ? 'thumb%04d.png' : previewManifest))
-  ]);
+  ]));
 }
 
 let ffmpeg: ChildProcessByStdio<null, Readable, null> | null;
