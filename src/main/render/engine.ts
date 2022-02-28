@@ -23,11 +23,11 @@ function buildArgs({
   videoInputs = [] as VideoInput[]
 }: EngineOptions): string[] {
   // The holy ffmpeg argument builder
-  return videoInputs.map((input:VideoInput) => [ '-ss', (startTime + input.startTime).toString(), '-i', input.file ]).flat(1).concat([
+  return videoInputs.map((input: VideoInput) => [ '-ss', (startTime + input.startTime).toString(), '-i', input.file ]).flat(1).concat([
     '-filter_complex',
     [
       videoInputs.map((input: VideoInput, i: number) => `[${i}:v]setpts=PTS-STARTPTS,volume=${input.volume},scale=${input.resolution.width}x${input.resolution.height}[input${i}];`).join(''),
-      `${videoInputs.map((__: VideoInput, i:number) => `[input${i}]`)}xstack=inputs=${videoInputs.length}:layout=0_0|0_h0|w0_0|w0_h0[matrix];`,
+      `${videoInputs.map((__: VideoInput, i: number) => `[input${i}]`)}xstack=inputs=${videoInputs.length}:layout=${videoInputs.map((input: VideoInput) => `${input.position.left}_${input.position.top}`).join('|')}[matrix];`,
       outputType === 'thumbnail' ? `[matrix]fps=${thumbnailEvery}[pr]` : '[matrix][pr]',
       `[pr]scale=${outputResolution.width}:${outputResolution.height},setsar=1:1[out]`
     ].join(''),
@@ -51,7 +51,7 @@ function buildArgs({
     '-vol', outputVolume.toString(),
     '-metadata', 'description="Made with VideoBones"',
     '-stats',
-    join(getTempDirectory(), outputType === 'render' ? outputFile : previewManifest)
+    join(getTempDirectory(), outputType === 'render' ? outputFile : (outputType === 'thumbnail' ? 'thumb%04d.png' : previewManifest))
   ]);
 }
 
