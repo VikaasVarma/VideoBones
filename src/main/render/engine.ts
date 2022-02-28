@@ -1,4 +1,4 @@
-import { AudioInput, EngineOptions, VideoInput } from '../types';
+import { AudioInput, EngineOptions, VideoInput } from './types';
 import { ChildProcessByStdio, spawn } from 'child_process';
 import ffmpegStatic from 'ffmpeg-static';
 import { getTempDirectory } from '../storage/config';
