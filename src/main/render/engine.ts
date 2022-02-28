@@ -29,9 +29,7 @@ function buildArgs({
       videoInputs.map((input: VideoInput, i: number) => `[${i}:v]setpts=PTS-STARTPTS,volume=${input.volume || 256},scale=${input.resolution.width}x${input.resolution.height}[input${i}];`).join(''),
       `${videoInputs.map((__: VideoInput, i: number) => `[input${i}]`)}xstack=inputs=${videoInputs.length}:layout=${videoInputs.map((input: VideoInput) => `${input.position.left}_${input.position.top}`).join('|')}[matrix];`,
       outputType === 'thumbnail' ? `[matrix]fps=${thumbnailEvery}[pr];` : '',
-      `[${outputType === 'thumbnail' ? '[pr]' : '[matrix]'}]scale=${outputResolution.width}:${outputResolution.height},setsar=1:1[out];`
-    ].join(''),
-    [
+      `[${outputType === 'thumbnail' ? '[pr]' : '[matrix]'}]scale=${outputResolution.width}:${outputResolution.height},setsar=1:1[out];`,
       audioInputs.map((input: AudioInput, i: number) => `[${i + videoInputs.length}:a]setpts=PTS-STARTPTS,volume=${input.volume || 256}[ainput${i}];`).join(''),
       audioInputs.map((input:AudioInput, i:number) => `[ainput${i}]`).join(''), `amerge=inputs=${audioInputs.length}[aout];`
     ].join(''),
