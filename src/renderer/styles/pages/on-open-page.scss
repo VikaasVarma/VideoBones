@@ -1,0 +1,16 @@
+
+
+.horizontal-options-menu {
+    height: 45%;
+    
+    &>div {
+        width: 200px;
+        margin-top: 10px;
+    }
+}
+
+.image-container {
+    padding: 30px;
+    background-color: $color-middleground;
+    border-radius: 7px;
+}
