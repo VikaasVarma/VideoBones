@@ -32,14 +32,14 @@ export default defineComponent({
     setup(props, context) {
 
       const folderIconClicked = () => {
-        context.emit("update")
-        console.log("This got called")
+        context.emit("create-new-project")
+        console.log("Emmiting create-new-project")
       }
 
       return { folderIconClicked }
 
     },
-    emits: ["update"], 
+    emits: ["create-new-project"], 
 });
 
 

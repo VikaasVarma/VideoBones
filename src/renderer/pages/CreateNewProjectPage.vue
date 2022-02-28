@@ -20,7 +20,7 @@
             </div>
             <div style="grid-column: 1 / 3; grid-row: 3/3;" class="horizontal-spacer">
                 <div class="button-secondary">Recording</div>
-                <div class="button-primary">Click me!</div>
+                <div @click="primaryButtonPressed()" class="button-primary">Click me!</div>
             </div>
 
         </menu>
@@ -31,7 +31,17 @@
 import { defineComponent } from 'vue';
 
 export default defineComponent({
-    name: "create-new-project",
+    name: "create-new-project-page",
+    emits: ["create-project"],
+    setup(props, context) {
+
+        function primaryButtonPressed() {
+            context.emit('create-project')
+        }
+
+        return {primaryButtonPressed}
+
+    }
 });
 </script>
 

@@ -1,6 +1,8 @@
 <template>
-  <create-new-project-page v-if="pageDisplayed === 'create-new-project-page'"/>
-  <on-open-page @update="pageDisplayed = 'create-new-project-page'" v-else-if="pageDisplayed === 'on-open-page'"/>
+  <on-open-page @create-new-project="pageDisplayed = 'create-new-project-page'"
+                v-if="pageDisplayed === 'on-open-page'"/>
+  <create-new-project-page @create-project="pageDisplayed = 'video-editor-page'" v-else-if="pageDisplayed === 'create-new-project-page'"/>
+
   <single-video-editor-page v-else-if="pageDisplayed === 'single-video-editor-page'"/>
   <video-editor-page v-else-if="pageDisplayed === 'video-editor-page'"/>
 </template>
@@ -20,20 +22,17 @@ export default defineComponent({
       SingleVideoEditorPage,
       VideoEditorPage, 
     },
-    // props : {
-    //   pageDisplayed : {type:String, default: "on-open-page"},
-    // },
-
     methods : {
       onClick() {
         console.log("dhjsakdhsakj")
       }
     },
     setup(props, context) {
-      var pageDisplayed = ref("video-editor-page")
+      var pageDisplayed = ref("on-open-page")
       
       function onClick() {
         pageDisplayed.value = "create-new-project-page"
+        console.log("working")
       }
 
       return {props, pageDisplayed}
