@@ -26,20 +26,14 @@ function buildArgs({
   return videoInputs.map((input: VideoInput) => [ '-ss', (startTime + input.startTime).toString(), '-i', input.file ]).flat(1).concat(audioInputs.map((input:AudioInput) => [ '-ss', (startTime + input.startTime).toString(), '-i', input.file ]).flat(1).concat([
     '-filter_complex',
     [
-      videoInputs.map((input: VideoInput, i: number) => `[${i}:v]setpts=PTS-STARTPTS,volume=${input.volume},scale=${input.resolution.width}x${input.resolution.height}[input${i}];`).join(''),
+      videoInputs.map((input: VideoInput, i: number) => `[${i}:v]setpts=PTS-STARTPTS,volume=${input.volume || 256},scale=${input.resolution.width}x${input.resolution.height}[input${i}];`).join(''),
       `${videoInputs.map((__: VideoInput, i: number) => `[input${i}]`)}xstack=inputs=${videoInputs.length}:layout=${videoInputs.map((input: VideoInput) => `${input.position.left}_${input.position.top}`).join('|')}[matrix];`,
-      outputType === 'thumbnail' ? `[matrix]fps=${thumbnailEvery}[pr]` : '[matrix][pr]',
-      `[pr]scale=${outputResolution.width}:${outputResolution.height},setsar=1:1[out]`
+      outputType === 'thumbnail' ? `[matrix]fps=${thumbnailEvery}[pr];` : '',
+      `[${outputType === 'thumbnail' ? '[pr]' : '[matrix]'}]scale=${outputResolution.width}:${outputResolution.height},setsar=1:1[out];`
     ].join(''),
     [
-      audioInputs.map((input: AudioInput, i: number) => {
-        const i2 = i + videoInputs.length;
-        return `[${i2}:a]setpts=PTS-STARTPTS, volume=${input.volume}[ainput${i}];`;
-      }).join(''),
-      audioInputs.map((input:AudioInput, i:number) => {
-        return `[ainput${i}]`;
-      }).join('').concat(`amerge=inputs=${audioInputs.length}[aout];`),
-      ''
+      audioInputs.map((input: AudioInput, i: number) => `[${i + videoInputs.length}:a]setpts=PTS-STARTPTS,volume=${input.volume || 256}[ainput${i}];`).join(''),
+      audioInputs.map((input:AudioInput, i:number) => `[ainput${i}]`).join(''), `amerge=inputs=${audioInputs.length}[aout];`
     ].join(''),
     '-map', '[out]',
     '-map', '[aout]',
@@ -79,6 +73,7 @@ export function start(
 
   const bin = getPath();
   const args = buildArgs(options);
+  console.log(bin, args);
 
   if (bin) {
     ffmpeg = spawn(bin, args, { stdio: [ 'ignore', 'pipe', process.stderr ] });

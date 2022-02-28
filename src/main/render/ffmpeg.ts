@@ -17,6 +17,8 @@ export function getPath() {
 
     const ffmpegPath = join(
       process.cwd(),
+      'node_modules',
+      'ffmpeg-static',
       pl === 'win32' ? 'ffmpeg.exe' : 'ffmpeg'
     );
 
