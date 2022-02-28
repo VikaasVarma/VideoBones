@@ -19,6 +19,9 @@ module.exports = {
     }, {
       env: { 'browser': true },
       files: [ 'src/renderer/**' ]
+    }, {
+      env: { 'node': true },
+      files: [ './*.js', './.*.js' ]
     }
   ],
   rules: {
@@ -40,7 +43,16 @@ module.exports = {
     'lines-between-class-members': [ 'error', 'always', { 'exceptAfterSingleLine': true }],
     'key-spacing': [ 'warn', { 'beforeColon': false, 'afterColon': true, 'mode': 'strict' }],
     'keyword-spacing': [ 'warn', { 'before': true, 'after': true }],
-    'max-len': [ 'error', 120 ],
+    'max-len': [
+      'error', {
+        'code': 120,
+        'ignoreRegExpLiterals': true,
+        'ignoreStrings': true,
+        'ignoreTemplateLiterals': true,
+        'ignoreTrailingComments': true,
+        'ignoreUrls': true
+      }
+    ],
     'no-else-return': 'off',
     'no-multiple-empty-lines': [ 'error', { 'max': 1, 'maxEOF': 0 }],
     'no-trailing-spaces': 'error',
@@ -55,9 +67,9 @@ module.exports = {
     'object-curly-spacing': [ 'warn', 'always' ],
     'operator-linebreak': [ 'warn', 'before' ],
     'quotes': [ 'error', 'single' ],
-    'semi': [ 'error', 'never' ],
+    'semi': [ 'error', 'always' ],
     'sort-imports': [ 'warn', { 'ignoreCase': true }],
     'space-in-parens': [ 'warn', 'never' ],
     'space-infix-ops': [ 'warn' ]
   }
-}
+};
