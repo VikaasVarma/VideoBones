@@ -1,9 +1,16 @@
-
-
 select {
-    background-color: $color-middleground;
-    width: 100%;
-    border: 0;
+	height: $scaling-factor * 60px;
+	width: 100%;
 
-    height: $scaling-factor * 60px;
+	border-style: solid;
+	background-color: $color-middleground;
+	border-color: $color-middleground;
+	color: white;
+	padding-left: 5px;
+	outline: none;
+	font-style: normal;
+
+	&:focus {
+		border-color: $color-purple;
+	}
 }
