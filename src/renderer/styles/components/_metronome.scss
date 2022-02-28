@@ -1,0 +1,34 @@
+.metronome-container {
+	background-color: $color-middleground;
+	display: inline-flex;
+	justify-content: center;
+	height: fit-content;
+	width: 100%;
+	padding: 5px;
+	padding-left: 10px;
+	margin: 10px 0 10px 0px;
+
+	& > h2 {
+		font-size: $scaling-factor * 30px;
+		color: white;
+		width: 80%;
+	}
+
+	& > div {
+		height: 100%;
+	}
+
+	:nth-child(2) {
+		& > img {
+			margin-top: 5px;
+			height: $scaling-factor * 15;
+			width: $scaling-factor * 20;
+
+			&:hover {
+				cursor: pointer;
+			}
+		}
+	}
+
+	border-radius: 5px;
+}

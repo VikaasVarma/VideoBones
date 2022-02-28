@@ -50,6 +50,13 @@
                     <input type="checkbox" class="tickbox"/>
                     <h3>Play While Recording</h3>
                 </div>
+                <div class="metronome-container">
+                    <h2>80 BPM</h2>
+                    <div>
+                        <img src="../../../assets/images/arrow.svg">
+                        <img src="../../../assets/images/arrow.svg" style="transform: scaleY(-1)">
+                    </div>
+                </div>
                 <div class="add-item-container">
                     <img src="../../../assets/images/addIcon.png">
                     <h3>New Clicker Track</h3>
