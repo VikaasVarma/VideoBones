@@ -59,7 +59,7 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
   @import "../styles/main.scss";
   @import "../styles/pages/single-video-editor.scss";
 </style>

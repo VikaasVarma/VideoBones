@@ -6,9 +6,9 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue'
-import OnOpenPage from './pages/OnOpenPage.vue'
-import CreateNewProjectPage from './pages/CreateNewProjectPage.vue'
-import SingleVideoEditorPage from './pages/SingleVideoEditorPage.vue'
+import OnOpenPage from './OnOpenPage.vue'
+import CreateNewProjectPage from './CreateNewProjectPage.vue'
+import SingleVideoEditorPage from './SingleVideoEditorPage.vue'
 
 export default defineComponent({
     name: "app",
@@ -39,6 +39,6 @@ export default defineComponent({
 });
 </script>
 
-<style>
-
+<style lang="scss">
+  @import "../styles/main.scss";
 </style>

@@ -1,7 +1,7 @@
 import './styles/reset.scss'
 import { createApp } from 'vue'
 
-import App from './App.vue'
+import App from './pages/App.vue'
 import OnOpenPage from './pages/OnOpenPage.vue'
 import Recording from './Recording.vue'
 
