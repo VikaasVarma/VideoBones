@@ -1,15 +1,17 @@
-@import 'base/typography';
+@import "base/typography";
 
-@import 'utilities/variables';
+@import "utilities/variables";
 
-@import 'themes/theme';
+@import "themes/theme";
 
-@import 'layout/container';
-@import 'layout/options-menu';
+@import "layout/container";
+@import "layout/options-menu";
 
-@import 'components/buttons';
-@import 'components/tickbox';
-@import 'components/border-lines';
-@import 'components/text-input';
-@import 'components/dropdown';
-@import 'components/timeline';
+@import "components/add-item";
+@import "components/border-lines";
+@import "components/buttons";
+@import "components/dropdown";
+@import "components/metronome";
+@import "components/text-input";
+@import "components/tickbox";
+@import "components/timeline";

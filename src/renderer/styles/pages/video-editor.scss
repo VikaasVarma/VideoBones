@@ -37,9 +37,11 @@
 	width: 100%;
 	height: 100%;
 	background-color: $color-outline;
+	display: block;
 
 	& > div {
 		&:not(:first-of-type) {
+			margin-top: 10px;
 			&::before {
 				display: block;
 				content: "";
@@ -50,6 +52,10 @@
 				border-radius: 5px;
 				margin-bottom: 10px;
 			}
+		}
+
+		& > :not(h2) {
+			margin-top: 10px;
 		}
 
 		:not(h2) {

@@ -1,0 +1,33 @@
+
+input {
+    font-weight: 600;
+}
+
+.horizontal-spacer {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 100%;
+    padding-left: 30%;
+
+    &>.button-secondary {
+        width: 100%;
+        font-weight: 600;
+    }
+    
+    &>.button-primary {
+        width: 100%;
+        margin: auto;
+        font-weight: 600;
+    }
+}
+
+.options-menu {
+
+    padding-bottom: 20px;
+    
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
+
+
+
+}
+

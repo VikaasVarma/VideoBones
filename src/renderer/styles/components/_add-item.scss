@@ -1,0 +1,28 @@
+$color_tickbox: #404451;
+
+.add-item-container {
+	width: $scaling-factor * 200px;
+	display: flex;
+
+	> * {
+		display: inline;
+	}
+
+	> h2,
+	h3,
+	h4 {
+		font-size: $scaling-factor * 28px;
+		color: white;
+		width: 80%;
+	}
+
+	& > img {
+		height: 15px;
+		width: auto;
+		top: 0;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		margin-right: 10px;
+	}
+}
