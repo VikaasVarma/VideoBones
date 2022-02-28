@@ -1,6 +1,6 @@
 import { AudioInput, EngineOptions, VideoInput } from './types';
 import { ChildProcessByStdio, spawn } from 'child_process';
-import ffmpegStatic from 'ffmpeg-static';
+import { getPath } from './ffmpeg';
 import { getTempDirectory } from '../storage/config';
 import { join } from 'path';
 import { Readable } from 'stream';
@@ -66,14 +66,17 @@ export function start(
     ffmpeg.kill();
   }
 
+  const bin = getPath();
   const args = buildArgs(options);
 
-  ffmpeg = spawn(ffmpegStatic, args, { stdio: [ 'ignore', 'pipe', process.stderr ] });
-  ffmpeg.stdout.on('data', data => {
-    console.log(data);
-    statusCallback(data.toString(), 0);
-  });
-  ffmpeg.on('exit', doneCallback);
+  if (bin) {
+    ffmpeg = spawn(bin, args, { stdio: [ 'ignore', 'pipe', process.stderr ] });
+    ffmpeg.stdout.on('data', data => {
+      console.log(data);
+      statusCallback(data.toString(), 0);
+    });
+    ffmpeg.on('exit', doneCallback);
+  }
 }
 
 export function kill() {
