@@ -10,7 +10,7 @@ import SingleVideoEditorPage from './pages/SingleVideoEditorPage.vue'
 import VideoEditorPage from './pages/VideoEditorPage.vue'
 
 
-const app = createApp(VideoEditorPage)
+const app = createApp(App)
 
 app.mount('#app')
 

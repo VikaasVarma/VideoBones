@@ -1,5 +1,7 @@
 <template>
-  <component ref="parent" @update="onClick()" :is="dynamicComponent"></component>
+  <create-new-project-page v-if="pageDisplayed === 'create-new-project-page'"/>
+  <on-open-page @update="pageDisplayed = 'create-new-project-page'" v-else-if="pageDisplayed === 'on-open-page'"/>
+  <single-video-editor-page v-else-if="pageDisplayed === 'single-video-editor-page'"/>
 </template>
 
 <script lang="ts">
@@ -8,31 +10,31 @@ import OnOpenPage from './pages/OnOpenPage.vue'
 import CreateNewProjectPage from './pages/CreateNewProjectPage.vue'
 import SingleVideoEditorPage from './pages/SingleVideoEditorPage.vue'
 
-
 export default defineComponent({
     name: "app",
-    props : {
-      dynamicComponent: String
+    components : {
+      OnOpenPage,
+      CreateNewProjectPage,
+      SingleVideoEditorPage 
+    },
+    // props : {
+    //   pageDisplayed : {type:String, default: "on-open-page"},
+    // },
+
+    methods : {
+      onClick() {
+        console.log("dhjsakdhsakj")
+      }
     },
     setup(props, context) {
+      var pageDisplayed = ref("on-open-page")
       
-
-      var dynamicComponent = "OnOpenPage"
-
-      var currentPage = OnOpenPage;
-
-      
-
       function onClick() {
-        console.log("Worjkmdsa")
-        dynamicComponent = "CreateNewProjectPage" 
-
+        pageDisplayed.value = "create-new-project-page"
       }
-      return {"dynamicComponent":CreateNewProjectPage}
 
-      // return {dynamicComponent, onClick, 
-              // "OnOpenPage" : OnOpenPage,
-              // "CreateNewProjectPage" : CreateNewProjectPage}
+      return {props, pageDisplayed}
+
     },
 });
 </script>
