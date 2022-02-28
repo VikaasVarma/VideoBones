@@ -2,6 +2,7 @@ import { app, BrowserWindow } from 'electron';
 import { close, listen } from './render/integratedServer';
 import { startHandler, stopHandler } from './render/ipcHandler';
 import path from 'path';
+import { startStorageHandlers } from './storage/ipcHandler';
 
 function createWindow () {
 
@@ -16,6 +17,8 @@ function createWindow () {
   });
 
   startHandler();
+  startStorageHandlers();
+
   listen();
   mainWindow.loadFile(path.join(__dirname, '..', 'renderer', 'index.html'));
   //mainWindow.webContents.openDevTools()
