@@ -112,11 +112,11 @@ class OpenProjectData {
     this.writeConfig()
   }
 
-  getConfigOption(option: string): any{
+  getConfigOption(option: string): unknown{
     return option in this.projectConfig.options ? this.projectConfig.options[option] : null
   }
 
-  setConfigOption(option: string, value: any): void {
+  setConfigOption(option: string, value: unknown): void {
     this.projectConfig.options[option] = value
 
     this.writeConfig()
@@ -310,7 +310,7 @@ function removeRecording(recordingIndex: number): void {
  * @param option The name of the option to get
  * @returns The value of the option in the project, or null if the option doesn't exist
  */
-function getOption(option: string): any {
+function getOption(option: string): unknown {
   if (currentOpenProject === null) {
     throw Error('No open project when calling getOption.')
   }
@@ -326,7 +326,7 @@ function getOption(option: string): any {
  * @param option The name of the option to check
  * @param value The value to set the option
  */
-function setOption(option: string, value: any): void {
+function setOption(option: string, value: unknown): void {
   if (currentOpenProject === null) {
     throw Error('No open project when calling setOption.')
   }
