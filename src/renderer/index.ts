@@ -7,9 +7,10 @@ import Recording from './Recording.vue'
 
 import CreateNewProjectPage from './pages/CreateNewProjectPage.vue'
 import SingleVideoEditorPage from './pages/SingleVideoEditorPage.vue'
+import VideoEditorPage from './pages/VideoEditorPage.vue'
 
 
-const app = createApp(App)
+const app = createApp(VideoEditorPage)
 
 app.mount('#app')
 
