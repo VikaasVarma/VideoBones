@@ -3,9 +3,19 @@ import { ipcMain } from 'electron';
 import * as projects from '../storage/projects'
 import * as config from '../storage/config'
 
+// Defines a bunch of ipc handlers for all the storage stuff
+
 export function startStorageHandlers() {
   ipcMain.addListener('create-project', (event, parentDirectory:string, projectName:string) => {
     return  projects.createProject(parentDirectory, projectName)
+  })
+
+  ipcMain.addListener('track-project', (event, directory:string) => {
+    projects.trackProject(directory)
+  })
+
+  ipcMain.addListener('untrack-project', (event, handle:projects.ProjectHandle) => {
+    projects.untrackProject(handle)
   })
 
   ipcMain.addListener('get-projects', event => {
@@ -22,6 +32,10 @@ export function startStorageHandlers() {
 
   ipcMain.addListener('get-recordings', (event) => {
     return config.getRecordingsList()
+  })
+
+  ipcMain.addListener('get-recordings-directory', event => {
+    return config.getRecordingsDirectory()
   })
 
   ipcMain.addListener('add-recording', (event, recordingName:string) => {
