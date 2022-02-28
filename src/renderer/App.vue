@@ -1,15 +1,15 @@
 <template>
-  <recording-screen> </recording-screen>
+  <full-video-editor-page/>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import  RecordingScreen from './pages/RecordingScreen.vue'
+import  FullVideoEditorPage from './pages/FullVideoEditorPage.vue'
 
 export default defineComponent({
     name: "App",
     components: {
-      RecordingScreen
+      FullVideoEditorPage
     }
 });
 </script>

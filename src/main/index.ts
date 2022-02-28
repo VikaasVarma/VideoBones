@@ -3,6 +3,8 @@ import { close, listen } from './render/integratedServer';
 import { startHandler, stopHandler } from './render/ipcHandler';
 import path from 'path';
 import { startStorageHandlers } from './storage/ipcHandler';
+import * as config from '../main/storage/config';
+import * as projects from '../main/storage/projects';
 
 function createWindow () {
 
@@ -15,9 +17,23 @@ function createWindow () {
       contextIsolation: false
     }
   });
-
-  startHandler();
-  startStorageHandlers();
+  try {
+    projects.createProject('', 'testing').then(handle => {
+      config.openProject(handle).then(() => {
+        startHandler();
+        listen();
+        mainWindow.loadFile(path.join(__dirname, '..', 'renderer', 'index.html'));
+        //mainWindow.webContents.openDevTools()
+      });
+    });
+  } catch (err) {
+    config.openProject(projects.getTrackedProjects()[0]).then(() => {
+      startHandler();
+      listen();
+      mainWindow.loadFile(path.join(__dirname, '..', 'renderer', 'index.html'));
+      //mainWindow.webContents.openDevTools()
+    });
+  }
 
   listen();
   mainWindow.loadFile(path.join(__dirname, '..', 'renderer', 'index.html'));
