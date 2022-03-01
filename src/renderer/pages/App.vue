@@ -1,7 +1,9 @@
 <template>
   <on-open-page @create-new-project="pageDisplayed = 'create-new-project-page'"
                 v-if="pageDisplayed === 'on-open-page'"/>
-  <create-new-project-page @create-project="pageDisplayed = 'video-editor-page'" v-else-if="pageDisplayed === 'create-new-project-page'"/>
+  <create-new-project-page @create-project="pageDisplayed = 'video-editor-page'"
+                           @cancel="pageDisplayed = 'on-open-page'" 
+                           v-else-if="pageDisplayed === 'create-new-project-page'"/>
 
   <single-video-editor-page v-else-if="pageDisplayed === 'single-video-editor-page'"/>
   <video-editor-page v-else-if="pageDisplayed === 'video-editor-page'"/>
@@ -28,7 +30,7 @@ export default defineComponent({
       }
     },
     setup(props, context) {
-      var pageDisplayed = ref("on-open-page")
+      var pageDisplayed = ref("create-new-project-page")
       
       function onClick() {
         pageDisplayed.value = "create-new-project-page"

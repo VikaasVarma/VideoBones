@@ -1,24 +1,27 @@
-
-
 .named-input-container {
-    width: 100%;
-    grid-column: 1 / 3;
-    grid-row: 1 / 2;
+	width: 100%;
+	grid-column: 1 / 3;
+	grid-row: 1 / 2;
 
-    &> input {
-        padding-left: 15px;
-        padding-right: 15px;
+	& > input {
+		padding-left: 15px;
+		padding-right: 15px;
+		margin-top: 3px;
 
-        border-style: none;
-        height: $scaling-factor * 55px;
-        width: 100%;
-        background-color: $color-middleground;
-        color: white;
-        
-        &::placeholder {
-            color: rgba(255, 255, 255, 0.2);
-        }
+		height: $scaling-factor * 55px;
+		width: 100%;
+		border-style: solid;
+		border-color: $color-middleground;
+		background-color: $color-middleground;
+		color: white;
+		outline: none;
 
-    }
+		&::placeholder {
+			color: rgba(255, 255, 255, 0.2);
+		}
 
+		&:focus {
+			border-color: $color-purple;
+		}
+	}
 }

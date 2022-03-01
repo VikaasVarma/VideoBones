@@ -1,33 +1,30 @@
-
 input {
-    font-weight: 600;
+	font-weight: 600;
 }
 
 .horizontal-spacer {
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 100%;
-    padding-left: 30%;
+	grid-template-columns: 1fr 1fr;
+	grid-template-rows: 100%;
+	margin-top: 5%;
+	padding-left: 55%;
 
-    &>.button-secondary {
-        width: 100%;
-        font-weight: 600;
-    }
-    
-    &>.button-primary {
-        width: 100%;
-        margin: auto;
-        font-weight: 600;
-    }
+	& > .button-secondary {
+		width: fit-content;
+		font-weight: 600;
+		font-size: medium;
+	}
+
+	& > .button-primary {
+		width: fit-content;
+		margin: auto;
+		font-weight: 600;
+		white-space: nowrap;
+	}
 }
 
 .options-menu {
+	padding-bottom: 20px;
 
-    padding-bottom: 20px;
-    
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr 1fr;
-
-
-
+	grid-template-columns: 1fr 1fr;
+	grid-template-rows: 1fr 1fr 1fr;
 }
-
