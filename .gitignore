@@ -6,6 +6,6 @@ media/*
 .DS_Store
 
 *.log
-*-stream*.m4s
 
 .vscode/
+*-stream*.m4s

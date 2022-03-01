@@ -1,6 +1,10 @@
 import { app, BrowserWindow } from 'electron';
+import { close, listen } from './render/integratedServer';
+import { startHandler, stopHandler } from './render/ipcHandler';
 import path from 'path';
-import { server } from './render/preview';
+import { startStorageHandlers } from './storage/ipcHandler';
+import * as config from '../main/storage/config';
+import * as projects from '../main/storage/projects';
 
 function createWindow () {
 
@@ -13,7 +17,25 @@ function createWindow () {
       contextIsolation: false
     }
   });
+  try {
+    projects.createProject('', 'testing').then(handle => {
+      config.openProject(handle).then(() => {
+        startHandler();
+        listen();
+        mainWindow.loadFile(path.join(__dirname, '..', 'renderer', 'index.html'));
+        //mainWindow.webContents.openDevTools()
+      });
+    });
+  } catch (err) {
+    config.openProject(projects.getTrackedProjects()[0]).then(() => {
+      startHandler();
+      listen();
+      mainWindow.loadFile(path.join(__dirname, '..', 'renderer', 'index.html'));
+      //mainWindow.webContents.openDevTools()
+    });
+  }
 
+  listen();
   mainWindow.loadFile(path.join(__dirname, '..', 'renderer', 'index.html'));
   //mainWindow.webContents.openDevTools()
 }
@@ -25,13 +47,10 @@ app.whenReady().then(() => {
       createWindow();
     }
   });
-
-  server.listen(8080);
 });
 
 app.on('window-all-closed', function () {
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
-  server.close();
+  stopHandler();
+  app.quit();
+  close();
 });

@@ -10,17 +10,23 @@
             </div>
 
             <div style="grid-column: 1 / 2; grid-row: 2/2;">
-                <h3>Video Input</h3>
-                <select name="" id="" ></select>
+                <h3 style="margin-bottom: 5px">Video Input</h3>
+                <select name="" id="" >
+                    <option value="built-in-camera" style="color: white">Built-in Camera</option>
+                </select>
             </div>
 
             <div style="grid-column: 2 / 2; grid-row: 2/2;">
-                <h3>Audio Input</h3>
-                <select name="" id=""></select>
+                <h3 style="margin-bottom: 5px">Audio Input</h3>
+                <div class="select-box">
+                    <select name="" id="">
+                        <option value="built-in-mic">Built-in Microphone</option>
+                    </select>
+                </div>
             </div>
             <div style="grid-column: 1 / 3; grid-row: 3/3;" class="horizontal-spacer">
-                <div class="button-secondary">Recording</div>
-                <div @click="primaryButtonPressed()" class="button-primary">Click me!</div>
+                <div @click="cancel()" class="button-secondary">Cancel</div>
+                <div @click="createProject()" class="button-primary">Create Project</div>
             </div>
 
         </menu>
@@ -32,14 +38,18 @@ import { defineComponent } from 'vue';
 
 export default defineComponent({
     name: "create-new-project-page",
-    emits: ["create-project"],
+    emits: ["create-project", "cancel"],
     setup(props, context) {
 
-        function primaryButtonPressed() {
+        function createProject() {
             context.emit('create-project')
         }
 
-        return {primaryButtonPressed}
+        function cancel() {
+            context.emit("cancel")
+        }
+
+        return {createProject, cancel}
 
     }
 });
