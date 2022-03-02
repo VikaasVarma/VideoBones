@@ -17,26 +17,15 @@ function createWindow () {
       contextIsolation: false
     }
   });
-  try {
-    projects.createProject('', 'testing').then(handle => {
-      config.openProject(handle).then(() => {
-        startHandler();
-        listen();
-        mainWindow.loadFile(path.join(__dirname, '..', 'renderer', 'index.html'));
-        //mainWindow.webContents.openDevTools()
-      });
-    });
-  } catch (err) {
-    config.openProject(projects.getTrackedProjects()[0]).then(() => {
-      startHandler();
-      listen();
-      mainWindow.loadFile(path.join(__dirname, '..', 'renderer', 'index.html'));
-      //mainWindow.webContents.openDevTools()
-    });
-  }
 
-  listen();
-  mainWindow.loadFile(path.join(__dirname, '..', 'renderer', 'index.html'));
+  config.openProject(projects.getTrackedProjects()[0]).then(() => {
+    startHandler();
+    startStorageHandlers();
+    listen();
+    mainWindow.loadFile(path.join(__dirname, '..', 'renderer', 'index.html'));
+    //mainWindow.webContents.openDevTools()
+  });
+
   //mainWindow.webContents.openDevTools()
 }
 app.whenReady().then(() => {
