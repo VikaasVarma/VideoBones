@@ -22,8 +22,8 @@ function createWindow () {
       config.openProject(handle).then(() => {
         startHandler();
         listen();
+        // mainWindow.webContents.openDevTools();
         mainWindow.loadFile(path.join(__dirname, '..', 'renderer', 'index.html'));
-        //mainWindow.webContents.openDevTools()
       });
     });
   } catch (err) {
@@ -31,7 +31,7 @@ function createWindow () {
       startHandler();
       listen();
       mainWindow.loadFile(path.join(__dirname, '..', 'renderer', 'index.html'));
-      //mainWindow.webContents.openDevTools()
+      mainWindow.webContents.openDevTools()
     });
   }
 
