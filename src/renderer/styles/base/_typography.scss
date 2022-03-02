@@ -1,59 +1,30 @@
-@font-face {
-    font-family: 'OpenSans';
-    src: url('../../../assets/fonts/OpenSans/OpenSans-Light.ttf') format('truetype');
-    font-style: normal;
-    font-weight: lighter;
-};
-
-@font-face {
-    font-family: 'OpenSans';
-    src: url('../../../assets/fonts/OpenSans/OpenSans-Regular.ttf') format('truetype');
-    font-style: normal;
-    font-weight: normal;
-};
-
-@font-face {
-    font-family: 'OpenSans';
-    src: url('../../../assets/fonts/OpenSans/OpenSans-Bold.ttf') format('truetype');
-    font-style: normal;
-    font-weight: bold;
-};
-
-@font-face {
-    font-family: 'OpenSans';
-    src: url('../../../assets/fonts/OpenSans/OpenSans-ExtraBold.ttf') format('truetype');
-    font-style: normal;
-    font-weight: bolder;
-};
+@import './_font_numans';
+@import './_font_opensans';
 
 .page-title {
-    color: white;
-    
-    width: fit-content;
-    margin: auto;
-    
-    font-family: OpenSans;
-    font-weight: bolder;
-    font-size: 45px;
+  color: white;
+  font-family: VBFont, sans-serif;
+  font-size: 45px;
+  font-weight: bolder;
+  margin: auto;
+  width: fit-content;
 }
 
 .section-title {
-    padding-bottom: 10px;
-    width: fit-content;
-    margin: auto;
-    
-    color: white;
-    font-family: OpenSans;
-    font-weight: bold;
-    font-size: 13px;
+  color: white;
+  font-family: VBFont, sans-serif;
+  font-size: 13px;
+  font-weight: bold;
+  margin: auto;
+  padding-bottom: 10px;
+  width: fit-content;
 }
 
 .text {
-    width: fit-content;
-    margin: auto;
-    
-    color: white;
-    font-family: OpenSans;
-    font-weight: lighter;
-    font-size: 13px;
+  color: white;
+  font-family: VBFont, sans-serif;
+  font-size: 13px;
+  font-weight: lighter;
+  margin: auto;
+  width: fit-content;
 }
