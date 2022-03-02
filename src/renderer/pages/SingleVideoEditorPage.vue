@@ -4,11 +4,9 @@
         <menu class="grid-container" style="margin: auto;">
 
             <div id="video-container">
-
                 <video controls>
                     <source>
                 </video>
-                
             </div>
 
             <div id="video-controls" class="horizontal-spacer">
@@ -21,9 +19,7 @@
                     </button>
 
                     <div class="timeline">
-                        
                     </div>
-                
             </div>
 
 
