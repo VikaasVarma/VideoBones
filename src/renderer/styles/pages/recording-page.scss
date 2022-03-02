@@ -1,25 +1,26 @@
 video {
-    width:92%;
-    height:80%;
-    background-color: white;
-    margin: auto;
+	width: 92%;
+	height: 80%;
+	background-color: white;
+	margin: auto;
 
-    border: 5px solid $color-middleground;
-    border-radius: 10px;
+	border: 5px solid $color-middleground;
+	border-radius: 10px;
 }
 
 .horizontal-spacer {
-    margin-top: 15px;
-    height: 15%;
-    padding: 0 4% 0 4%;
-    grid-column-gap: 40px;
-    grid-template-columns: 2fr 1fr 2fr;
+	margin-top: 15px;
+	height: 15%;
+	padding: 0 4% 0 4%;
+	grid-column-gap: 40px;
+	grid-template-columns: 2fr 1fr 2fr;
 }
 
 .image-container {
-    height: fit-content;
-    &>img {
-        height: 50px;
-        display: inline;
-    }
+	height: fit-content;
+	padding: 0;
+	& > img {
+		height: 50px;
+		display: inline;
+	}
 }
