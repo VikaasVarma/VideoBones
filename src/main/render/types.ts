@@ -22,7 +22,16 @@ interface Input {
 }
 
 interface AudioInput extends Input {
+  //TODO: why are both audioinput and videoinput required when videoinput extends Audioinput?
   volume: number
+  echo_active: boolean
+  reverse_active: boolean
+  echo_in_gain: number
+  echo_out_gain: number
+  echo_delays: number[]
+  echo_decays: number[]
+  declick_active: boolean
+  declip_active: boolean
 }
 
 interface VideoInput extends AudioInput {

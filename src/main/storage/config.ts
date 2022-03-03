@@ -1,8 +1,8 @@
-import { FileHandle } from 'fs/promises'
-import path from 'path'
-import { ProjectHandle } from './projects'
+import { FileHandle } from 'fs/promises';
+import path from 'path';
+import { ProjectHandle } from './projects';
 
-import { getProjectRecordingsDirectory, readProjectConfig, writeDirectoryConfig, writeProjectConfig, cleanProjectTempDirectory, getProjectTempDirectory, createProjectRecordingFile } from './storage'
+import { cleanProjectTempDirectory, createProjectRecordingFile, getProjectRecordingsDirectory, getProjectTempDirectory, readProjectConfig, writeDirectoryConfig, writeProjectConfig } from './storage';
 
 /**
  * Holds data from .bones project config files.
@@ -43,11 +43,11 @@ function isConfig(o: any): o is Config {
   return  'projectName' in o && typeof o.projectName === 'string'
           && 'version' in o && typeof o.version === 'number'
           && 'recordings' in o && typeof o.recordings === typeof []
-          && 'options' in o && o.options.constructor === Object
+          && 'options' in o && o.options.constructor === Object;
 }
 
 class ConfigBuilder {
-  private readonly _config: Config
+  private readonly _config: Config;
 
   // ctor sets required members of Config
   constructor(projectName: string) {
@@ -58,25 +58,25 @@ class ConfigBuilder {
       // set defaults
       recordings: [],
       options: {}
-    }
+    };
   }
 
   // setters for default set members
   recordings(recordings: Array<string>): ConfigBuilder {
-    this._config.recordings = recordings
-    return this
+    this._config.recordings = recordings;
+    return this;
   }
 
   options(options: Record<string, unknown>): ConfigBuilder {
-    this._config.options = options
-    return this
+    this._config.options = options;
+    return this;
   }
 
   /**
    * Returns the resulting Config object
    */
   build(): Config {
-    return this._config
+    return this._config;
   }
 }
 
@@ -90,42 +90,42 @@ class OpenProjectData {
    * This is a really simple way to do this which doesn't account for different config files,
    * but as there's only 1 per project this is fine.
    */
-  currentConfigWritePromise: Promise<void> = Promise.resolve()
+  currentConfigWritePromise: Promise<void> = Promise.resolve();
 
-  projectHandle: ProjectHandle
-  projectConfig: Config
+  projectHandle: ProjectHandle;
+  projectConfig: Config;
 
   constructor(projectHandle: ProjectHandle, projectConfig: Config) {
-    this.projectHandle = projectHandle
-    this.projectConfig = projectConfig
+    this.projectHandle = projectHandle;
+    this.projectConfig = projectConfig;
   }
 
   addRecording(recordingRelativePath: string): void {
-    this.projectConfig.recordings.push(recordingRelativePath)
+    this.projectConfig.recordings.push(recordingRelativePath);
 
-    this.writeConfig()
+    this.writeConfig();
   }
 
   removeRecording(recordingIndex: number): void {
-    this.projectConfig.recordings.splice(recordingIndex, 1)
+    this.projectConfig.recordings.splice(recordingIndex, 1);
 
-    this.writeConfig()
+    this.writeConfig();
   }
 
   getConfigOption(option: string): unknown{
-    return option in this.projectConfig.options ? this.projectConfig.options[option] : null
+    return option in this.projectConfig.options ? this.projectConfig.options[option] : null;
   }
 
   setConfigOption(option: string, value: unknown): void {
-    this.projectConfig.options[option] = value
+    this.projectConfig.options[option] = value;
 
-    this.writeConfig()
+    this.writeConfig();
   }
 
   removeConfigOption(option: string): void {
-    delete this.projectConfig.options[option]
+    delete this.projectConfig.options[option];
 
-    this.writeConfig()
+    this.writeConfig();
   }
 
   /**
@@ -134,17 +134,17 @@ class OpenProjectData {
    * @returns A promise which resolves when the write is complete
    */
   private writeConfig(): Promise<void> {
-    return writeProjectConfig(this.projectHandle, this.projectConfig)
+    return writeProjectConfig(this.projectHandle, this.projectConfig);
   }
 
   close(): Promise<void> {
     return this.currentConfigWritePromise.then(() => {
-      return
-    })
+      return;
+    });
   }
 }
 
-let currentOpenProject: OpenProjectData | null = null
+let currentOpenProject: OpenProjectData | null = null;
 
 /**
  * Writes an initial config to a new project file.
@@ -156,9 +156,9 @@ let currentOpenProject: OpenProjectData | null = null
  * @returns A promise which resolves when the write has completed
  */
 function initialiseProjectConfig(projectDirectory: string, projectName: string): Promise<void> {
-  const config = new ConfigBuilder(projectName).build()
+  const config = new ConfigBuilder(projectName).build();
 
-  return writeDirectoryConfig(projectDirectory, config)
+  return writeDirectoryConfig(projectDirectory, config);
 }
 
 /**
@@ -171,17 +171,17 @@ function initialiseProjectConfig(projectDirectory: string, projectName: string):
  * @returns A promise which resolves when the project has been opened for this module.
  */
 function openProject(projectHandle: ProjectHandle): Promise<void> {
-  const closePromise = closeProject()
+  const closePromise = closeProject();
 
-  const configPromise = closePromise.then(() => { 
-    return readProjectConfig(projectHandle)
-  })
+  const configPromise = closePromise.then(() => {
+    return readProjectConfig(projectHandle);
+  });
 
   return configPromise.then(config => {
-    currentOpenProject = new OpenProjectData(projectHandle, config)
+    currentOpenProject = new OpenProjectData(projectHandle, config);
 
-    tempCleanupLoop(projectHandle, 60000, Promise.resolve())
-  })
+    tempCleanupLoop(projectHandle, 60000, Promise.resolve());
+  });
 }
 
 /**
@@ -191,48 +191,50 @@ function openProject(projectHandle: ProjectHandle): Promise<void> {
  */
 function closeProject(): Promise<void> {
   if (currentOpenProject === null) {
-    return Promise.resolve()
+    return Promise.resolve();
   }
 
-  const closePromise = currentOpenProject.close()
+  const closePromise = currentOpenProject.close();
 
   return closePromise.then(() => {
-    return
-  })
+    return;
+  });
 }
 
 /**
  * Starts an async loop which cleans the temp directory repeatedly after set timeouts.
- * 
+ *
  * Stops on the iteration after the project is closed (or a different one is opened).
- * 
+ *
  * @param projectHandle The project to clean the temp directory of
  * @param timeout The timeout between cleanups
  * @param prevPromise The promise from the previous cleanup
  */
 function tempCleanupLoop(projectHandle: ProjectHandle, timeout: number, prevPromise: Promise<void>) {
   if (currentOpenProject === null || !projectHandle.equals(currentOpenProject.projectHandle)) {
-    return
+    return;
   }
 
-  console.log(`*** Starting project temp direcory cleanup ***`)
+  console.log('*** Starting project temp direcory cleanup ***');
 
-  const prom = prevPromise.then(() => { return cleanProjectTempDirectory(projectHandle) } ).then(() => console.log(`*** Finished project temp direcory cleanup ***`))
+  const prom = prevPromise.then(() => {
+    return cleanProjectTempDirectory(projectHandle);
+  }).then(() => console.log('*** Finished project temp direcory cleanup ***'));
 
-  setTimeout(tempCleanupLoop, timeout, projectHandle, timeout, prom)
+  setTimeout(tempCleanupLoop, timeout, projectHandle, timeout, prom);
 }
 
 /**
  * Get the path of the temp directory for the currently open project.
- * 
+ *
  * This directory is auto cleaned on a timer, with any files which are unused being deleted.
  */
 function getTempDirectory() {
   if (currentOpenProject === null) {
-    throw Error("No open project when calling getTempDirectory.");
+    throw Error('No open project when calling getTempDirectory.');
   }
 
-  return getProjectTempDirectory(currentOpenProject.projectHandle)
+  return getProjectTempDirectory(currentOpenProject.projectHandle);
 }
 
 /**
@@ -242,10 +244,10 @@ function getTempDirectory() {
  */
 function getRecordingsDirectory() {
   if (currentOpenProject === null) {
-    throw Error('No open project when calling getRecordingsDirectory.')
+    throw Error('No open project when calling getRecordingsDirectory.');
   }
 
-  return getProjectRecordingsDirectory(currentOpenProject.projectHandle)
+  return getProjectRecordingsDirectory(currentOpenProject.projectHandle);
 }
 
 /**
@@ -253,10 +255,10 @@ function getRecordingsDirectory() {
  */
 function getRecordingsList(): Readonly<Array<string>> {
   if (currentOpenProject === null) {
-    throw Error('No open project when calling getRecordingsList.')
+    throw Error('No open project when calling getRecordingsList.');
   }
 
-  return currentOpenProject.projectConfig.recordings
+  return currentOpenProject.projectConfig.recordings;
 }
 
 /**
@@ -267,23 +269,25 @@ function getRecordingsList(): Readonly<Array<string>> {
  */
 function addRecording(recordingName: string): Promise<FileHandle> {
   if (currentOpenProject === null) {
-    throw Error('No open project when calling addRecording.')
+    throw Error('No open project when calling addRecording.');
   }
 
-  currentOpenProject.addRecording(recordingName)
+  currentOpenProject.addRecording(recordingName);
 
   return createProjectRecordingFile(currentOpenProject.projectHandle, recordingName)
-  .catch(reason => {
+    .catch(reason => {
     // if making the file fails, don't actually add to project
-    if (currentOpenProject !== null) {
-      const index = getRecordingsList().findIndex(v => { return v === recordingName })
-      if (index !== null) {
-        removeRecording(index)
+      if (currentOpenProject !== null) {
+        const index = getRecordingsList().findIndex(v => {
+          return v === recordingName;
+        });
+        if (index !== null) {
+          removeRecording(index);
+        }
       }
-    }
 
-    throw Error(reason)
-  })
+      throw Error(reason);
+    });
 }
 
 /**
@@ -296,10 +300,10 @@ function addRecording(recordingName: string): Promise<FileHandle> {
  */
 function removeRecording(recordingIndex: number): void {
   if (currentOpenProject === null) {
-    throw Error('No open project when calling removeRecording.')
+    throw Error('No open project when calling removeRecording.');
   }
 
-  currentOpenProject.removeRecording(recordingIndex)
+  currentOpenProject.removeRecording(recordingIndex);
 }
 
 /**
@@ -312,10 +316,10 @@ function removeRecording(recordingIndex: number): void {
  */
 function getOption(option: string): unknown {
   if (currentOpenProject === null) {
-    throw Error('No open project when calling getOption.')
+    throw Error('No open project when calling getOption.');
   }
 
-  return currentOpenProject.getConfigOption(option)
+  return currentOpenProject.getConfigOption(option);
 }
 
 /**
@@ -328,10 +332,10 @@ function getOption(option: string): unknown {
  */
 function setOption(option: string, value: unknown): void {
   if (currentOpenProject === null) {
-    throw Error('No open project when calling setOption.')
+    throw Error('No open project when calling setOption.');
   }
 
-  currentOpenProject.setConfigOption(option, value)
+  currentOpenProject.setConfigOption(option, value);
 }
 
 /**
@@ -344,10 +348,10 @@ function setOption(option: string, value: unknown): void {
  */
 function removeOption(option: string): void {
   if (currentOpenProject === null) {
-    throw Error('No open project when calling removeOption.')
+    throw Error('No open project when calling removeOption.');
   }
 
-  currentOpenProject.removeConfigOption(option)
+  currentOpenProject.removeConfigOption(option);
 }
 
 export {
@@ -359,4 +363,4 @@ export {
   getTempDirectory,
   getRecordingsDirectory, getRecordingsList, addRecording, removeRecording,
   getOption, setOption, removeOption
-}
+};
