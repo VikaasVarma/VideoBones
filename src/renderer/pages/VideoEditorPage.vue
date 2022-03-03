@@ -46,10 +46,10 @@
                         <h3>Play While Recording</h3>
                     </div>
                     <div class="metronome-container">
-                        <h2>80 BPM</h2>
+                        <h2>{{bpm}}</h2>
                         <div>
-                            <img src="../../../assets/images/arrow.svg">
-                            <img src="../../../assets/images/arrow.svg" style="transform: scaleY(-1)">
+                            <img @click="incBpm()" src="../../../assets/images/arrow.svg">
+                            <img @click="decBpm()" src="../../../assets/images/arrow.svg" style="transform: scaleY(-1)">
                         </div>
                     </div>
                     <div class="add-item-container">
@@ -59,18 +59,18 @@
                 </div>
                 <div>
                     <h2 class="section-title">Screen Styles</h2>
-                    <div class="screen-style">
+                    <div class="screen-style" @click="setScreenStyle(0)">
                         <div style="grid-column: 1 / 2; grid-row: 1 / 2"></div>
                         <div style="grid-column: 2 / 3; grid-row: 1 / 2"></div>
                         <div style="grid-column: 1 / 2; grid-row: 2 / 3"></div>
                         <div style="grid-column: 2 / 3; grid-row: 2 / 3"></div>
                     </div>
-                    <div class="screen-style">
+                    <div class="screen-style" @click="setScreenStyle(1)">
                         <div style="grid-column: 1 / 2; grid-row: 1 / 2"></div>
                         <div style="grid-column: 2 / 3; grid-row: 1 / 2"></div>
                         <div style="grid-column: 1 / 3; grid-row: 2 / 3"></div>
                     </div>
-                    <div class="screen-style">
+                    <div class="screen-style" @click="setScreenStyle(2)">
                         <div style="grid-column: 1 / 2; grid-row: 1 / 2"></div>
                         <div style="grid-column: 1 / 2; grid-row: 2 / 3"></div>
                         <div style="grid-column: 2 / 3; grid-row: 1 / 3"></div>
@@ -86,14 +86,20 @@
 
 <script lang="ts">
 import { emit } from 'process';
-import { defineComponent } from 'vue';
+import { defineComponent, ref } from 'vue';
 
 export default defineComponent({
-    name: "SingleVideoEditorPage",
+    name: "VideoEditorPage",
     setup(props, context) {
-        function openSingleVideoEditor () { context.emit("open-single-editor") }
+        var bpm = ref(80);
+        var screenStyle = ref(0);
 
-        return {openSingleVideoEditor}
+        function openSingleVideoEditor () { context.emit("open-single-editor") }
+        function incBpm() { bpm.value += 1 }
+        function decBpm() { bpm.value -= 1 }
+        function setScreenStyle(style: number) { screenStyle.value = style }
+
+        return {openSingleVideoEditor, incBpm, decBpm, setScreenStyle, bpm}
     },
     emits: ["open-single-editor"]
 });
