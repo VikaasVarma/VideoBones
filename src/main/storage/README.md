@@ -81,10 +81,10 @@ const recordings: Readonly<Array<string>> = config.getRecordingsList()
 Returns a readonly view of the recordings files currently associated with the project.
 
 ```
-config.addRecording("{ Recording path }")
+config.addRecording("{ Recording name }")
 ```
 
-Creates a file for a new recording for the open project. Returns a promise resolving to a file handle for the new file (use this to write into the file).
+Creates a file for a new recording for the open project within the projects getRecordingsDirectory. Returns a promise resolving to a file handle for the new file (use this to write into the file).
 
 ```
 config.removeRecording({ Recording index })
