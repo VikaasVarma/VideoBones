@@ -59,6 +59,22 @@
                 </div>
                 <div>
                     <h2 class="section-title">Screen Styles</h2>
+                    <div class="screen-style">
+                        <div style="grid-column: 1 / 2; grid-row: 1 / 2"></div>
+                        <div style="grid-column: 2 / 3; grid-row: 1 / 2"></div>
+                        <div style="grid-column: 1 / 2; grid-row: 2 / 3"></div>
+                        <div style="grid-column: 2 / 3; grid-row: 2 / 3"></div>
+                    </div>
+                    <div class="screen-style">
+                        <div style="grid-column: 1 / 2; grid-row: 1 / 2"></div>
+                        <div style="grid-column: 2 / 3; grid-row: 1 / 2"></div>
+                        <div style="grid-column: 1 / 3; grid-row: 2 / 3"></div>
+                    </div>
+                    <div class="screen-style">
+                        <div style="grid-column: 1 / 2; grid-row: 1 / 2"></div>
+                        <div style="grid-column: 1 / 2; grid-row: 2 / 3"></div>
+                        <div style="grid-column: 2 / 3; grid-row: 1 / 3"></div>
+                    </div>
                 </div>
 
             </menu>
