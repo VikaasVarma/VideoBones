@@ -1,9 +1,8 @@
-import './styles/reset.scss'
-import { createApp } from 'vue'
+import './styles/reset.scss';
+import { createApp } from 'vue';
 
-import App from './pages/App.vue'
+import App from './pages/App.vue';
 
-const app = createApp(App)
+const app = createApp(App);
 
-app.mount('#app')
-
+app.mount('#app');

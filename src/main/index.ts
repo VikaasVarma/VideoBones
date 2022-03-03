@@ -18,31 +18,18 @@ function createWindow () {
     },
     title: 'Video Bones'
   });
-  try {
-    projects.createProject('', 'testing').then(handle => {
-      config.openProject(handle).then(() => {
-        startHandler();
-        listen();
-        const path = app.isPackaged ? join('..', 'renderer', 'index.html') : join(__dirname, '..', 'renderer', 'index.html');
-        mainWindow.loadFile(path);
-        //mainWindow.webContents.openDevTools()
-      });
-    });
-  } catch (err) {
-    config.openProject(projects.getTrackedProjects()[0]).then(() => {
-      startHandler();
-      listen();
-      const path = app.isPackaged ? join('..', 'renderer', 'index.html') : join(__dirname, '..', 'renderer', 'index.html');
-      mainWindow.loadFile(path);
-      //mainWindow.webContents.openDevTools()
-    });
-  }
+  
+  config.openProject(projects.getTrackedProjects()[0]).then(() => {
+    startHandler();
+    startStorageHandlers();    
+  });
 
   listen();
   const path = app.isPackaged ? join('..', 'renderer', 'index.html') : join(__dirname, '..', 'renderer', 'index.html');
   mainWindow.loadFile(path);
   //mainWindow.webContents.openDevTools()
 }
+  
 app.whenReady().then(() => {
   createWindow();
 
