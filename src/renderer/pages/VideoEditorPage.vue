@@ -18,7 +18,7 @@
                     <img src="../../../assets/images/stopButton.svg">
                 </button>
 
-                <div class="timeline">
+                <div @click="openSingleVideoEditor()" class="timeline">
                     
                 </div>
             
@@ -73,10 +73,17 @@
 </template>
 
 <script lang="ts">
+import { emit } from 'process';
 import { defineComponent } from 'vue';
 
 export default defineComponent({
-    name: "SingleVideoEditorPage"
+    name: "SingleVideoEditorPage",
+    setup(props, context) {
+        function openSingleVideoEditor () { context.emit("open-single-editor") }
+
+        return {openSingleVideoEditor}
+    },
+    emits: ["open-single-editor"]
 });
 </script>
 

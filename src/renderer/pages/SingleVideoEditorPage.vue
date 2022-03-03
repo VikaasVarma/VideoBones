@@ -39,7 +39,7 @@
 
             </menu>
 
-            <button class="button-primary">DONE</button>
+            <button @click="exitSingleEditor()" class="button-primary">DONE</button>
 
         </menu>
     </div>
@@ -51,6 +51,13 @@ import { defineComponent } from 'vue';
 
 export default defineComponent({
     name: "single-video-editor-page",
+    setup(props, context) {
+        function exitSingleEditor() {
+            context.emit("exit-single-editor")
+        }
+
+        return {exitSingleEditor}
+    }
 });
 </script>
 

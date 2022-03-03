@@ -5,8 +5,12 @@
                            @cancel="pageDisplayed = 'on-open-page'" 
                            v-else-if="pageDisplayed === 'create-new-project-page'"/>
 
-  <single-video-editor-page v-else-if="pageDisplayed === 'single-video-editor-page'"/>
-  <video-editor-page v-else-if="pageDisplayed === 'video-editor-page'"/>
+  <video-editor-page @open-single-editor="pageDisplayed = 'single-video-editor-page'" 
+                      v-else-if="pageDisplayed === 'video-editor-page'"/>
+
+  <single-video-editor-page @exit-single-editor="pageDisplayed = 'video-editor-page'" 
+                  v-else-if="pageDisplayed === 'single-video-editor-page'"/>
+
   <recording-screen v-else-if="pageDisplayed === 'recording-screen'"/>
 </template>
 
