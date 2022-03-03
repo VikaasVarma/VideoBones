@@ -10,16 +10,16 @@
             </div>
 
             <div id="video-controls" class="horizontal-spacer">
-                    <button class="image-container">
-                        <img src="../../../assets/images/playButton.svg">
-                    </button>
+                <button class="image-container">
+                    <img src="../../../assets/images/playButton.svg">
+                </button>
 
-                    <button class="image-container">
-                        <img src="../../../assets/images/stopButton.svg">
-                    </button>
+                <button class="image-container">
+                    <img src="../../../assets/images/stopButton.svg">
+                </button>
 
-                    <div class="timeline">
-                    </div>
+                <div class="timeline">
+                </div>
             </div>
 
 
