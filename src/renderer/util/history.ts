@@ -15,6 +15,12 @@ function createOperation(execute:()=>void, undo:()=>void): Operation {
   };
 }
 
+
+/**
+ * A stack for operations which you might want to undo/redo.
+ * 
+ * Has a max size, which once exceeded drops elements from the bottom of the stack.
+ */
 export class OperationUndoStack {
   private top: Operation | null = null;
   private bottom: Operation | null = null;
@@ -26,6 +32,12 @@ export class OperationUndoStack {
     this.maxSize = maxSize;
   }
 
+  /**
+   * Executes an operation and adds it to the stack
+   * 
+   * @param execute The lambda for the application of the operation
+   * @param undo The lambda for the inverse of the operation
+   */
   executeUndoableOperation(execute:()=>void, undo:()=>void) {
     const operation = createOperation(execute, undo);
 
@@ -51,6 +63,11 @@ export class OperationUndoStack {
     execute();
   }
 
+  /**
+   * Undoes the top operation of the stack.
+   * 
+   * Throws error if stack empty.
+   */
   undo() {
     if (this.isEmpty()) {
       throw Error('Nothing to undo!');
@@ -63,11 +80,16 @@ export class OperationUndoStack {
     --this.size;
   }
 
+  /**
+   * Redoes a previously undone operation.
+   * 
+   * Throws error if nothing avaliable to redo.
+   */
   redo() {
     if (this.isEmpty()) {
       if (this.bottom !== null) {
         this.top = this.bottom;
-        (this.top as Operation).execute();
+        this.top.execute();
         ++this.size;
         return;
       }
@@ -90,5 +112,19 @@ export class OperationUndoStack {
 
   isFull():boolean {
     return this.size === this.maxSize;
+  }
+
+  /**
+   * Will undo() succeed?
+   */
+  canUndo(): boolean {
+    return top !== null;
+  }
+
+  /**
+   * Will redo() succeed?
+   */
+  canRedo(): boolean {
+    return !this.isFull() && !(this.isEmpty() && this.bottom === null);
   }
 }
