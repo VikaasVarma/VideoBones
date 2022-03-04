@@ -8,7 +8,6 @@ import { startStorageHandlers } from './storage/ipcHandler';
 import { stopHandler } from './render/ipcHandler';
 
 function createWindow () {
-
   const mainWindow = new BrowserWindow({
     width: 1920,
     height: 1080,
@@ -20,7 +19,12 @@ function createWindow () {
     title: 'Video Bones'
   });
 
-  startIntegratedServer();
+  const serverPort = startIntegratedServer();
+  if (serverPort === -1) {
+    dialog.showErrorBox('Error', 'Failed to start integrated server');
+    app.quit();
+    return;
+  }
   const path = app.isPackaged ? join('..', 'renderer', 'index.html') : join(__dirname, '..', 'renderer', 'index.html');
   mainWindow.loadFile(path);
   mainWindow.webContents.openDevTools();

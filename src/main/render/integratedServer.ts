@@ -26,11 +26,19 @@ const server = createServer(async (request, response) => {
   }
 });
 
-export function startIntegratedServer(): void {
+export function startIntegratedServer(): number {
   if (server.listening) {
     server.close();
   }
-  server.listen(8080);
+  for (let port = 43234; port < 43244; port++) {
+    try {
+      server.listen(port);
+      return port;
+    } catch (error) {
+      console.warn(`Integrated server port ${port} in use`, error);
+    }
+  }
+  return -1;
 }
 
 export function stopIntegratedServer(): void {
