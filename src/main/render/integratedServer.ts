@@ -26,14 +26,14 @@ const server = createServer(async (request, response) => {
   }
 });
 
-export function listen(): void {
+export function startIntegratedServer(): void {
   if (server.listening) {
     server.close();
   }
   server.listen(8080);
 }
 
-export function close(): void {
+export function stopIntegratedServer(): void {
   if (server.listening) {
     server.close();
   }

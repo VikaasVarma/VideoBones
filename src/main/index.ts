@@ -2,7 +2,7 @@ import * as config from '../main/storage/config';
 import * as projects from '../main/storage/projects';
 
 import { app, BrowserWindow, dialog, ipcMain } from 'electron';
-import { close, listen } from './render/integratedServer';
+import { startIntegratedServer, stopIntegratedServer } from './render/integratedServer';
 import { join } from 'path';
 import { startStorageHandlers } from './storage/ipcHandler';
 import { stopHandler } from './render/ipcHandler';
@@ -20,13 +20,13 @@ function createWindow () {
     title: 'Video Bones'
   });
 
-  mainWindow.maximize();
-
-  listen();
+  startIntegratedServer();
   const path = app.isPackaged ? join('..', 'renderer', 'index.html') : join(__dirname, '..', 'renderer', 'index.html');
   mainWindow.loadFile(path);
   mainWindow.webContents.openDevTools();
   startStorageHandlers();
+
+  mainWindow.maximize();
 }
 
 app.whenReady().then(() => {
@@ -42,7 +42,7 @@ app.whenReady().then(() => {
 app.on('window-all-closed', function () {
   stopHandler();
   app.quit();
-  close();
+  stopIntegratedServer();
 });
 
 // Code to open the project when the FOLDER ICON on the
