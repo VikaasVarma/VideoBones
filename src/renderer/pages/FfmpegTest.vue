@@ -1,5 +1,5 @@
 <template>
-  <video-player/>
+  <video-player manifest-url="http://localhost:8080/stream.mpd"/>
 </template>
 
 <script lang="ts">
@@ -43,11 +43,11 @@ export default defineComponent({
           },
         ],
         audioInputs:[
-          {
+          /*{
             file: join("../recordings", "audio1.webm"),
             startTime: 0.02,
             volume: 255,
-          },
+          },*/
         ]
       }
     })
