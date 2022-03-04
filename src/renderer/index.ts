@@ -1,5 +1,3 @@
-import './styles/reset.scss';
-
 import App from './pages/App.vue';
 import { createApp } from 'vue';
 
