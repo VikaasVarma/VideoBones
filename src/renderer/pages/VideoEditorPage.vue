@@ -1,6 +1,6 @@
 
 <template id="SingleVideoEditorPage">
-    <div>
+    <div @mouseup="mouse_down = false" @mousemove="drag($event, mouse_down)" >
         <menu class="grid-container" style="margin: auto;">
 
             <div id="video-container">
@@ -18,7 +18,10 @@
                     <img src="../../../assets/images/stopButton.svg">
                 </button>
 
-                <div @click="openSingleVideoEditor()" class="timeline">
+                <div @mousedown="mouse_down = true" class="timeline">
+                    <div class="playhead" :style="`left: calc(-5px + ${playhead * 100}%)`">
+                        <div></div> <div></div>
+                    </div>
                 </div>
             </div>
 
@@ -85,21 +88,38 @@
 </template>
 
 <script lang="ts">
-import { emit } from 'process';
 import { defineComponent, ref } from 'vue';
 
 export default defineComponent({
     name: "VideoEditorPage",
     setup(props, context) {
-        var bpm = ref(80);
-        var screenStyle = ref(0);
+        var bpm = ref(80)
+        var screenStyle = ref(0)
+        var playhead = ref(.6)
+        var mouse_down = ref(false)
+        var track_data = {
+            all_track_ids: ["Track_0", "Track_1", "Track_3", "Track_3"],
+            timeline_splits: [
+                { endpoint: 0.3, screenStyle: "....", active_tracks: [0,1,2,3]},
+                { endpoint: 0.7, screenStyle: "_..", active_tracks: [0,2,3]},
+                { endpoint: 1.0, screenStyle: "|..", active_tracks: [0,1,3]},
+            ]
+        }
 
         function openSingleVideoEditor () { context.emit("open-single-editor") }
         function incBpm() { bpm.value += 1 }
         function decBpm() { bpm.value -= 1 }
         function setScreenStyle(style: number) { screenStyle.value = style }
 
-        return {openSingleVideoEditor, incBpm, decBpm, setScreenStyle, bpm}
+        function drag(event: any, mouse_down: boolean) {
+            if (mouse_down) {
+                var timeline = document.getElementsByClassName("timeline")[0].getBoundingClientRect()
+                var x = event.clientX;
+                playhead.value = Math.min(1, Math.max(0, (x - timeline.x) / timeline.width))
+            }
+        }
+
+        return {openSingleVideoEditor, incBpm, decBpm, setScreenStyle, drag, bpm, track_data, playhead, mouse_down}
     },
     emits: ["open-single-editor"]
 });

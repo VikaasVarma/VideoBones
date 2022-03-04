@@ -93,3 +93,30 @@
 		}
 	}
 }
+
+.timeline {
+	.playhead {
+		width: 10px;
+		height: 110%;
+		top: -10%;
+		position: relative;
+
+		:nth-child(1) {
+			width: 100%;
+			aspect-ratio: 1/1;
+			border-radius: 50%;
+			margin-bottom: -50%;
+			background-color: white;
+		}
+
+		:nth-child(2) {
+			width: 30%;
+			height: 91%;
+			position: absolute;
+			margin: auto;
+			bottom: 0px;
+			left: 35%;
+			background-color: white;
+		}
+	}
+}

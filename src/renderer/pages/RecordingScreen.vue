@@ -4,7 +4,7 @@
 
         <select class=dropdown ref=audioDevices @change="onAudioChange($event)"> </select>
 
-        <div v-bind:class="recording ? 'recording-button' : 'not-recording-button'" @click="recordOnClick()"> <div></div> </div>
+        <div :class="recording ? 'recording-button' : 'not-recording-button'" @click="recordOnClick()"> <div></div> </div>
         
         <select class=dropdown ref=videoDevices @change="onVideoChange($event)"> </select>
     </div>

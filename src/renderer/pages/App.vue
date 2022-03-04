@@ -32,7 +32,7 @@ export default defineComponent({
       RecordingScreen,
     },
     setup(props, context) {
-      var pageDisplayed = ref("on-open-page")
+      var pageDisplayed = ref("video-editor-page")
       
       function onClick() {
         pageDisplayed.value = "create-new-project-page"
