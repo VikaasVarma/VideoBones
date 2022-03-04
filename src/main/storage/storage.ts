@@ -98,7 +98,6 @@ export function cleanProjectTempDirectory(projectHandle: ProjectHandle): Promise
 export function writeDirectoryConfig(directory: string, cfg: Config): Promise<void> {
   const file = path.join(directory, '.bones');
   const cfgString = JSON.stringify(cfg);
-  console.log(cfgString);
 
   return fs.writeFile(file, cfgString)
     .catch(reason => {

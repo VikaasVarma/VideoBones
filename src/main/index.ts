@@ -1,11 +1,11 @@
-import { app, BrowserWindow, dialog, ipcMain } from 'electron';
-import { close, listen } from './render/integratedServer';
-import { startHandler, stopHandler } from './render/ipcHandler';
-import { join } from 'path';
-import { startStorageHandlers } from './storage/ipcHandler';
 import * as config from '../main/storage/config';
 import * as projects from '../main/storage/projects';
-import { stringify } from 'querystring';
+
+import { app, BrowserWindow, dialog, ipcMain } from 'electron';
+import { close, listen } from './render/integratedServer';
+import { join } from 'path';
+import { startStorageHandlers } from './storage/ipcHandler';
+import { stopHandler } from './render/ipcHandler';
 
 function createWindow () {
 
@@ -19,13 +19,8 @@ function createWindow () {
     },
     title: 'Video Bones'
   });
-  
-  mainWindow.maximize();
 
-  config.openProject(projects.getTrackedProjects()[0]).then(() => {
-    startHandler();
-    startStorageHandlers();
-  });
+  mainWindow.maximize();
 
   listen();
   const path = app.isPackaged ? join('..', 'renderer', 'index.html') : join(__dirname, '..', 'renderer', 'index.html');
@@ -84,15 +79,16 @@ ipcMain.handle('open-project-clicked', async() => {
 ipcMain.handle('create-project-clicked', async(event, projectName) => {
   try {
     await projects.createProject(app.getAppPath(), projectName)
-      .then(handle => {
-        config.openProject(handle)
+      .then(async handle => {
+        await config.openProject(handle);
+        config.setOption('audioTracks', []);
       });
-    return { failed: false, alert: false, output: '' };  
-    
+    return { failed: false, alert: false, output: '' };
+
   } catch (err:any) {
-    if (err.message.startsWith("Project directory already exists:")) {
-      return { failed: true, alert: true, output: 'That project already exists.' };  
-    } 
+    if (err.message.startsWith('Project directory already exists:')) {
+      return { failed: true, alert: true, output: 'That project already exists.' };
+    }
     return err;
   }
 });
