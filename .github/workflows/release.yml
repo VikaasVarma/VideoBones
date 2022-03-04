@@ -141,7 +141,7 @@ jobs:
           echo "${{ secrets.pat_token }}" | gh auth login --with-token
           gh auth setup-git
           git config user.name "GitHub Actions"
-          gh release "${{ jobs.create-release.outputs.tag }}" \
+          gh release upload "${{ jobs.create-release.outputs.tag }}" \
             windows-artifacts/*.exe \
             macos-artifacts/*.dmg \
             macos-artifacts/*.zip
