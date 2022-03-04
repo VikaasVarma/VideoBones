@@ -5,6 +5,7 @@ import { join } from 'path';
 import { startStorageHandlers } from './storage/ipcHandler';
 import * as config from '../main/storage/config';
 import * as projects from '../main/storage/projects';
+import { stringify } from 'querystring';
 
 function createWindow () {
 
@@ -18,6 +19,8 @@ function createWindow () {
     },
     title: 'Video Bones'
   });
+
+  mainWindow.maximize();
 
   config.openProject(projects.getTrackedProjects()[0]).then(() => {
     startHandler();
@@ -82,10 +85,14 @@ ipcMain.handle('create-project-clicked', async(event, projectName) => {
   try {
     await projects.createProject(app.getAppPath(), projectName)
       .then(handle => {
-        config.openProject(handle);
-        return { failed: false, alert: false, output: '' };
+        config.openProject(handle)
       });
-  } catch (err) {
+    return { failed: false, alert: false, output: '' };  
+    
+  } catch (err:any) {
+    if (err.message.startsWith("Project directory already exists:")) {
+      return { failed: true, alert: true, output: 'That project already exists.' };  
+    } 
     return err;
   }
 });

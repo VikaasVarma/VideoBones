@@ -40,6 +40,7 @@
 }
 
 .vertical-options-menu {
+	overflow: auto;
 	overflow-y: scroll;
 	grid-column: 2 / 3;
 	grid-row: 1 / 3;

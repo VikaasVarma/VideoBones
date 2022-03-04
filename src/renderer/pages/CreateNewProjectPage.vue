@@ -58,7 +58,7 @@ export default defineComponent({
             (result) => {
                 console.log(result)
                 if (result.failed) {
-                    if (result.output) {
+                    if (result.alert) {
                         alert(result.output)
                     }
                 } else {
