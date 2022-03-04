@@ -6,7 +6,7 @@
 
             <div style="grid-column: 1 / 3; grid-row: 1 / 2;" class="named-input-container">
                 <h3>Project Name</h3>
-                <input placeholder="Ex: Gangnam Style TikTok" type="text">
+                <input id="project-name-input" placeholder="Ex: Gangnam Style TikTok" type="text">
             </div>
 
             <div style="grid-column: 1 / 2; grid-row: 2 / 3;">
@@ -38,14 +38,34 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
+import { ipcRenderer } from 'electron';
 
 export default defineComponent({
     name: "create-new-project-page",
     emits: ["create-project", "cancel"],
     setup(props, context) {
 
-        function createProject() {
-            context.emit('create-project')
+        async function createProject() {
+            let inputButton = <HTMLInputElement>document.getElementById("project-name-input")
+            let projectName = inputButton.value
+
+            if (projectName == "") {
+                alert("Please name your project")
+                return
+            }
+            
+            ipcRenderer.invoke("create-project-clicked", projectName).then(
+            (result) => {
+                console.log(result)
+                if (result.failed) {
+                    if (result.output) {
+                        alert(result.output)
+                    }
+                } else {
+                    context.emit('create-project')
+                }
+            }
+          )
         }
 
         function cancel() {

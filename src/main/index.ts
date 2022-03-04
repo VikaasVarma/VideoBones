@@ -47,8 +47,10 @@ app.on('window-all-closed', function () {
   close();
 });
 
-ipcMain.handle("open-project-clicked", async() => {
+// Code to open the project when the FOLDER ICON on the
+// "OnOpenPage" gets pressed
 
+ipcMain.handle("open-project-clicked", async() => {
   var current_projects:any
 
   async function employFileSelector() {
@@ -57,14 +59,32 @@ ipcMain.handle("open-project-clicked", async() => {
   }
 
   var selected_attr = await employFileSelector()
-  if (selected_attr.canceled) { return }
-  var possible_projects = await current_projects.filter((item:any) => item.projectPath == selected_attr.filePaths)
+  if (selected_attr.canceled) { return {failed:true, alert:false, output:""} }
+  var possible_projects = await current_projects.filter((item:any) => item.projectPath == selected_attr.filePaths[0])
 
   if (possible_projects.length <= 0) {
-    return false
+    try {
+      var handle = await projects.trackProject(selected_attr.filePaths[0])
+      await config.openProject(handle)
+    } catch {
+      return {failed:true, alert:true, output:"Please select a Project file"}
+    }
   } else {
     await config.openProject(possible_projects[0])
   }
-  return await possible_projects[0]
+  return {failed:false, alert:false, output:""}
 
+})
+
+
+ipcMain.handle("create-project-clicked", async(event, projectName) => {
+  try {
+    await projects.createProject(app.getAppPath(), projectName)
+      .then(handle => {
+        config.openProject(handle)
+        return {failed:false, alert:false, output:""}
+      }) 
+  } catch(err) {
+    return err
+  }
 })

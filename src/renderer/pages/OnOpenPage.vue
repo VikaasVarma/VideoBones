@@ -34,12 +34,16 @@ export default defineComponent({
         context.emit("create-new-project")
         console.log("Emmiting create-new-project")
       }
-
+      
       function openProject() {
           ipcRenderer.invoke("open-project-clicked").then(
-            (value) => {
-              if (!value) {
-                alert("Please select a Project file")
+            (result) => {
+              if (result.failed) {
+                if (result.alert) {
+                  alert(result.output)
+                }
+              } else {
+                context.emit("open-previous-project")
               }
             }
           )
@@ -48,7 +52,7 @@ export default defineComponent({
       return { createNewProject, openProject }
 
     },
-    emits: ["create-new-project"], 
+    emits: ["create-new-project", "open-previous-project"], 
 });
 
 
