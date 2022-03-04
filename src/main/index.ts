@@ -75,19 +75,14 @@ ipcMain.handle("open-project-clicked", async() => {
 })
 
 
-// ipcMain.handle("create-project-clicked", async() => {
-
-
-
-//   projects.createProject('', 'testing').then(handle => {
-//     config.openProject(handle).then(() => {
-//       startHandler();
-//       listen();
-//       // mainWindow.webContents.openDevTools();
-//       mainWindow.loadFile(path.join(__dirname, '..', 'renderer', 'index.html'));
-//     });
-//   });
-
-
-//   await config.openProject(possible_projects[0])
-// })
+ipcMain.handle("create-project-clicked", async(event, projectName) => {
+  try {
+    await projects.createProject(app.getAppPath(), projectName)
+      .then(handle => {
+        config.openProject(handle)
+        return true
+      }) 
+  } catch(err) {
+    return err
+  }
+})
