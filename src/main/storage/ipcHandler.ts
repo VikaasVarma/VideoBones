@@ -30,7 +30,7 @@ export function startStorageHandlers() {
     return config.closeProject();
   });
 
-  ipcMain.handle('get-recordings', (event) => {
+  ipcMain.handle('get-recordings', event => {
     return JSON.stringify(config.getRecordingsList());
   });
 
