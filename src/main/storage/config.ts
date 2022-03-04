@@ -112,6 +112,12 @@ class OpenProjectData {
     this.writeConfig();
   }
 
+  removeRecordingByName(recordingName: string): void {
+    removeRecording(this.projectConfig.recordings.findIndex((str:string) => {
+      return str === recordingName;
+    }));
+  }
+
   getConfigOption(option: string): unknown{
     return option in this.projectConfig.options ? this.projectConfig.options[option] : null;
   }
@@ -276,16 +282,25 @@ function getRecordingsList(): Readonly<Array<string>> {
  * Creates a file for a recording and adds it to the list of files used in the current open project.
  *
  * @param recordingName The name of the new recording file
- * @returns TODO: Storage pls fix
+ * @returns A promise resolving to the file handle
  */
-function addRecording(recordingName: string): string {
+function addRecording(recordingName: string): Promise<FileHandle> {
   if (currentOpenProject === null) {
     throw Error('No open project when calling addRecording.');
   }
 
   currentOpenProject.addRecording(recordingName);
 
-  return createProjectRecordingFile(currentOpenProject.projectHandle, recordingName);
+  const projectHandle = ProjectHandle.copy(currentOpenProject.projectHandle);
+
+  return createProjectRecordingFile(currentOpenProject.projectHandle, recordingName)
+    .catch(reason => {
+      if (currentOpenProject === null || !projectHandle.equals(currentOpenProject.projectHandle)) {
+        throw Error('Changed project during recording create!');
+      }
+      currentOpenProject.removeRecordingByName(recordingName);
+      throw Error(reason);
+    });
 }
 
 /**

@@ -168,6 +168,10 @@ export function readProjectConfig(projectHandle: ProjectHandle): Promise<Config>
  * @param name The name of the recording file
  * @returns TODO: Storage pls fix
  */
-export function createProjectRecordingFile(projectHandle: ProjectHandle, name:string): string {
-  return path.join(getProjectRecordingsDirectory(projectHandle), name);
+export function createProjectRecordingFile(projectHandle: ProjectHandle, name:string): Promise<fs.FileHandle> {
+  const fullpath = path.join(getProjectRecordingsDirectory(projectHandle), name);
+
+  const fhprom = fs.open(fullpath, 'wx');
+
+  return fhprom;
 }
