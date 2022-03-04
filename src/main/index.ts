@@ -18,10 +18,10 @@ function createWindow () {
     },
     title: 'Video Bones'
   });
-  
+
   config.openProject(projects.getTrackedProjects()[0]).then(() => {
     startHandler();
-    startStorageHandlers();    
+    startStorageHandlers();
   });
 
   listen();
@@ -29,7 +29,7 @@ function createWindow () {
   mainWindow.loadFile(path);
   //mainWindow.webContents.openDevTools()
 }
-  
+
 app.whenReady().then(() => {
   createWindow();
 

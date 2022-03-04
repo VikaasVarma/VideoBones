@@ -15,10 +15,9 @@ function createOperation(execute:()=>void, undo:()=>void): Operation {
   };
 }
 
-
 /**
  * A stack for operations which you might want to undo/redo.
- * 
+ *
  * Has a max size, which once exceeded drops elements from the bottom of the stack.
  */
 export class OperationUndoStack {
@@ -34,7 +33,7 @@ export class OperationUndoStack {
 
   /**
    * Executes an operation and adds it to the stack
-   * 
+   *
    * @param execute The lambda for the application of the operation
    * @param undo The lambda for the inverse of the operation
    */
@@ -65,7 +64,7 @@ export class OperationUndoStack {
 
   /**
    * Undoes the #top operation of the stack.
-   * 
+   *
    * Throws error if stack empty.
    */
   undo() {
@@ -82,7 +81,7 @@ export class OperationUndoStack {
 
   /**
    * Redoes a previously undone operation.
-   * 
+   *
    * Throws error if nothing avaliable to redo.
    */
   redo() {
