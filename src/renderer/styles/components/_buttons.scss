@@ -1,5 +1,5 @@
-$color-button: #8367c7;
-$color-highlight: #00ff2a;
+$color-button: #8367C7;
+$color-highlight: #00FF2A;
 
 .button-primary {
 	font-family: VBFont;
@@ -25,16 +25,16 @@ $color-highlight: #00ff2a;
 }
 
 .button-secondary {
-	@extend .button-primary;
+  background-color: inherit;
+  color: white;
+  filter: none;
+  margin: auto;
+  opacity: .5;
 
-	margin: auto;
-	color: white;
-	opacity: 50%;
-	filter: none;
-	background-color: inherit;
+  @extend .button-primary;
 
-	&:hover {
-		cursor: pointer;
-		color: rgba(255, 255, 255, 0.4);
-	}
+  &:hover {
+    color: rgb(255 255 255 / 40%);
+    cursor: pointer;
+  }
 }

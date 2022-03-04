@@ -19,14 +19,14 @@
 	width: 100%;
 	background-color: inherit;
 
-	& > .image-container {
-		height: 100%;
-		padding: 0;
+  & > .image-container {
+    height: 100%;
+    padding: 0;
 
-		& > img {
-			height: 100%;
-		}
-	}
+    & > img {
+      height: 100%;
+    }
+  }
 }
 
 .add-item-container {
@@ -54,24 +54,21 @@
 	background-color: $color-outline;
 	display: block;
 
-	& > div {
-		&:not(:first-of-type) {
-			margin-top: 10px;
-			&::before {
-				display: block;
-				content: "";
-				width: 100%;
-				border: 0;
-				height: 3px;
-				border-top: 3px solid $color-middleground;
-				border-radius: 5px;
-				margin-bottom: 10px;
-			}
-		}
+      &::before {
+        border: 0;
+        border-radius: 5px;
+        border-top: 3px solid $color-middleground;
+        content: '';
+        display: block;
+        height: 3px;
+        margin-bottom: 10px;
+        width: 100%;
+      }
+    }
 
-		& > :not(h2) {
-			margin-top: 10px;
-		}
+    & > :not(h2) {
+      margin-top: 10px;
+    }
 
 		:not(h2) {
 			font-size: 11px;

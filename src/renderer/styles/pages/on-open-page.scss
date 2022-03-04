@@ -1,11 +1,11 @@
 .horizontal-options-menu {
-	height: fit-content;
-	display: flex;
+  display: flex;
+  height: fit-content;
 
-	& > div {
-		width: 200px;
-		margin-top: 10px;
-	}
+  & > div {
+    margin-top: 10px;
+    width: 200px;
+  }
 }
 
 .image-container {
