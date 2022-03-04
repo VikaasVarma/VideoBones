@@ -1,25 +1,25 @@
 video {
-    width:92%;
-    height:80%;
-    background-color: white;
-    margin: auto;
-
-    border: 5px solid $color-middleground;
-    border-radius: 10px;
+  background-color: white;
+  border: 5px solid $color-middleground;
+  border-radius: 10px;
+  height: 80%;
+  margin: auto;
+  width: 92%;
 }
 
 .horizontal-spacer {
-    margin-top: 15px;
-    height: 15%;
-    padding: 0 4% 0 4%;
-    grid-column-gap: 40px;
-    grid-template-columns: 2fr 1fr 2fr;
+  grid-column-gap: 40px;
+  grid-template-columns: 2fr 1fr 2fr;
+  height: 15%;
+  margin-top: 15px;
+  padding: 0 4%;
 }
 
 .image-container {
-    height: fit-content;
-    &>img {
-        height: 50px;
-        display: inline;
-    }
+  height: fit-content;
+
+  & > img {
+    display: inline;
+    height: 50px;
+  }
 }

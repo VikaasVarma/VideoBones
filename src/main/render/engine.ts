@@ -30,9 +30,9 @@ function buildArgs({
       `${videoInputs.map((__: VideoInput, i: number) => `[input${i}]`)}xstack=inputs=${videoInputs.length}:layout=${videoInputs.map((input: VideoInput) => `${input.position.left}_${input.position.top}`).join('|')}[matrix];`,
       outputType === 'thumbnail' ? `[matrix]fps=${thumbnailEvery}[pr];` : '',
       `[${outputType === 'thumbnail' ? '[pr]' : '[matrix]'}]scale=${outputResolution.width}:${outputResolution.height},setsar=1:1[out];`,
-      audioInputs.map((input: AudioInput, i: number) => 
-      `[${i + videoInputs.length}:a]setpts=PTS-STARTPTS,
-        ${!input.echo_active?'':'aecho=in_gain='+input.echo_in_gain+':out_gain='+input.echo_out_gain+':delays='+input.echo_delays+'decays='+input.echo_decays+','}
+      audioInputs.map((input: AudioInput, i: number) =>
+        `[${i + videoInputs.length}:a]setpts=PTS-STARTPTS,
+        ${!input.echo_active ? '' : 'aecho=in_gain=' + input.echo_in_gain + ':out_gain=' + input.echo_out_gain + ':delays=' + input.echo_delays + 'decays=' + input.echo_decays + ','}
         ${input.declip_active ? 'adeclip=window=55:overlap=75:arorder=8:threshold=10:hsize=1000:method=add,' : ''}
         ${input.declick_active ? 'adeclick=window=55:overlap:75:arorder=2:threshold=2:burst=2:method=a,' : ''}
         ${input.reverse_active ? 'reverse,' : ''}
