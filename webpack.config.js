@@ -1,6 +1,7 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const path = require('path');
 const { VueLoaderPlugin } = require('vue-loader');
+const { DefinePlugin } = require('webpack');
 
 let common_config = {
   devServer: {
@@ -93,10 +94,22 @@ module.exports = [
         }
       ]
     },
-    plugins: [ new VueLoaderPlugin(), new HtmlWebpackPlugin({
-      inject: false,
-      templateContent: ({htmlWebpackPlugin}) => `<html><head>${htmlWebpackPlugin.tags.headTags}</head><body><div id="app"></div>${htmlWebpackPlugin.tags.bodyTags}</body></html>`
-    })
+    plugins: [
+      new VueLoaderPlugin(),
+      new HtmlWebpackPlugin({
+        inject: false,
+        templateContent: ({ htmlWebpackPlugin }) => `<html>
+      <head>${htmlWebpackPlugin.tags.headTags}</head>
+      <body>
+        <div id="app"></div>
+        ${htmlWebpackPlugin.tags.bodyTags}
+      </body>
+      </html>`
+      }),
+      new DefinePlugin({
+        __VUE_OPTIONS_API__: true,
+        __VUE_PROD_DEVTOOLS__: false
+      })
     ]
   })
 ];

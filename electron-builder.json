@@ -19,5 +19,6 @@
   "asar": true,
   "asarUnpack": [
     "./renderer"
-  ]
+  ],
+  "productName": "Video Bones"
 }
