@@ -41,12 +41,19 @@ jobs:
         include:
           - os: windows-latest
             target: windows
+            artifact: |
+              dist\*.exe
 
           - os: macos-latest
             target: mac
+            artifact: |
+              dist/*.dmg
 
           - os: ubuntu-latest
             target: linux
+            artifact: |
+              dist/*.snap
+              dist/*.AppImage
 
     runs-on: ${{ matrix.os }}
     needs: create-release
@@ -79,7 +86,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.target }}-artifacts
-          path: dist/
+          path: ${{ matrix.artifact }}
           if-no-files-found: error
           retention-days: 3
 
@@ -88,6 +95,9 @@ jobs:
     needs: [ create-release, build-app ]
 
     steps:
+      - name: "Checkout repository"
+        uses: actions/checkout@v2
+
       - name: "Fetch artifacts"
         uses: actions/download-artifact@v3
 
@@ -100,6 +110,5 @@ jobs:
           gh release upload "${{ needs.create-release.outputs.tag }}" \
             windows-artifacts/*.exe \
             macos-artifacts/*.dmg \
-            macos-artifacts/*.zip \
             linux-artifacts/*.AppImage \
             linux-artifacts/*.snap \
