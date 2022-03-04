@@ -142,7 +142,7 @@ export default defineComponent({
       var audioTracks = 1;
       ipcRenderer.invoke("get-recordings").then(function(recordings: string) {
         JSON.parse(recordings).forEach(function(file:string) {
-          if (file.indexOf(".wav") === file.length - 4) {
+          if (file.indexOf(".webm") === file.length - 4) {
             audioTracks++;
           }
         });
@@ -159,10 +159,10 @@ export default defineComponent({
       })
 
       // Write audio data to file in project folder
-      const audioBlob = new Blob(this.audioChunks, { type: 'audio/wav' })
+      const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' })
       console.log(audioBlob);
       audioBlob.arrayBuffer().then(buffer => {
-        ipcRenderer.invoke('add-recording', 'audio' + audioTracks + '.wav').then(filePath => {
+        ipcRenderer.invoke('add-recording', 'audio' + audioTracks + '.webm').then(filePath => {
           fs.writeFile(filePath, new Uint8Array(buffer), err => {
             if (err) throw err;
           });
@@ -195,14 +195,14 @@ export default defineComponent({
     const playbackTracks = <HTMLDivElement> this.$refs.playbackTracks;
     ipcRenderer.invoke("get-recordings").then(function(recordings: string) {
       JSON.parse(recordings).forEach(function(file:string) {
-        if (file.indexOf(".wav") === file.length - 4) {
+        if (file.indexOf(".webm") === file.length - 4) {
           var checkbox = document.createElement('input');
           checkbox.className = 'tickbox';
           checkbox.type = 'checkbox';
           checkbox.value = file;
 
           var header = document.createElement('h3');
-          header.textContent = file.substr(0, file.indexOf(".wav"));
+          header.textContent = file.substr(0, file.indexOf(".webm"));
 
           playbackTracks.appendChild(checkbox);
           playbackTracks.appendChild(header);
