@@ -168,7 +168,7 @@ export function readProjectConfig(projectHandle: ProjectHandle): Promise<Config>
  *
  * @param projectHandle The project to create the recording in
  * @param name The name of the recording file
- * @returns A promise resolving to the file handle of the new recording file
+ * @returns TODO: Storage pls fix
  */
 export function createProjectRecordingFile(projectHandle: ProjectHandle, name:string): Promise<fs.FileHandle> {
   const fullPath = path.join(getProjectRecordingsDirectory(projectHandle), name);

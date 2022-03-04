@@ -63,7 +63,11 @@ const handles = {
       const out: Array<ProjectHandle> = [];
       json.forEach((e: any) => {
         if (ProjectHandle.isProjectHandle(e)) {
-          out.push(ProjectHandle.copy(e));
+          if (existsSync(e.projectPath)){
+            out.push(ProjectHandle.copy(e));
+          } else {
+            console.log(`The project folder for handle ${e} does not exist, removing the handle.`);
+          }
         } else {
           console.log(`Found malformed project handle: ${e}`);
         }

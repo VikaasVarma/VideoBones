@@ -1,0 +1,149 @@
+name: Publish latest release
+
+on:
+  push:
+    branches:
+      - master
+      - main
+
+jobs:
+  create-release:
+    if: contains( join( github.event.commits.*.message, ', ' ), '[ci release]' )
+    runs-on: ubuntu-latest
+    outputs:
+      tag: v${{ steps.npm-version.outputs.version }}
+
+    steps:
+      - name: "Checkout repository"
+        uses: actions/checkout@v3
+
+      - name: "Get release version"
+        id: npm-version
+        run: |
+          echo ::set-output name=version::=$(cat package.json | grep version | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]')
+
+      - name: "Tag latest commit"
+        run: |
+          echo "${{ secrets.pat_token }}" | gh auth login --with-token
+          gh auth setup-git
+          git config user.name "GitHub Actions"
+          git tag "v${{ steps.npm-version.outputs.version }}" -a -m "${{ github.event.commits[0].message }}"
+          git push origin "v${{ steps.npm-version.outputs.version }}"
+
+      - name: "Create draft GitHub release"
+        run: |
+          gh release create -d --generate-notes "v${{ steps.npm-version.outputs.version }}"
+
+  build-windows:
+    runs-on: windows-latest
+    needs: create-release
+
+    steps:
+      - name: "Checkout repository"
+        uses: actions/checkout@v3
+
+      - name: "Install node"
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: "Build app"
+        run: |
+          npm ci
+          npm run clean
+          npm run bundle
+          npm run dist:windows
+          dir /q /o:n dist
+
+      - name: "Store artifacts"
+        uses: actions/upload-artifact@v3
+        with:
+          name: windows-artifacts
+          path: dist/
+          if-no-files-found: error
+          retention-days: 3
+
+  build-macos:
+    runs-on: macos-latest
+    needs: create-release
+
+    steps:
+      - name: "Checkout repository"
+        uses: actions/checkout@v3
+
+      - name: "Install node"
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: "Build app"
+        run: |
+          npm ci
+          npm run clean
+          npm run bundle
+          npm run dist:mac
+          ls -larth dist
+
+      - name: "Store artifacts"
+        uses: actions/upload-artifact@v3
+        with:
+          name: macos-artifacts
+          path: dist/
+          if-no-files-found: error
+          retention-days: 3
+
+  build-linux:
+    runs-on: ubuntu-latest
+    needs: create-release
+
+    steps:
+      - name: "Checkout repository"
+        uses: actions/checkout@v3
+
+      - name: "Install node"
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: "Build app"
+        run: |
+          npm ci
+          npm run clean
+          npm run bundle
+          npm run dist:linux
+          ls -larth dist
+
+      - name: "Store artifacts"
+        uses: actions/upload-artifact@v3
+        with:
+          name: linux-artifacts
+          path: dist/
+          if-no-files-found: error
+          retention-days: 3
+
+  add-release-artifacts:
+    runs-on: ubuntu-latest
+    needs: [ build-windows, build-macos, build-linux ]
+
+    steps:
+      - name: "Fetch artifacts"
+        uses: actions/download-artifact@v3
+
+      - name: "Add artifacts to release"
+        # TODO add zip version of installers
+        run: |
+          echo "${{ secrets.pat_token }}" | gh auth login --with-token
+          gh auth setup-git
+          git config user.name "GitHub Actions"
+          gh release upload "${{ jobs.create-release.outputs.tag }}" \
+            windows-artifacts/*.exe \
+            macos-artifacts/*.dmg \
+            macos-artifacts/*.zip
+            linux-artifacts/*.AppImage
+            linux-artifacts/*.snap \

@@ -1,7 +1,7 @@
 import { app, BrowserWindow } from 'electron';
 import { close, listen } from './render/integratedServer';
 import { startHandler, stopHandler } from './render/ipcHandler';
-import path from 'path';
+import { join } from 'path';
 import { startStorageHandlers } from './storage/ipcHandler';
 import * as config from '../main/storage/config';
 import * as projects from '../main/storage/projects';
@@ -15,30 +15,21 @@ function createWindow () {
       // preload: path.join(__dirname, 'preload.ts')
       nodeIntegration: true,
       contextIsolation: false
-    }
+    },
+    title: 'Video Bones'
   });
-  try {
-    projects.createProject('', 'testing').then(handle => {
-      config.openProject(handle).then(() => {
-        startHandler();
-        listen();
-        mainWindow.loadFile(path.join(__dirname, '..', 'renderer', 'index.html'));
-        //mainWindow.webContents.openDevTools()
-      });
-    });
-  } catch (err) {
-    config.openProject(projects.getTrackedProjects()[0]).then(() => {
-      startHandler();
-      listen();
-      mainWindow.loadFile(path.join(__dirname, '..', 'renderer', 'index.html'));
-      //mainWindow.webContents.openDevTools()
-    });
-  }
+  
+  config.openProject(projects.getTrackedProjects()[0]).then(() => {
+    startHandler();
+    startStorageHandlers();    
+  });
 
   listen();
-  mainWindow.loadFile(path.join(__dirname, '..', 'renderer', 'index.html'));
+  const path = app.isPackaged ? join('..', 'renderer', 'index.html') : join(__dirname, '..', 'renderer', 'index.html');
+  mainWindow.loadFile(path);
   //mainWindow.webContents.openDevTools()
 }
+  
 app.whenReady().then(() => {
   createWindow();
 

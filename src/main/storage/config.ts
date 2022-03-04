@@ -265,9 +265,9 @@ function getRecordingsList(): Readonly<Array<string>> {
  * Creates a file for a recording and adds it to the list of files used in the current open project.
  *
  * @param recordingName The name of the new recording file
- * @returns An fs.FileHandle to the new recording file
+ * @returns TODO: Storage pls fix
  */
-function addRecording(recordingName: string): Promise<FileHandle> {
+function addRecording(recordingName: string): string {
   if (currentOpenProject === null) {
     throw Error('No open project when calling addRecording.');
   }
