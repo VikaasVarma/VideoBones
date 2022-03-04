@@ -58,13 +58,36 @@ ipcMain.handle("open-project-clicked", async() => {
 
   var selected_attr = await employFileSelector()
   if (selected_attr.canceled) { return }
-  var possible_projects = await current_projects.filter((item:any) => item.projectPath == selected_attr.filePaths)
+  var possible_projects = await current_projects.filter((item:any) => item.projectPath == selected_attr.filePaths[0])
 
   if (possible_projects.length <= 0) {
-    return false
+    try {
+      var handle = await projects.trackProject(selected_attr.filePaths[0])
+      await config.openProject(handle)
+    } catch {
+      return false
+    }
   } else {
     await config.openProject(possible_projects[0])
   }
-  return await possible_projects[0]
+  return current_projects
 
 })
+
+
+// ipcMain.handle("create-project-clicked", async() => {
+
+
+
+//   projects.createProject('', 'testing').then(handle => {
+//     config.openProject(handle).then(() => {
+//       startHandler();
+//       listen();
+//       // mainWindow.webContents.openDevTools();
+//       mainWindow.loadFile(path.join(__dirname, '..', 'renderer', 'index.html'));
+//     });
+//   });
+
+
+//   await config.openProject(possible_projects[0])
+// })

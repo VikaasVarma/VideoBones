@@ -6,7 +6,7 @@
 
             <div style="grid-column: 1 / 3; grid-row: 1 / 2;" class="named-input-container">
                 <h3>Project Name</h3>
-                <input placeholder="Ex: Gangnam Style TikTok" type="text">
+                <input id="project-name-input" placeholder="Ex: Gangnam Style TikTok" type="text">
             </div>
 
             <div style="grid-column: 1 / 2; grid-row: 2 / 3;">
@@ -38,14 +38,27 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
+import { ipcRenderer } from 'electron';
 
 export default defineComponent({
     name: "create-new-project-page",
     emits: ["create-project", "cancel"],
     setup(props, context) {
 
-        function createProject() {
-            context.emit('create-project')
+        async function createProject() {
+            
+            let username = await document.getElementById("project-name-input").value
+
+            ipcRenderer.invoke("create-project-clicked", {projectName : username}).then(
+            (value) => {
+              // I know, just leave it be
+              if (value === false) {
+                alert("Didn't work, sorry")
+              } else {
+                context.emit('create-project')
+              }
+            }
+          )
         }
 
         function cancel() {
