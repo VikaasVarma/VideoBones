@@ -39,7 +39,7 @@ export default defineComponent({
           ipcRenderer.invoke("open-project-clicked").then(
             (value) => {
               if (!value) {
-                alert("That is not a project")
+                alert("Please select a Project file")
               }
             }
           )
