@@ -46,15 +46,21 @@ export default defineComponent({
     setup(props, context) {
 
         async function createProject() {
-            
-            let projectName = await document.getElementById("project-name-input").value
+            let inputButton = <HTMLInputElement>document.getElementById("project-name-input")
+            let projectName = inputButton.value
+
+            if (projectName == "") {
+                alert("Please name your project")
+                return
+            }
             
             ipcRenderer.invoke("create-project-clicked", projectName).then(
-            (value) => {
-                console.log(value)
-                // I know, just leave it be
-                if (value === false) {
-                    alert("Didn't work, sorry")
+            (result) => {
+                console.log(result)
+                if (result.failed) {
+                    if (result.output) {
+                        alert(result.output)
+                    }
                 } else {
                     context.emit('create-project')
                 }

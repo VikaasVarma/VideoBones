@@ -37,11 +37,11 @@ export default defineComponent({
       
       function openProject() {
           ipcRenderer.invoke("open-project-clicked").then(
-            (value) => {
-              console.log(value)
-              // I know, just leave it be
-              if (value === false) {
-                alert("Please select a Project file")
+            (result) => {
+              if (result.failed) {
+                if (result.alert) {
+                  alert(result.output)
+                }
               } else {
                 context.emit("open-previous-project")
               }
