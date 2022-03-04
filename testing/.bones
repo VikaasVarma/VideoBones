@@ -1,1 +1,1 @@
-{"version":1,"projectName":"testing","recordings":[],"options":{}}
+{"version":1,"projectName":"testing","recordings":["video1.webm","audio1.wav","video2.webm"],"options":{}}"options":{}}
