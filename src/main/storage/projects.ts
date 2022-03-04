@@ -1,12 +1,10 @@
-import { app } from 'electron';
-
-import { existsSync, readFileSync } from 'fs';
 import * as fs from 'fs/promises';
-
-import path from 'path';
-
+import { existsSync, readFileSync } from 'fs';
 import { readDirectoryConfig, recordingsDirectoryName, tempDirectoryName } from './storage';
+
 import { internal_initialiseProjectConfig as initialiseProjectConfig } from './config';
+import { app } from 'electron';
+import path from 'path';
 
 /**
  * Holds information on a project the app currently knows about / tracks.
@@ -31,7 +29,7 @@ class ProjectHandle {
   /**
    * User-defined type guard for project handles.
    */
-  static isProjectHandle(h: any): h is ProjectHandle {
+  static isProjectHandle(h:any): h is ProjectHandle {
     return 'projectPath' in h && typeof h.projectPath === 'string'
     && 'projectName' in h && typeof h.projectName === 'string';
   }

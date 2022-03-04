@@ -3,7 +3,7 @@
     <menu class="horizontal-options-menu">
 
         <div>
-            <button @click="folderIconClicked()" class="image-container">
+            <button @click="createNewProject()" class="image-container">
                 <img src="../../../assets/images/addIcon.png">
             </button>
             
@@ -13,7 +13,7 @@
         <hr class="vertical-border-line">
 
         <div>
-            <button class="image-container">
+            <button @click="openProject()" class="image-container">
                 <img src="../../../assets/images/folderIcon.png">
             </button>
 
@@ -24,20 +24,35 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
+import { ipcRenderer } from 'electron'
 
 export default defineComponent({
     name: "on-open-page",
     setup(props, context) {
 
-      const folderIconClicked = () => {
+      function createNewProject () {
         context.emit("create-new-project")
         console.log("Emmiting create-new-project")
       }
+      
+      function openProject() {
+          ipcRenderer.invoke("open-project-clicked").then(
+            (result) => {
+              if (result.failed) {
+                if (result.alert) {
+                  alert(result.output)
+                }
+              } else {
+                context.emit("open-previous-project")
+              }
+            }
+          )
+      }
 
-      return { folderIconClicked }
+      return { createNewProject, openProject }
 
     },
-    emits: ["create-new-project"], 
+    emits: ["create-new-project", "open-previous-project"], 
 });
 
 

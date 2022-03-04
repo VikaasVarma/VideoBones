@@ -1,18 +1,17 @@
 <template>
-  <video ref=videoPreview style="transform:scaleX(-1)"> </video>
+    <div class="recording-grid">
+        <video ref=videoPreview> </video>
 
-  <div class="horizontal-spacer">
-    <select class=dropdown ref=audioDevices @change="onAudioChange($event)"> </select>
+        <select class=dropdown ref=audioDevices @change="onAudioChange($event)"> </select>
 
-    <button class="image-container" @click="recordOnClick()">
-      <img src="../../../assets/images/record.svg">
-    </button>
-
-    <select class=dropdown ref=videoDevices @change="onVideoChange($event)"> </select>
-  </div>
+        <div :class="recording ? 'recording-button' : 'not-recording-button'" @click="recordOnClick()"> <div></div> </div>
+        
+        <select class=dropdown ref=videoDevices @change="onVideoChange($event)"> </select>
+    </div>
 
   <h2>Playback Audio Tracks</h2>
   <div class="tickbox-container" ref=playbackTracks> </div>
+
 </template>
 
 <script lang="ts">
@@ -218,7 +217,7 @@ export default defineComponent({
 })
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
   @import "../styles/main.scss";
   @import "../styles/pages/recording-page.scss"
 </style>
