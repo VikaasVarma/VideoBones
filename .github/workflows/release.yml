@@ -103,12 +103,13 @@ jobs:
 
       - name: "Add artifacts to release"
         # TODO add zip version of installers
+        # NOTE there is no folder (windows-artifacts, mac-artifacts) for only 1 file
         run: |
           echo "${{ secrets.pat_token }}" | gh auth login --with-token
           gh auth setup-git
           git config user.name "GitHub Actions"
           gh release upload "${{ needs.create-release.outputs.tag }}" \
-            windows-artifacts/*.exe \
-            macos-artifacts/*.dmg \
+            *.exe \
+            *.dmg \
             linux-artifacts/*.AppImage \
             linux-artifacts/*.snap \
