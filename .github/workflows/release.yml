@@ -85,7 +85,7 @@ jobs:
 
   add-release-artifacts:
     runs-on: ubuntu-latest
-    needs: [ create-release, build-windows, build-macos, build-linux ]
+    needs: [ create-release, build-app ]
 
     steps:
       - name: "Fetch artifacts"
