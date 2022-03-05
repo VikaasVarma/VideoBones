@@ -19,7 +19,7 @@ function createWindow () {
     },
     title: 'Video Bones'
   });
-  
+
   mainWindow.maximize();
 
   config.openProject(projects.getTrackedProjects()[0]).then(() => {
@@ -85,14 +85,14 @@ ipcMain.handle('create-project-clicked', async(event, projectName) => {
   try {
     await projects.createProject(app.getAppPath(), projectName)
       .then(handle => {
-        config.openProject(handle)
+        config.openProject(handle);
       });
-    return { failed: false, alert: false, output: '' };  
-    
+    return { failed: false, alert: false, output: '' };
+
   } catch (err:any) {
-    if (err.message.startsWith("Project directory already exists:")) {
-      return { failed: true, alert: true, output: 'That project already exists.' };  
-    } 
+    if (err.message.startsWith('Project directory already exists:')) {
+      return { failed: true, alert: true, output: 'That project already exists.' };
+    }
     return err;
   }
 });

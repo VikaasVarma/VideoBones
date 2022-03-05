@@ -27,16 +27,10 @@
 
             <menu class="vertical-options-menu">
                 
-                <div>
+                <div id="track-selection-menu">
                     <h2 class="section-title">Tracks</h2>
-                    <div class="tickbox-container">
-                        <input type="checkbox" class="tickbox"/>
-                        <h3>Track 1</h3>
-                    </div>
-                    <div class="tickbox-container">
-                        <input type="checkbox" class="tickbox"/>
-                        <h3>Track 2</h3>
-                    </div>
+                    <track-selector v-for="track in tracks" :key="track.trackName" :trackName="track.trackName" />
+
                     <div @click="openRecordingPage()" class="add-item-container">
                         <img src="../../../assets/images/addIcon.png">
                         <h3>Add New Track</h3>
@@ -89,10 +83,16 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
+import TrackSelector from '../components/TrackSelector.vue';
 
 export default defineComponent({
+  components: { TrackSelector },
     name: "VideoEditorPage",
     setup(props, context) {
+        
+        var tracks = ref([
+            {trackName:"Track 1"}, 
+            {trackName:"fmeegleboob"}])
         var bpm = ref(80)
         var screenStyle = ref(0)
         var playhead = ref(.6)
@@ -118,12 +118,14 @@ export default defineComponent({
                 playhead.value = Math.min(1, Math.max(0, (x - timeline.x) / timeline.width))
             }
         }
-
+        
         function openRecordingPage () {
-            context.emit("open-recording-page")
+            console.log(tracks)
+            tracks.value.push({trackName: "works?"})
+            // tracks.value.append({trackName: "works?"})
         }
 
-        return {openSingleVideoEditor, incBpm, decBpm, setScreenStyle, drag, bpm, track_data, playhead, mouse_down, openRecordingPage}
+        return {tracks, openSingleVideoEditor, incBpm, decBpm, setScreenStyle, drag, bpm, track_data, playhead, mouse_down, openRecordingPage}
     },
     emits: ["open-single-editor", "open-recording-page"]
 });
