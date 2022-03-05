@@ -9,7 +9,6 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import * as shaka from 'shaka-player';
 
 export default defineComponent({
   name: "track-selector",

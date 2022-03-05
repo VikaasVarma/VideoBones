@@ -31,7 +31,7 @@
                     <h2 class="section-title">Tracks</h2>
                     <track-selector v-for="track in tracks" :key="track.trackName" :trackName="track.trackName" />
 
-                    <div @click="openRecordingPage()" class="add-item-container">
+                    <div @click="addNewTrack()" class="add-item-container">
                         <img src="../../../assets/images/addIcon.png">
                         <h3>Add New Track</h3>
                     </div>
@@ -42,14 +42,10 @@
                         <input type="checkbox" class="tickbox"/>
                         <h3>Play While Recording</h3>
                     </div>
-                    <div class="metronome-container">
-                        <h2>{{bpm}}</h2>
-                        <div>
-                            <img @click="incBpm()" src="../../../assets/images/arrow.svg">
-                            <img @click="decBpm()" src="../../../assets/images/arrow.svg" style="transform: scaleY(-1)">
-                        </div>
-                    </div>
-                    <div class="add-item-container">
+
+                    <metronome-component v-for="metronome in clickTracks" :key="metronome.initialBpm" />
+
+                    <div @click="addNewClickTrack()" class="add-item-container">
                         <img src="../../../assets/images/addIcon.png">
                         <h3>New Clicker Track</h3>
                     </div>
@@ -85,16 +81,17 @@
 import { stringify } from 'querystring';
 import { defineComponent, ref } from 'vue';
 import TrackSelector from '../components/TrackSelector.vue';
+import MetronomeComponent from '../components/MetronomeComponent.vue';
 
 export default defineComponent({
-  components: { TrackSelector },
+  components: { TrackSelector, MetronomeComponent },
     name: "VideoEditorPage",
     setup(props, context) {
         
         var tracks = ref([
-            {trackName:"Track 0"}, 
+            {trackName : "Track 0"}, 
         ])
-        var bpm = ref(80)
+        var clickTracks = ref([{ initialBpm : 80}])
         var screenStyle = ref(0)
         var playhead = ref(.6)
         var mouse_down = ref(false)
@@ -108,8 +105,6 @@ export default defineComponent({
         }
 
         function openSingleVideoEditor () { context.emit("open-single-editor") }
-        function incBpm() { bpm.value += 1 }
-        function decBpm() { bpm.value -= 1 }
         function setScreenStyle(style: number) { screenStyle.value = style }
 
         function drag(event: any, mouse_down: boolean) {
@@ -120,14 +115,15 @@ export default defineComponent({
             }
         }
         
-        function openRecordingPage () {
-            console.log(tracks)
-            let currentTracks = tracks.value.length
-            tracks.value.push({trackName: "Track " + (tracks.value.length + 0).toString()})
-            // tracks.value.append({trackName: "works?"})
+        function addNewClickTrack() {
+            clickTracks.value.push({ initialBpm : 80 })
         }
 
-        return {tracks, openSingleVideoEditor, incBpm, decBpm, setScreenStyle, drag, bpm, track_data, playhead, mouse_down, openRecordingPage}
+        function addNewTrack () {
+            tracks.value.push({trackName: "Track " + (tracks.value.length + 0).toString()})
+        }
+
+        return {tracks, clickTracks, addNewClickTrack, openSingleVideoEditor, setScreenStyle, drag, track_data, playhead, mouse_down, addNewTrack}
     },
     emits: ["open-single-editor", "open-recording-page"]
 });

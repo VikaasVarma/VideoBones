@@ -74,9 +74,12 @@
 		}
 
 		:not(h2) {
-			width: fit-content;
 			font-size: 11px;
 			font-weight: lighter;
+		}
+
+		h3 {
+			width: fit-content;
 		}
 	}
 }
