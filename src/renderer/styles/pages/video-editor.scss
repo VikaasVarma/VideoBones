@@ -29,6 +29,10 @@
 	}
 }
 
+.add-item-container {
+	cursor: pointer;
+}
+
 .grid-container {
 	height: 100%;
 	grid-template-columns: 9fr 2.5fr;

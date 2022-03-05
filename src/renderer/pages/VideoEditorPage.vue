@@ -37,7 +37,7 @@
                         <input type="checkbox" class="tickbox"/>
                         <h3>Track 2</h3>
                     </div>
-                    <div class="add-item-container">
+                    <div @click="openRecordingPage()" class="add-item-container">
                         <img src="../../../assets/images/addIcon.png">
                         <h3>Add New Track</h3>
                     </div>
@@ -119,9 +119,13 @@ export default defineComponent({
             }
         }
 
-        return {openSingleVideoEditor, incBpm, decBpm, setScreenStyle, drag, bpm, track_data, playhead, mouse_down}
+        function openRecordingPage () {
+            context.emit("open-recording-page")
+        }
+
+        return {openSingleVideoEditor, incBpm, decBpm, setScreenStyle, drag, bpm, track_data, playhead, mouse_down, openRecordingPage}
     },
-    emits: ["open-single-editor"]
+    emits: ["open-single-editor", "open-recording-page"]
 });
 </script>
 
