@@ -2,6 +2,8 @@
 *::before,
 *::after {
 	box-sizing: border-box;
+	-webkit-user-drag: none;
+	-webkit-app-region: no-drag;
 }
 
 * {
@@ -45,4 +47,18 @@ h4,
 h5,
 h6 {
 	overflow-wrap: break-word;
+}
+
+:not(input):not(textarea),
+:not(input):not(textarea)::after,
+:not(input):not(textarea)::before {
+	-webkit-user-select: none;
+	user-select: none;
+	cursor: default;
+}
+input,
+button,
+textarea,
+:focus {
+	outline: none; // You should add some other style for :focus to help UX/a11y
 }
