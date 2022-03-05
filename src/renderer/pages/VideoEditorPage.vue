@@ -82,6 +82,7 @@
 </template>
 
 <script lang="ts">
+import { stringify } from 'querystring';
 import { defineComponent, ref } from 'vue';
 import TrackSelector from '../components/TrackSelector.vue';
 
@@ -91,8 +92,8 @@ export default defineComponent({
     setup(props, context) {
         
         var tracks = ref([
-            {trackName:"Track 1"}, 
-            {trackName:"fmeegleboob"}])
+            {trackName:"Track 0"}, 
+        ])
         var bpm = ref(80)
         var screenStyle = ref(0)
         var playhead = ref(.6)
@@ -121,7 +122,8 @@ export default defineComponent({
         
         function openRecordingPage () {
             console.log(tracks)
-            tracks.value.push({trackName: "works?"})
+            let currentTracks = tracks.value.length
+            tracks.value.push({trackName: "Track " + (tracks.value.length + 0).toString()})
             // tracks.value.append({trackName: "works?"})
         }
 
