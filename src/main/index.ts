@@ -19,7 +19,7 @@ function createWindow () {
     },
     title: 'Video Bones'
   });
-
+  
   mainWindow.maximize();
 
   config.openProject(projects.getTrackedProjects()[0]).then(() => {
