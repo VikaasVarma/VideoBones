@@ -49,9 +49,9 @@ h6 {
 	overflow-wrap: break-word;
 }
 
-:not(input):not(textarea),
-:not(input):not(textarea)::after,
-:not(input):not(textarea)::before {
+:not(input):not(textarea):not(.image-container:first),
+:not(input):not(textarea):not(.image-container:first)::after,
+:not(input):not(textarea):not(.image-container:first)::before {
 	-webkit-user-select: none;
 	user-select: none;
 	cursor: default;
