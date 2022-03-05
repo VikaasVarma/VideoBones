@@ -108,7 +108,7 @@ export default defineComponent({
             const dir = await ipcRenderer.invoke('get-recordings-directory');
             
             // Create an audio element and preload it
-            const audio = new Audio(path.join('../../', dir, (<HTMLInputElement> node).value));
+            const audio = new Audio(path.join(dir, (<HTMLInputElement> node).value));
             audio.preload = 'auto';
             
             audioTracks.push(audio);
