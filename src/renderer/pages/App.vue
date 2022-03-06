@@ -1,6 +1,6 @@
 <template>
   <on-open-page @create-new-project="pageDisplayed = 'create-new-project-page'"
-                @open-previous-project="pageDisplayed = 'ffmpeg-test'"
+                @open-previous-project="pageDisplayed = 'video-editor-page'"
                 v-if="pageDisplayed === 'on-open-page'"/>
   <create-new-project-page @create-project="pageDisplayed = 'recording-page'"
                            @cancel="pageDisplayed = 'on-open-page'" 

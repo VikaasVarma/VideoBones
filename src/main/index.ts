@@ -25,7 +25,7 @@ async function createWindow () {
     app.quit();
     return;
   }
-  startHandler(serverPort)
+  startHandler(serverPort);
   const path = app.isPackaged ? join('..', 'renderer', 'index.html') : join(__dirname, '..', 'renderer', 'index.html');
   mainWindow.loadFile(path);
   mainWindow.webContents.openDevTools();
@@ -54,7 +54,7 @@ app.on('window-all-closed', function () {
 // "OnOpenPage" gets pressed
 
 ipcMain.handle('open-project-clicked', async() => {
-  let current_projects:any;
+  let current_projects: any;
 
   async function employFileSelector() {
     current_projects = projects.getTrackedProjects();
@@ -65,7 +65,7 @@ ipcMain.handle('open-project-clicked', async() => {
   if (selected_attr.canceled) {
     return { failed: true, alert: false, output: '' };
   }
-  const possible_projects = await current_projects.filter((item:any) => item.projectPath == selected_attr.filePaths[0]);
+  const possible_projects = await current_projects.filter((item: any) => item.projectPath == selected_attr.filePaths[0]);
 
   if (possible_projects.length <= 0) {
     try {
@@ -90,7 +90,7 @@ ipcMain.handle('create-project-clicked', async(event, projectName) => {
       });
     return { failed: false, alert: false, output: '' };
 
-  } catch (err:any) {
+  } catch (err: any) {
     if (err.message.startsWith('Project directory already exists:')) {
       return { failed: true, alert: true, output: 'That project already exists.' };
     }

@@ -1,7 +1,7 @@
 import { kill, start } from './engine';
 import { ipcMain } from 'electron';
 
-export function startHandler(port:number) {
+export function startHandler(port: number) {
 
   ipcMain.addListener('asynchronous-message', (event, arg) => {
     if (!arg.type) {

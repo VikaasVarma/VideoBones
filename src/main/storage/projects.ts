@@ -29,7 +29,7 @@ class ProjectHandle {
   /**
    * User-defined type guard for project handles.
    */
-  static isProjectHandle(h:any): h is ProjectHandle {
+  static isProjectHandle(h: any): h is ProjectHandle {
     return 'projectPath' in h && typeof h.projectPath === 'string'
     && 'projectName' in h && typeof h.projectName === 'string';
   }
