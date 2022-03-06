@@ -51,5 +51,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
-  @import "../styles/main.scss";
+  @import '../styles/reset.scss';
+  @import '../styles/main.scss';
 </style>
