@@ -1,13 +1,14 @@
 <template>
-  <video-player manifest-url="http://localhost:8080/stream.mpd"/>
+  <video-player v-if="stream_url != '' " :manifest-url="stream_url"/>
 </template>
 
 <script lang="ts">
 import VideoPlayer from '../components/VideoPlayer.vue'
 import { ipcRenderer } from "electron";
-import { defineComponent } from 'vue'
+import { defineComponent, Ref } from 'vue'
 import { join } from 'path';
 import { ref } from 'vue'
+import { stringify } from 'querystring';
 
 export default defineComponent({
   name: "FfmpegTest",
@@ -19,17 +20,18 @@ export default defineComponent({
     }
   },
   setup() {
-    let stream_url = ref("")
-
-
-
-    return {}
-  },
-  created() {
+    let stream_url = ref('')
 
     ipcRenderer.addListener('asynchronous-reply',  (event, args) => {
-      
+      let port = args.port
+      if (stream_url.value === "") {
+        stream_url.value = "http://localhost:"+port.toString()+"/stream.mpd"
+      }
     })
+
+    return {stream_url}
+  },
+  created() {
 
     console.log("Running created ()");
     ipcRenderer.invoke('get-recordings-directory').then( (dir) => {

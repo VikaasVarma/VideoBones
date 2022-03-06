@@ -2,6 +2,7 @@ import { open, readFile } from 'fs/promises';
 import { createServer } from 'http';
 import { getTempDirectory } from '../storage/config';
 import { join } from 'path';
+import { promisify } from 'util';
 
 const server = createServer(async (request, response) => {
   console.log('Integrated server request', request.url);
@@ -26,7 +27,7 @@ const server = createServer(async (request, response) => {
   }
 });
 
-export function startIntegratedServer(): number {
+export async function startIntegratedServer(): Promise<number> {
   if (server.listening) {
     server.close();
   }
