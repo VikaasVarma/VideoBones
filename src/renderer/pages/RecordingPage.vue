@@ -2,7 +2,7 @@
     <div class="recording-grid">
       <video ref=videoPreview> </video>
 
-      <div class="row vu" ref="vu" :style="vuClip"></div>
+      <div class="row vu" ref="vu" :style="{ clipPath : vuClip }"></div>
 
       <select class=dropdown ref=audioDevices @change="onAudioChange($event)"> </select>
 
@@ -87,6 +87,7 @@ export default defineComponent({
             that.handleDataAvailable(event, 'audio');
           }
           
+          // Hooking more things up
           const ac = new AudioContext();
           const m = ac.createMediaStreamSource(stream);
           const analyser = ac.createAnalyser();
@@ -96,9 +97,12 @@ export default defineComponent({
           const vuAnimation = () => {
             let d = new Uint8Array(analyser.frequencyBinCount);
             analyser.getByteFrequencyData(d);
-            console.log(d);
-            this.vuClip = `clip-path: inset(0 0 0 ${d.reduce((d1, d2) => Math.max(d1, d2)) / 255 * 100}% 0)`;
+            console.log(d)
 
+            let volume = d.reduce((d1, d2) => Math.max(d1, d2)) / 255 * 100
+
+            this.vuClip = `polygon(0 0, ${volume}% 0, ${volume}% 100%, 0 100%)`;
+            console.log(this.vuClip)
             requestAnimationFrame(vuAnimation);
 
           };
