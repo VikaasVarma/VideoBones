@@ -1,1 +1,1 @@
-{"version":1,"projectName":"TestProject","recordings":[],"options":{"audioTracks":[]}}
+{"version":1,"projectName":"TestProject","recordings":[],"options":{"audioTracks":[],"clickTracks":[]}}
