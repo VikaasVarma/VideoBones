@@ -1,6 +1,6 @@
 {
   "name": "video-bones",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "A simple-to-use video editor",
   "main": "build/main/index.js",
   "scripts": {
@@ -9,9 +9,9 @@
     "dev": "npm run bundle -- --watch",
     "bundle": "webpack --config webpack.config.js",
     "dist": "npm run dist:windows && npm run dist:mac && npm run dist:linux",
-    "dist:windows": "electron-builder --windows --config electron-builder.json",
-    "dist:mac": "electron-builder --macos --config electron-builder.json",
-    "dist:linux": "electron-builder --linux --config electron-builder.json",
+    "dist:windows": "electron-builder --windows --config electron-builder.json --publish never",
+    "dist:mac": "electron-builder --macos --config electron-builder.json --publish never",
+    "dist:linux": "electron-builder --linux --config electron-builder.json --publish never",
     "build": "npm run clean && NODE_ENV=production npm run bundle && npm run dist",
     "lint": "npm run lint:js && npm run lint:css",
     "lint:fix": "npm run lint:js -- --fix && npm run lint:css -- --fix",

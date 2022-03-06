@@ -1,18 +1,17 @@
 <template>
-  <video ref=videoPreview style="transform:scaleX(-1)"> </video>
+    <div class="recording-grid">
+        <video ref=videoPreview> </video>
 
-  <div class="horizontal-spacer">
-    <select class=dropdown ref=audioDevices @change="onAudioChange($event)"> </select>
+        <select class=dropdown ref=audioDevices @change="onAudioChange($event)"> </select>
 
-    <button class="image-container" @click="recordOnClick()">
-      <img src="../../../assets/images/record.svg">
-    </button>
-
-    <select class=dropdown ref=videoDevices @change="onVideoChange($event)"> </select>
-  </div>
+        <div :class="recording ? 'recording-button' : 'not-recording-button'" @click="recordOnClick()"> <div></div> </div>
+        
+        <select class=dropdown ref=videoDevices @change="onVideoChange($event)"> </select>
+    </div>
 
   <h2>Playback Audio Tracks</h2>
   <div class="tickbox-container" ref=playbackTracks> </div>
+
 </template>
 
 <script lang="ts">
@@ -109,7 +108,7 @@ export default defineComponent({
             const dir = await ipcRenderer.invoke('get-recordings-directory');
             
             // Create an audio element and preload it
-            const audio = new Audio(path.join('../../', dir, (<HTMLInputElement> node).value));
+            const audio = new Audio(path.join(dir, (<HTMLInputElement> node).value));
             audio.preload = 'auto';
             
             audioTracks.push(audio);
@@ -140,11 +139,15 @@ export default defineComponent({
     download() {
       // Get number to append to file names
       var audioTracks = 1;
-      ipcRenderer.invoke("get-recordings").then(function(recordings: string) {
+      ipcRenderer.invoke('get-option', 'audioTracks').then(function(recordings: string) {
         JSON.parse(recordings).forEach(function(file:string) {
+<<<<<<< HEAD
           if (file.indexOf(".webm") === file.length - 4) {
             audioTracks++;
           }
+=======
+          audioTracks++;
+>>>>>>> origin/master
         });
       });
 
@@ -156,18 +159,30 @@ export default defineComponent({
             if (err) throw err;
           });
         });
-      })
+      });
+      this.$data.videoChunks = [];
 
       // Write audio data to file in project folder
       const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' })
+<<<<<<< HEAD
       console.log(audioBlob);
+=======
+>>>>>>> origin/master
       audioBlob.arrayBuffer().then(buffer => {
         ipcRenderer.invoke('add-recording', 'audio' + audioTracks + '.webm').then(filePath => {
           fs.writeFile(filePath, new Uint8Array(buffer), err => {
             if (err) throw err;
           });
+
+          // Update the audioTracks option to hold the new audio track
+          ipcRenderer.invoke('get-option', 'audioTracks').then(option => {
+            var copy = JSON.parse(option);
+            copy.push('audio' + audioTracks + '.webm');
+            ipcRenderer.send('set-option', 'audioTracks', copy);
+          })
         });
-      })
+      });
+      this.$data.audioChunks = [];
     },
   },
   mounted () {
@@ -193,8 +208,9 @@ export default defineComponent({
 
     // Add checkboxes for each audio track already recorded to be played back
     const playbackTracks = <HTMLDivElement> this.$refs.playbackTracks;
-    ipcRenderer.invoke("get-recordings").then(function(recordings: string) {
+    ipcRenderer.invoke("get-option", "audioTracks").then(function(recordings: string) {
       JSON.parse(recordings).forEach(function(file:string) {
+<<<<<<< HEAD
         if (file.indexOf(".webm") === file.length - 4) {
           var checkbox = document.createElement('input');
           checkbox.className = 'tickbox';
@@ -203,10 +219,18 @@ export default defineComponent({
 
           var header = document.createElement('h3');
           header.textContent = file.substr(0, file.indexOf(".webm"));
+=======
+        var checkbox = document.createElement('input');
+        checkbox.className = 'tickbox';
+        checkbox.type = 'checkbox';
+        checkbox.value = file;
 
-          playbackTracks.appendChild(checkbox);
-          playbackTracks.appendChild(header);
-        }
+        var header = document.createElement('h3');
+        header.textContent = file.substr(0, file.indexOf(".webm"));
+>>>>>>> origin/master
+
+        playbackTracks.appendChild(checkbox);
+        playbackTracks.appendChild(header);
       });
     }).catch(err => {
       console.log(err);
@@ -218,7 +242,7 @@ export default defineComponent({
 })
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
   @import "../styles/main.scss";
   @import "../styles/pages/recording-page.scss"
 </style>

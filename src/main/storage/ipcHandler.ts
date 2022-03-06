@@ -1,7 +1,7 @@
-import { ipcMain } from 'electron';
-
-import * as projects from '../storage/projects';
 import * as config from '../storage/config';
+import * as projects from '../storage/projects';
+
+import { ipcMain } from 'electron';
 
 // Defines a bunch of ipc handlers for all the storage stuff
 
@@ -50,8 +50,8 @@ export function startStorageHandlers() {
     config.setOption(optionName, optionValue);
   });
 
-  ipcMain.addListener('get-option', (event, optionName:string) => {
-    config.getOption(optionName);
+  ipcMain.handle('get-option', (event, optionName:string) => {
+    return JSON.stringify(config.getOption(optionName));
   });
 
   ipcMain.addListener('remove-option', (event, optionName) => {

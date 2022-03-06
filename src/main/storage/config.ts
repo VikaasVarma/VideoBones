@@ -1,8 +1,5 @@
-import { FileHandle } from 'fs/promises';
-import path from 'path';
-import { ProjectHandle } from './projects';
-
 import { cleanProjectTempDirectory, createProjectRecordingFile, getProjectRecordingsDirectory, getProjectTempDirectory, readProjectConfig, writeDirectoryConfig, writeProjectConfig } from './storage';
+import { ProjectHandle } from './projects';
 
 /**
  * Holds data from .bones project config files.
@@ -110,12 +107,6 @@ class OpenProjectData {
     this.projectConfig.recordings.splice(recordingIndex, 1);
 
     this.writeConfig();
-  }
-
-  removeRecordingByName(recordingName: string): void {
-    removeRecording(this.projectConfig.recordings.findIndex((str:string) => {
-      return str === recordingName;
-    }));
   }
 
   getConfigOption(option: string): unknown{
@@ -282,25 +273,16 @@ function getRecordingsList(): Readonly<Array<string>> {
  * Creates a file for a recording and adds it to the list of files used in the current open project.
  *
  * @param recordingName The name of the new recording file
- * @returns A promise resolving to the file handle
+ * @returns TODO: Storage pls fix
  */
-function addRecording(recordingName: string): Promise<FileHandle> {
+function addRecording(recordingName: string): string {
   if (currentOpenProject === null) {
     throw Error('No open project when calling addRecording.');
   }
 
   currentOpenProject.addRecording(recordingName);
 
-  const projectHandle = ProjectHandle.copy(currentOpenProject.projectHandle);
-
-  return createProjectRecordingFile(currentOpenProject.projectHandle, recordingName)
-    .catch(reason => {
-      if (currentOpenProject === null || !projectHandle.equals(currentOpenProject.projectHandle)) {
-        throw Error('Changed project during recording create!');
-      }
-      currentOpenProject.removeRecordingByName(recordingName);
-      throw Error(reason);
-    });
+  return createProjectRecordingFile(currentOpenProject.projectHandle, recordingName);
 }
 
 /**
