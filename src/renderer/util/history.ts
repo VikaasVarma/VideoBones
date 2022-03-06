@@ -1,12 +1,12 @@
 interface Operation {
-    execute: ()=>void;
-    undo: ()=>void;
+    execute: () => void;
+    undo: () => void;
 
     next: Operation | null;
     prev: Operation | null;
 }
 
-function createOperation(execute:()=>void, undo:()=>void): Operation {
+function createOperation(execute: () => void, undo: () => void): Operation {
   return {
     'execute': execute,
     'undo': undo,
@@ -27,7 +27,7 @@ export class OperationUndoStack {
   #size = 0;
   #maxSize: number;
 
-  constructor(maxSize:number) {
+  constructor(maxSize: number) {
     this.#maxSize = maxSize;
   }
 
@@ -37,7 +37,7 @@ export class OperationUndoStack {
    * @param execute The lambda for the application of the operation
    * @param undo The lambda for the inverse of the operation
    */
-  executeUndoableOperation(execute:()=>void, undo:()=>void) {
+  executeUndoableOperation(execute: () => void, undo: () => void) {
     const operation = createOperation(execute, undo);
 
     if (this.isEmpty()) {
@@ -109,7 +109,7 @@ export class OperationUndoStack {
     return this.#size === 0;
   }
 
-  isFull():boolean {
+  isFull(): boolean {
     return this.#size === this.#maxSize;
   }
 

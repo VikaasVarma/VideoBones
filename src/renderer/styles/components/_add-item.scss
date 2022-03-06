@@ -3,6 +3,7 @@ $color_tickbox: #404451;
 .add-item-container {
 	width: $scaling-factor * 200px;
 	display: flex;
+	cursor: pointer;
 
 	> * {
 		display: inline;
