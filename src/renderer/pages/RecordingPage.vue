@@ -87,6 +87,22 @@ export default defineComponent({
             that.handleDataAvailable(event, 'audio');
           }
           
+          const ac = new AudioContext();
+          const m = ac.createMediaStreamSource(stream);
+          const analyser = ac.createAnalyser();
+          m.connect(analyser);
+          analyser.fftSize = 32;
+
+          const vuAnimation = () => {
+            let d = new Uint8Array(analyser.frequencyBinCount);
+            analyser.getByteFrequencyData(d);
+            console.log(d);
+            this.vuClip = `clip-path: inset(0 0 0 ${d.reduce((d1, d2) => Math.max(d1, d2)) / 255 * 100}% 0)`;
+
+            requestAnimationFrame(vuAnimation);
+
+          };
+          requestAnimationFrame(vuAnimation);
         })
     },
     async recordOnClick() {
@@ -122,22 +138,6 @@ export default defineComponent({
         audioTracks.forEach(audio => {
           audio.play();
         });
-
-        const ac = new AudioContext();
-        const analyser = ac.createAnalyser();
-        analyser.fftSize = 32;
-
-        const vuAnimation = () => {
-          let d = new Uint8Array(analyser.frequencyBinCount);
-          analyser.getByteFrequencyData(d);
-          console.log(d);
-          this.vuClip = `clip-path: inset(0 0 0 ${d.reduce((d1, d2) => Math.max(d1, d2)) / 255 * 100}% 0)`;
-
-          if (this.recording) {
-            requestAnimationFrame(vuAnimation);
-          }
-        };
-        requestAnimationFrame(vuAnimation);
       } else {
         this.audioRecorder.stop();
         this.videoRecorder.stop();
