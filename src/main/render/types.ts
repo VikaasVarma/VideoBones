@@ -18,7 +18,7 @@ interface EngineOptions {
 
 
 interface AudioInput {
-  files: string[]
+  files: string[] 
   volumes: number[]
   interval: [number, number]
 }
