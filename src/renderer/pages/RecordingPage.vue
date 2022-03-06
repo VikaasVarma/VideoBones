@@ -140,7 +140,7 @@ export default defineComponent({
       // Get number to append to file names
       var audioTracks = 1;
       ipcRenderer.invoke('get-option', 'audioTracks').then(function(recordings: string) {
-        JSON.parse(recordings).forEach(function(file:string) {
+        JSON.parse(recordings).forEach(() => {
           audioTracks++;
         });
       });

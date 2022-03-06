@@ -69,17 +69,25 @@ export function generateMetronome({
   });
   const wav = new Blob([ wavBytes ], { type: 'audio/wav' });
 
+  // Get number to append to file names
+  let clickTracks = 1;
+  ipcRenderer.invoke('get-option', 'clickTracks').then(function(recordings: string) {
+    JSON.parse(recordings).forEach(() =>  {
+      clickTracks++;
+    });
+  });
+
   wav.arrayBuffer().then(buffer => {
-    ipcRenderer.invoke('add-recording', 'metronome.wav').then(filePath => {
+    ipcRenderer.invoke('add-recording', 'metronome' + clickTracks + '.wav').then(filePath => {
       fs.writeFile(filePath, new Uint8Array(buffer), err => {
         if (err) throw err;
       });
 
       // Update the audioTracks option to hold the new audio track
-      ipcRenderer.invoke('get-option', 'audioTracks').then(option => {
-        const copy = JSON.parse(option);
-        copy.push('metronome.wav');
-        ipcRenderer.send('set-option', 'audioTracks', copy);
+      ipcRenderer.invoke('get-option', 'clickTracks').then(option => {
+        const copy = <string[]> JSON.parse(option);
+        copy.push('metronome' + clickTracks + '.wav');
+        ipcRenderer.send('set-option', 'clickTracks', copy);
       });
     });
   });
