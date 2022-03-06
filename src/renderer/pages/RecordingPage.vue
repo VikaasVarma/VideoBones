@@ -153,7 +153,8 @@ export default defineComponent({
             if (err) throw err;
           });
         });
-      })
+      });
+      this.$data.videoChunks = [];
 
       // Write audio data to file in project folder
       const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' })
@@ -170,7 +171,8 @@ export default defineComponent({
             ipcRenderer.send('set-option', 'audioTracks', copy);
           })
         });
-      })
+      });
+      this.$data.audioChunks = [];
     },
   },
   mounted () {
