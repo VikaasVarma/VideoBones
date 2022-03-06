@@ -141,13 +141,7 @@ export default defineComponent({
       var audioTracks = 1;
       ipcRenderer.invoke('get-option', 'audioTracks').then(function(recordings: string) {
         JSON.parse(recordings).forEach(function(file:string) {
-<<<<<<< HEAD
-          if (file.indexOf(".webm") === file.length - 4) {
-            audioTracks++;
-          }
-=======
           audioTracks++;
->>>>>>> origin/master
         });
       });
 
@@ -164,10 +158,6 @@ export default defineComponent({
 
       // Write audio data to file in project folder
       const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' })
-<<<<<<< HEAD
-      console.log(audioBlob);
-=======
->>>>>>> origin/master
       audioBlob.arrayBuffer().then(buffer => {
         ipcRenderer.invoke('add-recording', 'audio' + audioTracks + '.webm').then(filePath => {
           fs.writeFile(filePath, new Uint8Array(buffer), err => {
@@ -210,16 +200,6 @@ export default defineComponent({
     const playbackTracks = <HTMLDivElement> this.$refs.playbackTracks;
     ipcRenderer.invoke("get-option", "audioTracks").then(function(recordings: string) {
       JSON.parse(recordings).forEach(function(file:string) {
-<<<<<<< HEAD
-        if (file.indexOf(".webm") === file.length - 4) {
-          var checkbox = document.createElement('input');
-          checkbox.className = 'tickbox';
-          checkbox.type = 'checkbox';
-          checkbox.value = file;
-
-          var header = document.createElement('h3');
-          header.textContent = file.substr(0, file.indexOf(".webm"));
-=======
         var checkbox = document.createElement('input');
         checkbox.className = 'tickbox';
         checkbox.type = 'checkbox';
@@ -227,7 +207,6 @@ export default defineComponent({
 
         var header = document.createElement('h3');
         header.textContent = file.substr(0, file.indexOf(".webm"));
->>>>>>> origin/master
 
         playbackTracks.appendChild(checkbox);
         playbackTracks.appendChild(header);
