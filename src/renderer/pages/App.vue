@@ -33,8 +33,8 @@ export default defineComponent({
       RecordingPage,
     },
     setup(props, context) {
-      var pageDisplayed = ref("on-open-page")
       // var pageDisplayed = ref("recording-page")
+      var pageDisplayed = ref("on-open-page")
       
       function onClick() {
         pageDisplayed.value = "create-new-project-page"
