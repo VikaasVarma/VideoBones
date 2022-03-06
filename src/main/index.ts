@@ -2,13 +2,12 @@ import * as config from '../main/storage/config';
 import * as projects from '../main/storage/projects';
 
 import { app, BrowserWindow, dialog, ipcMain } from 'electron';
-import { close, listen } from './render/integratedServer';
+import { startIntegratedServer, stopIntegratedServer } from './render/integratedServer';
 import { join } from 'path';
 import { startStorageHandlers } from './storage/ipcHandler';
 import { startHandler, stopHandler } from './render/ipcHandler';
 
-function createWindow () {
-
+async function createWindow () {
   const mainWindow = new BrowserWindow({
     width: 1920,
     height: 1080,
@@ -20,14 +19,19 @@ function createWindow () {
     title: 'Video Bones'
   });
 
-  mainWindow.maximize();
-
-  listen();
-  startHandler();
+  const serverPort = await startIntegratedServer();
+  if (serverPort === -1) {
+    dialog.showErrorBox('Error', 'Failed to start integrated server');
+    app.quit();
+    return;
+  }
+  startHandler(serverPort);
   const path = app.isPackaged ? join('..', 'renderer', 'index.html') : join(__dirname, '..', 'renderer', 'index.html');
   mainWindow.loadFile(path);
   mainWindow.webContents.openDevTools();
   startStorageHandlers();
+
+  mainWindow.maximize();
 }
 
 app.whenReady().then(() => {
@@ -43,14 +47,14 @@ app.whenReady().then(() => {
 app.on('window-all-closed', function () {
   stopHandler();
   app.quit();
-  close();
+  stopIntegratedServer();
 });
 
 // Code to open the project when the FOLDER ICON on the
 // "OnOpenPage" gets pressed
 
 ipcMain.handle('open-project-clicked', async() => {
-  let current_projects:any;
+  let current_projects: any;
 
   async function employFileSelector() {
     current_projects = projects.getTrackedProjects();
@@ -61,7 +65,7 @@ ipcMain.handle('open-project-clicked', async() => {
   if (selected_attr.canceled) {
     return { failed: true, alert: false, output: '' };
   }
-  const possible_projects = await current_projects.filter((item:any) => item.projectPath == selected_attr.filePaths[0]);
+  const possible_projects = await current_projects.filter((item: any) => item.projectPath == selected_attr.filePaths[0]);
 
   if (possible_projects.length <= 0) {
     try {
@@ -86,7 +90,7 @@ ipcMain.handle('create-project-clicked', async(event, projectName) => {
       });
     return { failed: false, alert: false, output: '' };
 
-  } catch (err:any) {
+  } catch (err: any) {
     if (err.message.startsWith('Project directory already exists:')) {
       return { failed: true, alert: true, output: 'That project already exists.' };
     }
