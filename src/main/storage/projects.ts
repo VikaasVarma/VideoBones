@@ -1,9 +1,9 @@
 import * as fs from 'fs/promises';
+
+import { app } from 'electron';
 import { existsSync, readFileSync } from 'fs';
 import { readDirectoryConfig, recordingsDirectoryName, tempDirectoryName } from './storage';
-
 import { internal_initialiseProjectConfig as initialiseProjectConfig } from './config';
-import { app } from 'electron';
 import path from 'path';
 
 /**
@@ -29,7 +29,7 @@ class ProjectHandle {
   /**
    * User-defined type guard for project handles.
    */
-  static isProjectHandle(h:any): h is ProjectHandle {
+  static isProjectHandle(h: any): h is ProjectHandle {
     return 'projectPath' in h && typeof h.projectPath === 'string'
     && 'projectName' in h && typeof h.projectName === 'string';
   }
@@ -65,6 +65,7 @@ const handles = {
             out.push(ProjectHandle.copy(e));
           } else {
             console.log(`The project folder for handle ${e} does not exist, removing the handle.`);
+            // TODO: actually remove the handle
           }
         } else {
           console.log(`Found malformed project handle: ${e}`);

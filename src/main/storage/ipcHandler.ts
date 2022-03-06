@@ -1,20 +1,20 @@
-import { ipcMain } from 'electron';
-
-import * as projects from '../storage/projects';
 import * as config from '../storage/config';
+import * as projects from '../storage/projects';
+
+import { ipcMain } from 'electron';
 
 // Defines a bunch of ipc handlers for all the storage stuff
 
 export function startStorageHandlers() {
-  ipcMain.addListener('create-project', (event, parentDirectory:string, projectName:string) => {
+  ipcMain.addListener('create-project', (event, parentDirectory: string, projectName: string) => {
     return  projects.createProject(parentDirectory, projectName);
   });
 
-  ipcMain.addListener('track-project', (event, directory:string) => {
+  ipcMain.addListener('track-project', (event, directory: string) => {
     projects.trackProject(directory);
   });
 
-  ipcMain.addListener('untrack-project', (event, handle:projects.ProjectHandle) => {
+  ipcMain.addListener('untrack-project', (event, handle: projects.ProjectHandle) => {
     projects.untrackProject(handle);
   });
 
@@ -22,7 +22,7 @@ export function startStorageHandlers() {
     return projects.getTrackedProjects();
   });
 
-  ipcMain.addListener('open-project', (event, projectHandle:projects.ProjectHandle) => {
+  ipcMain.addListener('open-project', (event, projectHandle: projects.ProjectHandle) => {
     return config.openProject(projectHandle);
   });
 
@@ -38,20 +38,20 @@ export function startStorageHandlers() {
     return config.getRecordingsDirectory();
   });
 
-  ipcMain.handle('add-recording', (event, recordingName:string) => {
+  ipcMain.handle('add-recording', (event, recordingName: string) => {
     return config.addRecording(recordingName);
   });
 
-  ipcMain.addListener('remove-recording', (event, index:number) => {
+  ipcMain.addListener('remove-recording', (event, index: number) => {
     config.removeRecording(index);
   });
 
-  ipcMain.addListener('set-option', (event, optionName:string, optionValue:string) => {
+  ipcMain.addListener('set-option', (event, optionName: string, optionValue: string) => {
     config.setOption(optionName, optionValue);
   });
 
-  ipcMain.addListener('get-option', (event, optionName:string) => {
-    config.getOption(optionName);
+  ipcMain.handle('get-option', (event, optionName: string) => {
+    return JSON.stringify(config.getOption(optionName));
   });
 
   ipcMain.addListener('remove-option', (event, optionName) => {

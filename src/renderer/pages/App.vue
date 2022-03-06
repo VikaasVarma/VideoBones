@@ -2,7 +2,7 @@
   <on-open-page @create-new-project="pageDisplayed = 'create-new-project-page'"
                 @open-previous-project="pageDisplayed = 'video-editor-page'"
                 v-if="pageDisplayed === 'on-open-page'"/>
-  <create-new-project-page @create-project="pageDisplayed = 'video-editor-page'"
+  <create-new-project-page @create-project="pageDisplayed = 'recording-page'"
                            @cancel="pageDisplayed = 'on-open-page'" 
                            v-else-if="pageDisplayed === 'create-new-project-page'"/>
 
@@ -14,6 +14,8 @@
                   v-else-if="pageDisplayed === 'single-video-editor-page'"/>
 
   <recording-page v-else-if="pageDisplayed === 'recording-page'"/>
+
+  <ffmpeg-test v-else-if="pageDisplayed === 'ffmpeg-test'"/>
 </template>
 
 <script lang="ts">
@@ -23,6 +25,7 @@ import CreateNewProjectPage from './CreateNewProjectPage.vue'
 import SingleVideoEditorPage from './SingleVideoEditorPage.vue'
 import VideoEditorPage from './VideoEditorPage.vue';
 import RecordingPage from './RecordingPage.vue';
+import FfmpegTest from './FfmpegTest.vue';
 
 export default defineComponent({
     name: "app",
@@ -32,6 +35,7 @@ export default defineComponent({
       SingleVideoEditorPage,
       VideoEditorPage, 
       RecordingPage,
+      FfmpegTest
     },
     setup(props, context) {
       // var pageDisplayed = ref("recording-page")
@@ -48,5 +52,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
-  @import "../styles/main.scss";
+  @import '../styles/reset.scss';
+  @import '../styles/main.scss';
 </style>

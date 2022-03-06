@@ -108,7 +108,7 @@ export default defineComponent({
             const dir = await ipcRenderer.invoke('get-recordings-directory');
             
             // Create an audio element and preload it
-            const audio = new Audio(path.join('../../', dir, (<HTMLInputElement> node).value));
+            const audio = new Audio(path.join(dir, (<HTMLInputElement> node).value));
             audio.preload = 'auto';
             
             audioTracks.push(audio);
@@ -139,11 +139,9 @@ export default defineComponent({
     download() {
       // Get number to append to file names
       var audioTracks = 1;
-      ipcRenderer.invoke("get-recordings").then(function(recordings: string) {
+      ipcRenderer.invoke('get-option', 'audioTracks').then(function(recordings: string) {
         JSON.parse(recordings).forEach(function(file:string) {
-          if (file.indexOf(".wav") === file.length - 4) {
-            audioTracks++;
-          }
+          audioTracks++;
         });
       });
 
@@ -155,18 +153,26 @@ export default defineComponent({
             if (err) throw err;
           });
         });
-      })
+      });
+      this.$data.videoChunks = [];
 
       // Write audio data to file in project folder
-      const audioBlob = new Blob(this.audioChunks, { type: 'audio/wav' })
-      console.log(audioBlob);
+      const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' })
       audioBlob.arrayBuffer().then(buffer => {
-        ipcRenderer.invoke('add-recording', 'audio' + audioTracks + '.wav').then(filePath => {
+        ipcRenderer.invoke('add-recording', 'audio' + audioTracks + '.webm').then(filePath => {
           fs.writeFile(filePath, new Uint8Array(buffer), err => {
             if (err) throw err;
           });
+
+          // Update the audioTracks option to hold the new audio track
+          ipcRenderer.invoke('get-option', 'audioTracks').then(option => {
+            var copy = JSON.parse(option);
+            copy.push('audio' + audioTracks + '.webm');
+            ipcRenderer.send('set-option', 'audioTracks', copy);
+          })
         });
-      })
+      });
+      this.$data.audioChunks = [];
     },
   },
   mounted () {
@@ -192,20 +198,18 @@ export default defineComponent({
 
     // Add checkboxes for each audio track already recorded to be played back
     const playbackTracks = <HTMLDivElement> this.$refs.playbackTracks;
-    ipcRenderer.invoke("get-recordings").then(function(recordings: string) {
+    ipcRenderer.invoke("get-option", "audioTracks").then(function(recordings: string) {
       JSON.parse(recordings).forEach(function(file:string) {
-        if (file.indexOf(".wav") === file.length - 4) {
-          var checkbox = document.createElement('input');
-          checkbox.className = 'tickbox';
-          checkbox.type = 'checkbox';
-          checkbox.value = file;
+        var checkbox = document.createElement('input');
+        checkbox.className = 'tickbox';
+        checkbox.type = 'checkbox';
+        checkbox.value = file;
 
-          var header = document.createElement('h3');
-          header.textContent = file.substr(0, file.indexOf(".wav"));
+        var header = document.createElement('h3');
+        header.textContent = file.substr(0, file.indexOf(".webm"));
 
-          playbackTracks.appendChild(checkbox);
-          playbackTracks.appendChild(header);
-        }
+        playbackTracks.appendChild(checkbox);
+        playbackTracks.appendChild(header);
       });
     }).catch(err => {
       console.log(err);
