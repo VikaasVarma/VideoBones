@@ -5,7 +5,7 @@ import { app, BrowserWindow, dialog, ipcMain } from 'electron';
 import { close, listen } from './render/integratedServer';
 import { join } from 'path';
 import { startStorageHandlers } from './storage/ipcHandler';
-import { stopHandler } from './render/ipcHandler';
+import { startHandler, stopHandler } from './render/ipcHandler';
 
 function createWindow () {
 
@@ -23,6 +23,7 @@ function createWindow () {
   mainWindow.maximize();
 
   listen();
+  startHandler();
   const path = app.isPackaged ? join('..', 'renderer', 'index.html') : join(__dirname, '..', 'renderer', 'index.html');
   mainWindow.loadFile(path);
   mainWindow.webContents.openDevTools();

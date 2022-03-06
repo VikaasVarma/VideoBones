@@ -78,6 +78,7 @@ export function start(
   console.log(bin, args);
 
   if (bin) {
+    console.log(getTempDirectory());
     ffmpeg = spawn(bin, args, { cwd: getTempDirectory(), stdio: [ 'ignore', 'pipe', process.stderr ] });
     ffmpeg.stdout.on('data', data => {
       console.log(data);

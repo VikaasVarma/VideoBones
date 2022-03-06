@@ -41,6 +41,18 @@ export default defineComponent({
             position: {left: "w0", top: 0},
             resolution: {width: 1280, height: 720}
           },
+          {
+            file: join("../recordings", "video3.webm"),
+            startTime: 0.02,
+            position: {left: 0, top: "h0"},
+            resolution: {width: 1280, height: 720}
+          },
+          {
+            file: join("../recordings", "video4.webm"),
+            startTime: 0.02,
+            position: {left: "w0", top: "h0"},
+            resolution: {width: 1280, height: 720}
+          },
         ],
         audioInputs:[
           /*{
