@@ -7,6 +7,7 @@ import VideoPlayer from '../components/VideoPlayer.vue'
 import { ipcRenderer } from "electron";
 import { defineComponent } from 'vue'
 import { join } from 'path';
+import { ref } from 'vue'
 
 export default defineComponent({
   name: "FfmpegTest",
@@ -17,12 +18,21 @@ export default defineComponent({
     return {
     }
   },
-  methods: {
-    
+  setup() {
+    let stream_url = ref("")
+
+
+
+    return {}
   },
   created() {
-    console.log("hello");
-    ipcRenderer.invoke('get-recordings-directory').then(dir => {
+
+    ipcRenderer.addListener('asynchronous-reply',  (event, args) => {
+      
+    })
+
+    console.log("Running created ()");
+    ipcRenderer.invoke('get-recordings-directory').then( (dir) => {
       ipcRenderer.send('asynchronous-message', 
     {
       type: 'startEngine', 
