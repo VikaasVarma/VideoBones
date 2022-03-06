@@ -7,10 +7,10 @@
                            v-else-if="pageDisplayed === 'create-new-project-page'"/>
 
   <video-editor-page @open-single-editor="pageDisplayed = 'single-video-editor-page'" 
-                     v-else-if="pageDisplayed === 'video-editor-page'"/>
+                      v-else-if="pageDisplayed === 'video-editor-page'"/>
 
   <single-video-editor-page @exit-single-editor="pageDisplayed = 'video-editor-page'" 
-                            v-else-if="pageDisplayed === 'single-video-editor-page'"/>
+                  v-else-if="pageDisplayed === 'single-video-editor-page'"/>
 
   <recording-page v-else-if="pageDisplayed === 'recording-page'"/>
 </template>
@@ -24,21 +24,25 @@ import VideoEditorPage from './VideoEditorPage.vue';
 import RecordingPage from './RecordingPage.vue';
 
 export default defineComponent({
-  name: "app",
-  components : {
-    OnOpenPage,
-    CreateNewProjectPage,
-    SingleVideoEditorPage,
-    VideoEditorPage, 
-    RecordingPage,
-  },
-  setup(props, context) {
-    var pageDisplayed = ref("on-open-page")
-    // var pageDisplayed = ref("recording-page")
+    name: "app",
+    components : {
+      OnOpenPage,
+      CreateNewProjectPage,
+      SingleVideoEditorPage,
+      VideoEditorPage, 
+      RecordingPage,
+    },
+    setup(props, context) {
+      var pageDisplayed = ref("on-open-page")
+      // var pageDisplayed = ref("recording-page")
+      
+      function onClick() {
+        pageDisplayed.value = "create-new-project-page"
+      }
 
-    return {props, pageDisplayed}
+      return {props, pageDisplayed}
 
-  },
+    },
 });
 </script>
 
