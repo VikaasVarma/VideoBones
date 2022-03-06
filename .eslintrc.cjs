@@ -25,6 +25,18 @@ module.exports = {
     }
   ],
   rules: {
+    '@typescript-eslint/type-annotation-spacing': [
+      'warn', {
+        'after': true, 'before': true,
+        'overrides': { 'colon': { 'after': true, 'before': false } }
+      }
+    ],
+    '@typescript-eslint/member-delimiter-style': [
+      'error', {
+        'multiline': { 'delimiter': 'semi', 'requireLast': true },
+        'singleline': { 'delimiter': 'semi', 'requireLast': false }
+      }
+    ],
     'array-bracket-newline': [ 'warn', { 'multiline': true }],
     'array-bracket-spacing': [ 'warn', 'always', { 'objectsInArrays': false, 'arraysInArrays': false }],
     'arrow-parens': [ 'warn', 'as-needed' ],

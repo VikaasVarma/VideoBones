@@ -8,7 +8,7 @@ import { ipcRenderer } from "electron";
 import { defineComponent } from 'vue'
 
 export default defineComponent({
-  name: "RecordingScreen",
+  name: "RecordingPage",
   components: {
     VideoPlayer,
   },

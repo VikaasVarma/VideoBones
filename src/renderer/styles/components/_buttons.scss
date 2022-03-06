@@ -2,23 +2,26 @@ $color-button: #8367C7;
 $color-highlight: #00FF2A;
 
 .button-primary {
-  background-color: $color-button;
-  border-radius: $scaling-factor * 10px;
-  color: white;
-  filter: drop-shadow(0 4px 4px rgb(0 0 0 / 25%));
-  font-family: OpenSans;
-  font-size: $scaling-factor * 33px;
-  height: fit-content;
-  line-height: $scaling-factor * 67px;
-  padding-left: 5%;
-  padding-right: 5%;
-  text-align: center;
-  text-transform: uppercase;
-  width: fit-content;
+	font-family: VBFont;
+	font-size: $scaling-factor * 33px;
+	line-height: $scaling-factor * 67px;
+	text-align: center;
 
-  &:hover {
-    cursor: pointer;
-  }
+	text-transform: uppercase;
+	background-color: $color-button;
+	color: white;
+
+	padding-left: 5%;
+	padding-right: 5%;
+	width: fit-content;
+	height: fit-content;
+
+	border-radius: $scaling-factor * 10px;
+	filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));
+
+	&:hover {
+		cursor: pointer;
+	}
 }
 
 .button-secondary {

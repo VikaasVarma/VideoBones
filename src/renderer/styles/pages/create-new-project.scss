@@ -2,28 +2,24 @@ input {
   font-weight: 600;
 }
 
-.horizontal-spacer {
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: 100%;
-  margin-top: 5%;
-  padding-left: 55%;
-
-  & > .button-secondary {
-    font-size: medium;
-    font-weight: 600;
-    width: fit-content;
-  }
-
-  & > .button-primary {
-    font-weight: 600;
-    margin: auto;
-    white-space: nowrap;
-    width: fit-content;
-  }
-}
-
 .options-menu {
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: 1fr 1fr 1fr;
-  padding-bottom: 20px;
+	padding-bottom: 30px;
+
+	grid-template-columns: 1fr 1fr;
+	grid-template-rows: 1fr 1fr 1.2fr;
+	width: 60vw;
+
+	& .button-secondary {
+		width: fit-content;
+		font-weight: 600;
+		font-size: medium;
+		margin: 0;
+	}
+
+	& .button-primary {
+		width: fit-content;
+		margin: 0;
+		font-weight: 600;
+		white-space: nowrap;
+	}
 }

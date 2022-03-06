@@ -1,6 +1,6 @@
 {
   "name": "video-bones",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "A simple-to-use video editor",
   "main": "build/main/index.js",
   "scripts": {
@@ -9,9 +9,9 @@
     "dev": "npm run bundle -- --watch",
     "bundle": "webpack --config webpack.config.js",
     "dist": "npm run dist:windows && npm run dist:mac && npm run dist:linux",
-    "dist:windows": "electron-builder --windows --config electron-builder.json",
-    "dist:mac": "electron-builder --macos --config electron-builder.json",
-    "dist:linux": "electron-builder --linux --config electron-builder.json",
+    "dist:windows": "electron-builder --windows --config electron-builder.json --publish never",
+    "dist:mac": "electron-builder --macos --config electron-builder.json --publish never",
+    "dist:linux": "electron-builder --linux --config electron-builder.json --publish never",
     "build": "npm run clean && NODE_ENV=production npm run bundle && npm run dist",
     "lint": "npm run lint:js && npm run lint:css",
     "lint:fix": "npm run lint:js -- --fix && npm run lint:css -- --fix",
@@ -30,6 +30,7 @@
   },
   "homepage": "https://github.com/VikaasVarma/VideoBones#readme",
   "dependencies": {
+    "@fontsource/inter": "^4.5.4",
     "@fontsource/numans": "^4.5.3",
     "@fontsource/open-sans": "^4.5.5",
     "ffmpeg-static": "^5.0.0",
@@ -41,7 +42,7 @@
     "@types/node": "^17.0.21",
     "@typescript-eslint/eslint-plugin": "^5.12.1",
     "@typescript-eslint/parser": "^5.12.1",
-    "css-loader": "^6.6.0",
+    "css-loader": "^6.7.0",
     "electron": "^17.1.0",
     "electron-builder": "^22.14.13",
     "eslint": "^8.8.0",

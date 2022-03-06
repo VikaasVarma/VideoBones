@@ -1,25 +1,72 @@
 video {
-  background-color: white;
-  border: 5px solid $color-middleground;
-  border-radius: 10px;
-  height: 80%;
-  margin: auto;
-  width: 92%;
+	grid-column: 1 / 4;
+	grid-row: 1 / 2;
+
+	background-color: white;
+	margin: auto;
+	transform: scaleX(-1);
+
+	border: 5px solid $color-middleground;
+	border-radius: 10px;
 }
 
-.horizontal-spacer {
-  grid-column-gap: 40px;
-  grid-template-columns: 2fr 1fr 2fr;
-  height: 15%;
-  margin-top: 15px;
-  padding: 0 4%;
+select[ref="audioDevices"] {
+	grid-column: 1 / 2;
+	grid-row: 2 / 3;
+}
+
+select[ref="videoDevices"] {
+	grid-column: 3 / 4;
+	grid-row: 2 / 3;
+}
+
+.recording-button {
+	grid-column: 2 / 3;
+	grid-row: 2 / 3;
+	display: flex;
+
+	width: $scaling-factor * 60px;
+	height: $scaling-factor * 60px;
+	margin: auto;
+	border-radius: $scaling-factor * 30px;
+	border: 2px solid white;
+	background: none;
+
+	& > div {
+		width: $scaling-factor * 27px;
+		height: $scaling-factor * 27px;
+		border-radius: $scaling-factor * 5px;
+		background-color: red;
+		margin: auto;
+		transition: border-radius 100ms ease-out, width 100ms ease-out,
+			height 100ms ease-out;
+	}
+}
+
+.not-recording-button {
+	@extend .recording-button;
+
+	& > div {
+		width: $scaling-factor * 36px;
+		height: $scaling-factor * 36px;
+		border-radius: $scaling-factor * 18px;
+	}
 }
 
 .image-container {
-  height: fit-content;
+	height: fit-content;
+	padding: 0;
+	& > img {
+		height: 50px;
+		display: inline;
+	}
+}
 
-  & > img {
-    display: inline;
-    height: 50px;
-  }
+.recording-grid {
+	display: grid;
+	grid-template-columns: 2fr 1fr 2fr;
+
+	grid-row-gap: 20px;
+	grid-column-gap: 20px;
+	margin: 20px;
 }

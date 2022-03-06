@@ -1,61 +1,86 @@
 #video-container {
+	grid-column: 1 / 2;
+	grid-row: 1 / 2;
 
-  & > video {
-    height: 90%;
-  }
+	& > video {
+		height: 100%;
+	}
 }
 
-.horizontal-spacer {
-  background-color: inherit;
-  grid-template-columns: 1fr 1fr 8fr;
-  grid-template-rows: 100%;
-  height: 7%;
-  margin-top: 10px;
-  width: 100%;
+#video-controls {
+	grid-column: 1 / 2;
+	grid-row: 2 / 3;
 
-  & > .image-container {
-    height: 100%;
-    padding: 0;
+	grid-template-columns: 1fr 1fr 8fr;
+	grid-template-rows: 100%;
+	grid-column-gap: 13px;
 
-    & > img {
-      height: 100%;
-    }
-  }
+	height: 100%;
+	width: 100%;
+	background-color: inherit;
+
+	& > .image-container {
+		height: 100%;
+		padding: 0;
+
+		& > img {
+			height: 100%;
+		}
+	}
 }
 
 .grid-container {
-  grid-column-gap: 20px;
-  grid-row-gap: 20px;
-  grid-template-columns: 9fr 2.5fr;
-  grid-template-rows: 1fr;
-  height: 100%;
-  padding: 20px;
+	height: 100%;
+	grid-template-columns: 9fr 2.5fr;
+	grid-template-rows: 90% 10%;
+
+	grid-column-gap: 30px;
+	grid-row-gap: 13px;
+	padding: 20px;
 }
 
 .vertical-options-menu {
-  background-color: $color-outline;
-  height: 100%;
-  width: 100%;
+	overflow-y: scroll;
+	overflow-x: auto;
+	grid-column: 2 / 3;
+	grid-row: 1 / 2;
 
-  & > div {
+	width: 100%;
+	height: 100%;
+	background-color: $color-outline;
+	display: block;
 
-    &:not(:first-of-type) {
+	& > div {
+		&:not(:first-of-type) {
+			margin-top: 10px;
+			&::before {
+				display: block;
+				content: "";
+				width: 100%;
+				border: 0;
+				height: 3px;
+				border-top: 3px solid $color-middleground;
+				border-radius: 5px;
+				margin-bottom: 10px;
+			}
+		}
 
-      &::before {
-        border: 0;
-        border-radius: 5px;
-        border-top: 3px solid $color-middleground;
-        content: '';
-        display: block;
-        height: 3px;
-        margin-bottom: 10px;
-        width: 100%;
-      }
-    }
+		& > :not(h2) {
+			margin-top: 10px;
+		}
 
-    :not(h2) {
-      font-size: 11px;
-      font-weight: lighter;
-    }
-  }
+		:not(h2) {
+			font-size: 11px;
+			font-weight: lighter;
+		}
+	}
+}
+
+.button-primary {
+	grid-column: 2 / 3;
+	grid-row: 2 / 3;
+	height: 100%;
+	width: 100%;
+	font-size: 16px;
+	border: none;
 }
