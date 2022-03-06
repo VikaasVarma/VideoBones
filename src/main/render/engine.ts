@@ -23,11 +23,15 @@ function buildArgs({
 }: EngineOptions): string[] {
   // The holy ffmpeg argument builder
   // eslint-disable-next-line function-paren-newline
-  return [ outputType === 'preview' ? '-re' : '' ].concat(
+  let args: string[] = (<string[]>[]).concat(
+    [outputType === 'preview' ? '-re' : ''],
+    videoInputs.map(input => input.files.map((file) => ['-i', file])).flat(2)
+  )
+   [ outputType === 'preview' ? '-re' : '' ].concat(
     // eslint-disable-next-line function-paren-newline
-    videoInputs.map((input: VideoInput) => [ '-ss', (startTime + input.startTime).toString(), '-i', input.file ]).flat(1).concat(
+    videoInputs.map((input: VideoInput) => [ '-i', input.file ]).flat(1).concat(
       // eslint-disable-next-line function-paren-newline
-      audioInputs.map((input: AudioInput) => [ '-ss', (startTime + input.startTime).toString(), '-i', input.file ]).flat(1).concat([
+      audioInputs.map((input: AudioInput) => [ '-i', input.file ]).flat(1).concat([
         '-filter_complex',
         [
           videoInputs.map((input: VideoInput, i: number) => `[${i}:v]setpts=PTS-STARTPTS,scale=${input.resolution.width}x${input.resolution.height}[input${i}];`).join(''),
@@ -59,6 +63,8 @@ function buildArgs({
         '-stats',
         outputType === 'render' ? outputFile : (outputType === 'thumbnail' ? 'thumb%04d.png' : previewManifest)
       ])));
+    console.log(args);
+    return args;
 }
 
 let ffmpeg: ChildProcessByStdio<null, Readable, null> | null;

@@ -16,18 +16,18 @@ interface EngineOptions {
   videoInputs: VideoInput[] // required
 }
 
-interface Input {
-  file: string
-  startTime: number // Measured in seconds
+
+interface AudioInput {
+  files: string[]
+  volumes: number[]
+  interval: [number, number]
 }
 
-interface AudioInput extends Input {
-  volume: number
-}
-
-interface VideoInput extends AudioInput {
-  position: Position
-  resolution: Resolution
+interface VideoInput {
+  files: string[]
+  screenStyle: string
+  interval: [number, number]
+  resolution: Resolution[]
 }
 
 interface Resolution {
