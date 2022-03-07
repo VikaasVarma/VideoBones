@@ -18,7 +18,7 @@ export function startStorageHandlers() {
     projects.untrackProject(handle);
   });
 
-  ipcMain.addListener('get-projects', event => {
+  ipcMain.addListener('get-projects', () => {
     return projects.getTrackedProjects();
   });
 
@@ -26,15 +26,15 @@ export function startStorageHandlers() {
     return config.openProject(projectHandle);
   });
 
-  ipcMain.addListener('close-project', event => {
+  ipcMain.addListener('close-project', () => {
     return config.closeProject();
   });
 
-  ipcMain.handle('get-recordings', event => {
+  ipcMain.handle('get-recordings', () => {
     return JSON.stringify(config.getRecordingsList());
   });
 
-  ipcMain.handle('get-recordings-directory', event => {
+  ipcMain.handle('get-recordings-directory', () => {
     return config.getRecordingsDirectory();
   });
 
@@ -58,7 +58,7 @@ export function startStorageHandlers() {
     config.removeOption(optionName);
   });
 
-  ipcMain.addListener('get-temp-directory', event => {
+  ipcMain.addListener('get-temp-directory', () => {
     return config.getTempDirectory();
   });
 }

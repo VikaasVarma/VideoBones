@@ -35,17 +35,13 @@
                         <input type="checkbox" class="tickbox"/>
                         <h3>Track 2</h3>
                     </div>
-                    <div class="add-item-container">
+                    <div class="add-item-container" @click="record()">
                         <img src="../../../assets/images/addIcon.png">
                         <h3>Add New Track</h3>
                     </div>
                 </div>
                 <div>
                     <h2 class="section-title">Metronome</h2>
-                    <div class="tickbox-container">
-                        <input type="checkbox" class="tickbox"/>
-                        <h3>Play While Recording</h3>
-                    </div>
                     <div class="metronome-container">
                         <h2>{{bpm}}</h2>
                         <div>
@@ -53,7 +49,7 @@
                             <img @click="decBpm()" src="../../../assets/images/arrow.svg" style="transform: scaleY(-1)">
                         </div>
                     </div>
-                    <div class="add-item-container">
+                    <div class="add-item-container" @click="createMetronome()">
                         <img src="../../../assets/images/addIcon.png">
                         <h3>New Clicker Track</h3>
                     </div>
@@ -90,6 +86,7 @@ import { defineComponent, ref } from 'vue';
 import { ipcRenderer } from 'electron';
 import { join } from 'path';
 import VideoPlayer from '../components/VideoPlayer.vue'
+import { generateMetronome } from '../util/metronome'
 
 export default defineComponent({
     name: "VideoEditorPage",
@@ -130,9 +127,15 @@ export default defineComponent({
                 stream_url.value = "http://localhost:"+port.toString()+"/stream.mpd"
             }
         })
-
-        return {stream_url, openSingleVideoEditor, incBpm, decBpm, setScreenStyle, drag, bpm, track_data, playhead, mouse_down}
         
+        function record() {
+            context.emit('recording');
+        }
+
+        function createMetronome() {
+            generateMetronome({ bpm: bpm.value });
+        }
+        return {bpm, createMetronome, decBpm, drag, incBpm, mouse_down, playhead, record, setScreenStyle, track_data, openSingleVideoEditor, stream_url}
 
     },
     created() {
@@ -181,7 +184,7 @@ export default defineComponent({
         })
         });
     },
-    emits: ["open-single-editor"]
+    emits: ["open-single-editor", "recording"]
 });
 </script>
 
