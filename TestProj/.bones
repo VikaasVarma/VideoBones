@@ -1,1 +1,0 @@
-{"version":1,"projectName":"TestProj","recordings":["audio1.webm","video1.webm","video2.webm","audio2.webm","video3.webm","audio3.webm","video4.webm","audio4.webm","video5.webm","audio5.webm"],"options":{"audioTracks":["audio1.webm","audio2.webm","audio3.webm","audio4.webm","audio5.webm"]}}
