@@ -58,11 +58,8 @@ export function generateMetronome({
     }
   }
 
-  // Float32Array samples
-  const data =  buf.getChannelData(0);
-
   // get WAV file bytes and audio params of your audio source
-  const wavBytes = getWavBytes(data.buffer, {
+  const wavBytes = getWavBytes(channel.buffer, {
     isFloat: true,       // floating point or 16-bit integer
     numChannels: 1,
     sampleRate: 48000
@@ -78,13 +75,13 @@ export function generateMetronome({
   });
 
   wav.arrayBuffer().then(buffer => {
-    ipcRenderer.invoke('add-recording', 'metronome' + clickTracks + '.wav').then(filePath => {
+    ipcRenderer.invoke('add-recording', 'metronome' + clickTracks + '.wav').then((filePath: string) => {
       fs.writeFile(filePath, new Uint8Array(buffer), err => {
         if (err) throw err;
       });
 
       // Update the audioTracks option to hold the new audio track
-      ipcRenderer.invoke('get-option', 'clickTracks').then(option => {
+      ipcRenderer.invoke('get-option', 'clickTracks').then((option: string) => {
         const copy = <string[]> JSON.parse(option);
         copy.push('metronome' + clickTracks + '.wav');
         ipcRenderer.send('set-option', 'clickTracks', copy);
