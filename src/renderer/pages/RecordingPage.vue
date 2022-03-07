@@ -1,16 +1,18 @@
 <template>
     <div class="recording-grid">
-        <video ref=videoPreview> </video>
+      <video ref=videoPreview> </video>
 
-        <select class=dropdown ref=audioDevices @change="onAudioChange($event)"> </select>
+      <div class="row vu" ref="vu" :style="{ clipPath : vuClip }"></div>
 
-        <div :class="recording ? 'recording-button' : 'not-recording-button'" @click="recordOnClick()"> <div></div> </div>
-        
-        <select class=dropdown ref=videoDevices @change="onVideoChange($event)"> </select>
+      <select class=dropdown ref=audioDevices @change="onAudioChange($event)"> </select>
+
+      <div :class="recording ? 'recording-button' : 'not-recording-button'" @click="recordOnClick()"> <div></div> </div>
+      
+      <select class=dropdown ref=videoDevices @change="onVideoChange($event)"> </select>
+
+      <h2 class="row">Playback Audio Tracks</h2>
+      <div class="row tickbox-container" ref=playbackTracks> </div>
     </div>
-
-  <h2>Playback Audio Tracks</h2>
-  <div class="tickbox-container" ref=playbackTracks> </div>
 
 </template>
 
@@ -31,6 +33,7 @@ export default defineComponent({
       videoChunks: <Blob[]> [],
       audioChunks: <Blob[]> [],
       recording: false,
+      vuClip: ""
     }
   },
   methods: {
@@ -84,6 +87,26 @@ export default defineComponent({
             that.handleDataAvailable(event, 'audio');
           }
           
+          // Hooking more things up
+          const ac = new AudioContext();
+          const m = ac.createMediaStreamSource(stream);
+          const analyser = ac.createAnalyser();
+          m.connect(analyser);
+          analyser.fftSize = 32;
+
+          const vuAnimation = () => {
+            let d = new Uint8Array(analyser.frequencyBinCount);
+            analyser.getByteFrequencyData(d);
+            console.log(d)
+
+            let volume = d.reduce((d1, d2) => Math.max(d1, d2)) / 255 * 100
+
+            this.vuClip = `polygon(0 0, ${volume}% 0, ${volume}% 100%, 0 100%)`;
+            console.log(this.vuClip)
+            requestAnimationFrame(vuAnimation);
+
+          };
+          requestAnimationFrame(vuAnimation);
         })
     },
     async recordOnClick() {
@@ -102,6 +125,7 @@ export default defineComponent({
 
         const playbackTracks = <HTMLDivElement> this.$refs.playbackTracks;
         const audioTracks = <HTMLAudioElement[]> [];
+        // @ts-ignore
         for (const node of [...playbackTracks.childNodes]) {
           // Get inputs that have been checked
           if ((<HTMLElement> node).tagName === "INPUT" && (<HTMLInputElement> node).checked) {
@@ -118,7 +142,7 @@ export default defineComponent({
         // Play all the new audio elements
         audioTracks.forEach(audio => {
           audio.play();
-        })
+        });
       } else {
         this.audioRecorder.stop();
         this.videoRecorder.stop();
@@ -223,5 +247,5 @@ export default defineComponent({
 
 <style lang="scss" scoped>
   @import "../styles/main.scss";
-  @import "../styles/pages/recording-page.scss"
+  @import "../styles/pages/recording-page.scss";
 </style>
