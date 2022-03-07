@@ -9,3 +9,5 @@ media/*
 
 .vscode/
 *-stream*.m4s
+
+TestProj/
