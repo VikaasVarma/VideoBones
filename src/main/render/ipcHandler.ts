@@ -1,7 +1,8 @@
 import { kill, start } from './engine';
 import { ipcMain } from 'electron';
 
-export function startHandler() {
+export function startHandler(port: number) {
+
   ipcMain.addListener('asynchronous-message', (event, arg) => {
     if (!arg.type) {
       console.warn('Incorrect type from IPC', arg);
@@ -11,9 +12,9 @@ export function startHandler() {
     switch (arg.type) {
         case 'startEngine':
           start(arg.data, (elapsedTime, donePercentage) => {
-            event.sender.send('asynchronous-reply', { event: 'progress', elapsedTime, donePercentage });
+            event.sender.send('asynchronous-reply', { event: 'progress', elapsedTime, donePercentage, port });
           }, () => {
-            event.sender.send('asynchronous-reply', { event: 'done' });
+            event.sender.send('asynchronous-reply', { event: 'done', port });
           });
           break;
         case 'stopEngine':

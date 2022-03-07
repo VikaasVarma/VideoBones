@@ -5,9 +5,9 @@ import { app, BrowserWindow, dialog, ipcMain } from 'electron';
 import { startIntegratedServer, stopIntegratedServer } from './render/integratedServer';
 import { join } from 'path';
 import { startStorageHandlers } from './storage/ipcHandler';
-import { stopHandler } from './render/ipcHandler';
+import { startHandler, stopHandler } from './render/ipcHandler';
 
-function createWindow () {
+async function createWindow () {
   const mainWindow = new BrowserWindow({
     width: 1920,
     height: 1080,
@@ -19,12 +19,13 @@ function createWindow () {
     title: 'Video Bones'
   });
 
-  const serverPort = startIntegratedServer();
+  const serverPort = await startIntegratedServer();
   if (serverPort === -1) {
     dialog.showErrorBox('Error', 'Failed to start integrated server');
     app.quit();
     return;
   }
+  startHandler(serverPort);
   const path = app.isPackaged ? join('..', 'renderer', 'index.html') : join(__dirname, '..', 'renderer', 'index.html');
   mainWindow.loadFile(path);
   mainWindow.webContents.openDevTools();
