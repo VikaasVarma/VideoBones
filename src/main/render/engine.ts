@@ -51,7 +51,7 @@ function buildArgs({
     ].join(''))).join('') + `${videoInputs.map((_,i) => `[v${i}]`).join('')}concat[out]`],
     [
         '-map', '[out]',
-        //'-map', '[aout]',
+        //'-map', '[aout]', 
         '-c:v', 'libx264',
         '-c:a', 'aac',
         '-ac', '2',
