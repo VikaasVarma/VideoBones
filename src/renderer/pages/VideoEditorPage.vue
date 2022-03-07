@@ -109,6 +109,7 @@ export default defineComponent({
         }
 
         function openSingleVideoEditor () { context.emit("open-single-editor") }
+
         function setScreenStyle(style: number) { screenStyle.value = style }
 
         function drag(event: any, mouse_down: boolean) {
@@ -144,7 +145,6 @@ export default defineComponent({
     },
     created() {
 
-        console.log("Running created ()");
         ipcRenderer.invoke('get-recordings-directory').then( (dir) => {
         ipcRenderer.send('asynchronous-message', 
         {
