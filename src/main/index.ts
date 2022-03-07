@@ -28,7 +28,7 @@ async function createWindow () {
   startHandler(serverPort);
   const path = app.isPackaged ? join('..', 'renderer', 'index.html') : join(__dirname, '..', 'renderer', 'index.html');
   mainWindow.loadFile(path);
-  mainWindow.webContents.openDevTools();
+  !app.isPackaged && mainWindow.webContents.openDevTools();
   startStorageHandlers();
 
   mainWindow.maximize();
