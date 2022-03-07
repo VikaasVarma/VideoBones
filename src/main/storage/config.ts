@@ -285,19 +285,6 @@ function addRecording(recordingName: string): string {
   currentOpenProject.addRecording(recordingName);
 
   return createProjectRecordingFile(currentOpenProject.projectHandle, recordingName)
-    .catch(reason => {
-    // if making the file fails, don't actually add to project
-      if (currentOpenProject !== null) {
-        const index = getRecordingsList().findIndex(v => {
-          return v === recordingName;
-        });
-        if (index !== null) {
-          removeRecording(index);
-        }
-      }
-
-      throw Error(reason);
-    });
 }
 
 /**
