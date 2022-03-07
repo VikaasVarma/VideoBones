@@ -25,7 +25,7 @@ interface AudioInput {
 
 interface VideoInput {
   files: string[]
-  screenStyle: string
+  screenStyle: '....' | '|..' | '_..'
   interval: [number, number]
   resolution: Resolution[]
 }
