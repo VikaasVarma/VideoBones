@@ -6,7 +6,7 @@
 
             <div style="grid-column: 1 / 3; grid-row: 1 / 2;" class="named-input-container">
                 <h3>Project Name</h3>
-                <input id="project-name-input" placeholder="Ex: Gangnam Style TikTok" type="text">
+                <input id="project-name-input" placeholder="Ex: Gangnam Style A Capella" type="text">
             </div>
 
             <div style="grid-column: 1 / 2; grid-row: 2 / 3;">
@@ -27,7 +27,7 @@
 
             <div style="grid-column: 1 / 3; grid-row: 3 / 4; margin-top: auto">
                 <div style="display: flex; justify-content: right">
-                    <div @click="cancel()" class="button-secondary">Cancel</div>
+                    <div @click="$emit('cancel')" class="button-secondary">Cancel</div>
                     <div @click="createProject()" class="button-primary">Create Project</div>
                 </div>
             </div>
@@ -56,7 +56,6 @@ export default defineComponent({
             
             ipcRenderer.invoke("create-project-clicked", projectName).then(
             (result) => {
-                console.log(result)
                 if (result.failed) {
                     if (result.alert) {
                         alert(result.output)
@@ -68,11 +67,7 @@ export default defineComponent({
           )
         }
 
-        function cancel() {
-            context.emit("cancel")
-        }
-
-        return {createProject, cancel}
+        return {createProject}
 
     }
 });

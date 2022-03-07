@@ -4,9 +4,7 @@
         <menu class="grid-container" style="margin: auto;">
 
             <div id="video-container">
-                <video controls>
-                    <source>
-                </video>
+                <video-player v-if="stream_url != '' " :manifest-url="stream_url"/>
             </div>
 
             <div id="video-controls" class="horizontal-spacer">
@@ -27,17 +25,12 @@
 
             <menu class="vertical-options-menu">
                 
-                <div>
+                <div id="track-selection-menu">
                     <h2 class="section-title">Tracks</h2>
-                    <div class="tickbox-container">
-                        <input type="checkbox" class="tickbox"/>
-                        <h3>Track 1</h3>
-                    </div>
-                    <div class="tickbox-container">
-                        <input type="checkbox" class="tickbox"/>
-                        <h3>Track 2</h3>
-                    </div>
-                    <div class="add-item-container">
+                    <track-selector v-for="track in tracks" :key="track.trackName" :trackName="track.trackName" />
+
+                    <div @click="addNewTrack()" class="add-item-container">
+
                         <img src="../../../assets/images/addIcon.png">
                         <h3>Add New Track</h3>
                     </div>
@@ -48,14 +41,10 @@
                         <input type="checkbox" class="tickbox"/>
                         <h3>Play While Recording</h3>
                     </div>
-                    <div class="metronome-container">
-                        <h2>{{bpm}}</h2>
-                        <div>
-                            <img @click="incBpm()" src="../../../assets/images/arrow.svg">
-                            <img @click="decBpm()" src="../../../assets/images/arrow.svg" style="transform: scaleY(-1)">
-                        </div>
-                    </div>
-                    <div class="add-item-container">
+
+                    <metronome-component v-for="metronome in clickTracks" :key="metronome.initialBpm" />
+
+                    <div @click="addNewClickTrack()" class="add-item-container">
                         <img src="../../../assets/images/addIcon.png">
                         <h3>New Clicker Track</h3>
                     </div>
@@ -88,16 +77,29 @@
 </template>
 
 <script lang="ts">
+import { stringify } from 'querystring';
 import { defineComponent, ref } from 'vue';
+import TrackSelector from '../components/TrackSelector.vue';
+import MetronomeComponent from '../components/MetronomeComponent.vue';
+import { ipcRenderer } from 'electron';
+import { join } from 'path';
+import VideoPlayer from '../components/VideoPlayer.vue'
+import { generateMetronome } from '../util/metronome'
 
 export default defineComponent({
     name: "VideoEditorPage",
+    components: { TrackSelector, MetronomeComponent, VideoPlayer },
     setup(props, context) {
-        var bpm = ref(80)
-        var screenStyle = ref(0)
-        var playhead = ref(.6)
-        var mouse_down = ref(false)
-        var track_data = {
+        
+        var tracks = ref([
+            {trackName : "Track 0"}, 
+        ])
+        let clickTracks = ref([{ initialBpm : 80}])
+        let screenStyle = ref(0)
+        let playhead = ref(.6)
+        let mouse_down = ref(false)
+        let stream_url = ref('')
+        let track_data = {
             all_track_ids: ["Track_0", "Track_1", "Track_3", "Track_3"],
             timeline_splits: [
                 { endpoint: 0.3, screenStyle: "....", active_tracks: [0,1,2,3]},
@@ -107,8 +109,6 @@ export default defineComponent({
         }
 
         function openSingleVideoEditor () { context.emit("open-single-editor") }
-        function incBpm() { bpm.value += 1 }
-        function decBpm() { bpm.value -= 1 }
         function setScreenStyle(style: number) { screenStyle.value = style }
 
         function drag(event: any, mouse_down: boolean) {
@@ -118,10 +118,78 @@ export default defineComponent({
                 playhead.value = Math.min(1, Math.max(0, (x - timeline.x) / timeline.width))
             }
         }
+        
+        function addNewClickTrack() {
+            clickTracks.value.push({ initialBpm : 80 })
+        }
 
-        return {openSingleVideoEditor, incBpm, decBpm, setScreenStyle, drag, bpm, track_data, playhead, mouse_down}
+        function addNewTrack () {
+            tracks.value.push({trackName: "Track " + (tracks.value.length + 0).toString()})
+        }
+
+        ipcRenderer.addListener('asynchronous-reply',  (event, args) => {
+            let port = args.port
+            if (stream_url.value === "") {
+                stream_url.value = "http://localhost:"+port.toString()+"/stream.mpd"
+            }
+        })
+        
+        function record() {
+            context.emit('recording');
+        }
+
+        return {addNewClickTrack, addNewTrack, clickTracks, drag, mouse_down, openSingleVideoEditor, playhead, record, setScreenStyle, track_data, tracks, stream_url}
+
+
     },
-    emits: ["open-single-editor"]
+    created() {
+
+        console.log("Running created ()");
+        ipcRenderer.invoke('get-recordings-directory').then( (dir) => {
+        ipcRenderer.send('asynchronous-message', 
+        {
+        type: 'startEngine', 
+        data: {
+            outputType: "preview",
+            videoInputs: [
+            {
+                file: join("../recordings", "video1.webm"),
+                startTime: 0.02,
+                position: {left: 0, top: 0},
+                resolution: {width: 1280, height: 720}
+            },
+            {
+                file: join("../recordings", "video2.webm"),
+                startTime: 0.02,
+                position: {left: "w0", top: 0},
+                resolution: {width: 1280, height: 720}
+            },
+            {
+                file: join("../recordings", "video3.webm"),
+                startTime: 0.02,
+                position: {left: 0, top: "h0"},
+                resolution: {width: 1280, height: 720}
+            },
+            {
+                file: join("../recordings", "video4.webm"),
+                startTime: 0.02,
+                position: {left: "w0", top: "h0"},
+                resolution: {width: 1280, height: 720}
+            },
+            ],
+            audioInputs:[
+            /*{
+                file: join("../recordings", "audio1.webm"),
+                startTime: 0.02,
+                volume: 255,
+            },*/
+            ]
+        }
+        })
+        });
+    },
+    emits: ["open-single-editor", "open-recording-page", "recording"]
+
 });
 </script>
 

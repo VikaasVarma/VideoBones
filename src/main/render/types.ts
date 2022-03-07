@@ -1,32 +1,24 @@
 interface EngineOptions {
-  aspectRatio: string // A:B format, e.g. 16:9
-  audioBitRate: string
-  audioInputs: AudioInput[] // required
-  audioSampleRate: number
-  bufferSize: string
-  framesPerSecond: number
-  outputFile: string // Ignored unless type is render
-  outputResolution: Resolution
-  outputType: 'thumbnail' | 'preview' | 'render' // required
-  outputVolume: number
-  previewManifest: string // Ignored unless type is preview
-  thumbnailEvery: string // X/Y format, X images every Y seconds
-  startTime: number // Measured in seconds
-  videoBitRate: string
-  videoInputs: VideoInput[] // required
-}
-
-class Input {
-  file: string;
+  aspectRatio: string; // A:B format, e.g. 16:9
+  audioBitRate: string;
+  audioInputs: AudioInput[]; // required
+  audioSampleRate: number;
+  bufferSize: string;
+  framesPerSecond: number;
+  outputFile: string; // Ignored unless type is render
+  outputResolution: Resolution;
+  outputType: 'thumbnail' | 'preview' | 'render'; // required
+  outputVolume: number;
+  previewManifest: string; // Ignored unless type is preview
+  thumbnailEvery: string; // X/Y format, X images every Y seconds
   startTime: number; // Measured in seconds
-
-  constructor(file:string, start:number){
-    this.file=file;
-    this.startTime=start;
-  }
+  videoBitRate: string;
+  videoInputs: VideoInput[]; // required
 }
 
- class AudioInput extends Input {
+class AudioInput {
+  file:string;
+  startTime:number;
   volume: number;
   reverb_active: 'Off'|'Low'|'High';
   declick_active: boolean;
@@ -40,7 +32,8 @@ class Input {
     declick_active:boolean = true,
     declip_active:boolean = true
   ){
-    super(file,startTime);
+    this.file=file;
+    this.startTime=startTime;
     this.volume = volume;
     this.reverb_active = reverb_active;
     this.declick_active = declick_active;
@@ -76,25 +69,26 @@ class Input {
   }
 }
 
-interface VideoInput extends AudioInput {
-  position: Position
-  resolution: Resolution
+interface VideoInput {
+  files: string[]
+  screenStyle: '....' | '|..' | '_..'
+  interval: [number, number]
+  resolution: Resolution[]
 }
 
 interface Resolution {
-  width: number
-  height: number
+  width: number;
+  height: number;
 }
 
 interface Position {
-  left: number | string
-  top: number | string
+  left: number | string;
+  top: number | string;
 }
 
 export {
   AudioInput,
   EngineOptions,
-  Input,
   Position,
   Resolution,
   VideoInput

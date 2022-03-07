@@ -3,7 +3,7 @@
     <menu class="horizontal-options-menu">
 
         <div>
-            <button @click="createNewProject()" class="image-container">
+            <button @click="$emit('create-new-project')" class="image-container">
                 <img src="../../../assets/images/addIcon.png">
             </button>
             
@@ -30,11 +30,6 @@ export default defineComponent({
     name: "on-open-page",
     setup(props, context) {
 
-      function createNewProject () {
-        context.emit("create-new-project")
-        console.log("Emmiting create-new-project")
-      }
-      
       function openProject() {
           ipcRenderer.invoke("open-project-clicked").then(
             (result) => {
@@ -49,7 +44,7 @@ export default defineComponent({
           )
       }
 
-      return { createNewProject, openProject }
+      return { openProject }
 
     },
     emits: ["create-new-project", "open-previous-project"], 

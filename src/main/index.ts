@@ -5,9 +5,9 @@ import { app, BrowserWindow, dialog, ipcMain } from 'electron';
 import { startIntegratedServer, stopIntegratedServer } from './render/integratedServer';
 import { join } from 'path';
 import { startStorageHandlers } from './storage/ipcHandler';
-import { stopHandler } from './render/ipcHandler';
+import { startHandler, stopHandler } from './render/ipcHandler';
 
-function createWindow () {
+async function createWindow () {
   const mainWindow = new BrowserWindow({
     width: 1920,
     height: 1080,
@@ -19,12 +19,13 @@ function createWindow () {
     title: 'Video Bones'
   });
 
-  const serverPort = startIntegratedServer();
+  const serverPort = await startIntegratedServer();
   if (serverPort === -1) {
     dialog.showErrorBox('Error', 'Failed to start integrated server');
     app.quit();
     return;
   }
+  startHandler(serverPort);
   const path = app.isPackaged ? join('..', 'renderer', 'index.html') : join(__dirname, '..', 'renderer', 'index.html');
   mainWindow.loadFile(path);
   mainWindow.webContents.openDevTools();
@@ -53,10 +54,10 @@ app.on('window-all-closed', function () {
 // "OnOpenPage" gets pressed
 
 ipcMain.handle('open-project-clicked', async() => {
-  let current_projects:any;
+  let curr_projects: any;
 
   async function employFileSelector() {
-    current_projects = projects.getTrackedProjects();
+    curr_projects = projects.getTrackedProjects();
     return await dialog.showOpenDialog({ properties: [ 'openDirectory' ] });
   }
 
@@ -64,7 +65,7 @@ ipcMain.handle('open-project-clicked', async() => {
   if (selected_attr.canceled) {
     return { failed: true, alert: false, output: '' };
   }
-  const possible_projects = await current_projects.filter((item:any) => item.projectPath == selected_attr.filePaths[0]);
+  const possible_projects = await curr_projects.filter((item: any) => item.projectPath === selected_attr.filePaths[0]);
 
   if (possible_projects.length <= 0) {
     try {
@@ -86,10 +87,11 @@ ipcMain.handle('create-project-clicked', async(event, projectName) => {
       .then(async handle => {
         await config.openProject(handle);
         config.setOption('audioTracks', []);
+        config.setOption('clickTracks', []);
       });
     return { failed: false, alert: false, output: '' };
 
-  } catch (err:any) {
+  } catch (err: any) {
     if (err.message.startsWith('Project directory already exists:')) {
       return { failed: true, alert: true, output: 'That project already exists.' };
     }

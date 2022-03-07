@@ -98,9 +98,11 @@ class OpenProjectData {
   }
 
   addRecording(recordingRelativePath: string): void {
-    this.projectConfig.recordings.push(recordingRelativePath);
+    if (!this.projectConfig.recordings.includes(recordingRelativePath)) {
+      this.projectConfig.recordings.push(recordingRelativePath);
 
-    this.writeConfig();
+      this.writeConfig();
+    }
   }
 
   removeRecording(recordingIndex: number): void {

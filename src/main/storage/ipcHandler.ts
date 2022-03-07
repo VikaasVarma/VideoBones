@@ -6,51 +6,51 @@ import { ipcMain } from 'electron';
 // Defines a bunch of ipc handlers for all the storage stuff
 
 export function startStorageHandlers() {
-  ipcMain.addListener('create-project', (event, parentDirectory:string, projectName:string) => {
+  ipcMain.addListener('create-project', (event, parentDirectory: string, projectName: string) => {
     return  projects.createProject(parentDirectory, projectName);
   });
 
-  ipcMain.addListener('track-project', (event, directory:string) => {
+  ipcMain.addListener('track-project', (event, directory: string) => {
     projects.trackProject(directory);
   });
 
-  ipcMain.addListener('untrack-project', (event, handle:projects.ProjectHandle) => {
+  ipcMain.addListener('untrack-project', (event, handle: projects.ProjectHandle) => {
     projects.untrackProject(handle);
   });
 
-  ipcMain.addListener('get-projects', event => {
+  ipcMain.addListener('get-projects', () => {
     return projects.getTrackedProjects();
   });
 
-  ipcMain.addListener('open-project', (event, projectHandle:projects.ProjectHandle) => {
+  ipcMain.addListener('open-project', (event, projectHandle: projects.ProjectHandle) => {
     return config.openProject(projectHandle);
   });
 
-  ipcMain.addListener('close-project', event => {
+  ipcMain.addListener('close-project', () => {
     return config.closeProject();
   });
 
-  ipcMain.handle('get-recordings', event => {
+  ipcMain.handle('get-recordings', () => {
     return JSON.stringify(config.getRecordingsList());
   });
 
-  ipcMain.addListener('get-recordings-directory', event => {
+  ipcMain.handle('get-recordings-directory', () => {
     return config.getRecordingsDirectory();
   });
 
-  ipcMain.addListener('add-recording', (event, recordingName:string) => {
+  ipcMain.handle('add-recording', (event, recordingName: string) => {
     return config.addRecording(recordingName);
   });
 
-  ipcMain.addListener('remove-recording', (event, index:number) => {
+  ipcMain.addListener('remove-recording', (event, index: number) => {
     config.removeRecording(index);
   });
 
-  ipcMain.addListener('set-option', (event, optionName:string, optionValue:string) => {
+  ipcMain.addListener('set-option', (event, optionName: string, optionValue: string) => {
     config.setOption(optionName, optionValue);
   });
 
-  ipcMain.handle('get-option', (event, optionName:string) => {
+  ipcMain.handle('get-option', (event, optionName: string) => {
     return JSON.stringify(config.getOption(optionName));
   });
 
@@ -58,7 +58,7 @@ export function startStorageHandlers() {
     config.removeOption(optionName);
   });
 
-  ipcMain.addListener('get-temp-directory', event => {
+  ipcMain.addListener('get-temp-directory', () => {
     return config.getTempDirectory();
   });
 }
