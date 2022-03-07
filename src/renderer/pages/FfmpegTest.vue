@@ -8,6 +8,7 @@ import { ipcRenderer } from "electron";
 import { defineComponent, Ref } from 'vue'
 import { join } from 'path';
 import { ref } from 'vue'
+import { AudioInput } from '../../main/render/types';
 
 export default defineComponent({
   name: "FfmpegTest",
@@ -67,11 +68,12 @@ export default defineComponent({
           }
         ],
         audioInputs:[
-          /*{
-            file: join("../recordings", "audio1.webm"),
-            startTime: 0.02,
-            volume: 255,
-          },*/
+          new AudioInput(join("../recordings", "audio1.webm"),
+            1.0,255,'High',true,true),
+          new AudioInput(join("../recordings", "audio2.webm"),
+            0.2,255,'Low',false,false),
+          new AudioInput(join("../recordings", "audio3.webm"),
+            2.0,255,'Off',false,true),
         ]
       }
     })
