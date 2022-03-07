@@ -70,6 +70,8 @@ export default defineComponent({
           this.videoRecorder.ondataavailable = function(event) {
             that.handleDataAvailable(event, 'video');
           };
+
+          this.videoRecorder.onstop = this.download;
         })
 
       const audioConstraints = {
@@ -149,14 +151,14 @@ export default defineComponent({
               this.$data.metronomeSources.push(await this.handleMetronome((<HTMLInputElement> node).value));
             } else {
               const dir = await ipcRenderer.invoke('get-recordings-directory');
-              
+
               // Create an audio element and preload it
               const audio = new Audio(path.join(dir, (<HTMLInputElement> node).value));
               audio.preload = 'auto';
               
               audioTracks.push(audio);
               playbackTracks.appendChild(audio);
-          }
+            }
           }
         }
         // Play all the new audio elements
@@ -176,8 +178,6 @@ export default defineComponent({
         this.$data.metronomeSources.forEach(source => {
           source.stop();
         })
-
-      this.download();
       }
     },
     handleDataAvailable(event: BlobEvent, type: string) {
