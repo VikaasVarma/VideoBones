@@ -53,6 +53,11 @@ app.on('window-all-closed', function () {
 // Code to open the project when the FOLDER ICON on the
 // "OnOpenPage" gets pressed
 
+ipcMain.handle('browse-directory-clicked', async () => {
+  const selected = await dialog.showOpenDialog({ properties: [ 'createDirectory', 'openDirectory' ] });
+  return selected.filePaths[0];
+});
+
 ipcMain.handle('open-project-clicked', async() => {
   let curr_projects: any;
 
@@ -81,9 +86,13 @@ ipcMain.handle('open-project-clicked', async() => {
 
 });
 
-ipcMain.handle('create-project-clicked', async(event, projectName) => {
+ipcMain.handle('get-default-project-directory', async () => {
+  return join(app.getPath('documents'), 'VideoBones');
+});
+
+ipcMain.handle('create-project-clicked', async (event, projectName, projectLocation) => {
   try {
-    await projects.createProject(app.getAppPath(), projectName)
+    await projects.createProject(projectLocation.replace(projectName, '') ?? join(app.getPath('documents'), 'VideoBones'), projectName)
       .then(async handle => {
         await config.openProject(handle);
         config.setOption('audioTracks', []);
