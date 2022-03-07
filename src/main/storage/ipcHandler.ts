@@ -58,7 +58,7 @@ export function startStorageHandlers() {
     config.removeOption(optionName);
   });
 
-  ipcMain.addListener('get-temp-directory', () => {
+  ipcMain.handle('get-temp-directory', () => {
     return config.getTempDirectory();
   });
 }

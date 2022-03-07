@@ -1,4 +1,3 @@
-
 <template id="SingleVideoEditorPage">
     <div @mouseup="mouse_down = false" @mousemove="drag($event, mouse_down)" >
         <menu class="grid-container" style="margin: auto;">
@@ -36,20 +35,14 @@
                     <h2 class="section-title">Tracks</h2>
                     <track-selector v-for="track in tracks" :key="track.trackName" :trackName="track.trackName" />
 
-                    <div @click="addNewTrack()" class="add-item-container">
-
+                    <div @click="record()" class="add-item-container">
                         <img src="../../../assets/images/addIcon.png">
                         <h3>Add New Track</h3>
                     </div>
                 </div>
                 <div>
                     <h2 class="section-title">Metronome</h2>
-                    <div class="tickbox-container">
-                        <input type="checkbox" class="tickbox"/>
-                        <h3>Play While Recording</h3>
-                    </div>
-
-                    <metronome-component v-for="metronome in clickTracks" :key="metronome.initialBpm" />
+                    <metronome-component v-for="metronome in clickTracks" :key="metronome.initialBpm" ref="metronome" />
 
                     <div @click="addNewClickTrack()" class="add-item-container">
                         <img src="../../../assets/images/addIcon.png">
@@ -84,14 +77,12 @@
 </template>
 
 <script lang="ts">
-import { stringify } from 'querystring';
 import { defineComponent, ref } from 'vue';
 import TrackSelector from '../components/TrackSelector.vue';
 import MetronomeComponent from '../components/MetronomeComponent.vue';
 import { ipcRenderer } from 'electron';
+import VideoPlayer from '../components/VideoPlayer.vue';
 import { join } from 'path';
-import VideoPlayer from '../components/VideoPlayer.vue'
-import { generateMetronome } from '../util/metronome'
 
 
 const thumbnailFrequency = '1/5';
@@ -109,9 +100,7 @@ export default defineComponent({
     },
     setup(props, context) {
         
-        var tracks = ref([
-            {trackName : "Track 0"}, 
-        ])
+        var tracks = ref(<object[]> [])
         let clickTracks = ref([{ initialBpm : 80}])
         let screenStyle = ref(0)
         let playhead = ref(.6)
@@ -141,9 +130,8 @@ export default defineComponent({
             clickTracks.value.push({ initialBpm : 80 })
         }
 
-        function addNewTrack () {
-            tracks.value.push({trackName: "Track " + (tracks.value.length + 0).toString()})
-            context.emit("recording")
+        function record () {
+            context.emit('open-recording-page');
         }
 
         ipcRenderer.addListener('asynchronous-reply',  (event, args) => {
@@ -152,12 +140,8 @@ export default defineComponent({
                     stream_url.value = "http://localhost:"+port.toString()+"/stream.mpd"
                 }
         })
-        
-        function record() {
-            context.emit('recording');
-        }
 
-        return {addNewClickTrack, addNewTrack, clickTracks, drag, mouse_down, openSingleVideoEditor, playhead, record, setScreenStyle, track_data, tracks, stream_url}
+        return {addNewClickTrack, record, clickTracks, drag, mouse_down, openSingleVideoEditor, playhead, setScreenStyle, track_data, tracks, stream_url}
 
 
     },
@@ -210,12 +194,15 @@ export default defineComponent({
         })
         });
     },
-    mounted() {
+    async mounted() {
+        ipcRenderer.invoke('get-option', 'videoTracks').then(videoTracks => {
+            JSON.parse(videoTracks).forEach((track: string) => {
+                this.tracks.push({trackName: track.substr(0, track.indexOf(".webm"))})
+            }) 
+        })
+
         let timeline_h:any = (this.$refs.timeline as any).clientHeight;
         let timeline_w: any = (this.$refs.timeline as any).clientWidth;
-
-        console.log(timeline_h)
-        console.log(timeline_w)
 
         this.timeline_seg_height = timeline_h;
 
@@ -223,8 +210,6 @@ export default defineComponent({
         const timeline_seg_width = Math.floor((timeline_h / 9) * 16);
 
         this.timeline_segments_count = Math.ceil(timeline_w / timeline_seg_width);
-
-        console.log(this.timeline_seg_height)
 
         //this.$forceUpdate();
     },
