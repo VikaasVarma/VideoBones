@@ -43,15 +43,22 @@ function buildArgs({
   let args: string[] = (<string[]>[]).concat(
     [outputType === 'preview' ? '-re' : ''],
     videoInputs.map(input => input.files.map((file) => ['-i', file])).flat(2),
-    audioInputs.map(input => '-i'+input.file).join(' '),
+    audioInputs.map(input => '-ss '+input.startTime.toString()+' -i '+input.file).join(' '),
     ['-filter_complex', videoInputs.map((input, i) => ([
         input.resolution.map((res, j) => `[${offset[i] + j}:v]setpts=PTS-STARTPTS,scale=${res.width}x${res.height},trim=${input.interval[0]}:${input.interval[1]}[input${offset[i] + j}];`).join(''),
         `${input.files.map((_,j) => `[input${offset[i] + j}]`).join('')}xstack=inputs=${input.files.length}:layout=${screenStyle_to_layout(input.screenStyle)}[matrix${i}];`,
-        `[matrix${i}]scale=${outputResolution.width}:${outputResolution.height},setsar=1:1[v${i}];`
-    ].join(''))).join('') + `${videoInputs.map((_,i) => `[v${i}]`).join('')}concat[out]`],
+        `[matrix${i}]scale=${outputResolution.width}:${outputResolution.height},setsar=1:1[v${i}];`        
+      ].join(''))).join('') + `${videoInputs.map((_,i) => `[v${i}]`).join('')}concat[out]`,
+      audioInputs.map((input: AudioInput, i: number) =>
+      `[${i + offset[offset.length-1]}:a]setpts=PTS-STARTPTS,
+      ${input.getDeclickArgs()}
+      ${input.getDeclipArgs()}
+      ${input.getReverbArgs()}
+      volume=${input.volume || 256}[ainput${i}];`).join(''),`amerge=inputs=${audioInputs.length}[aout];`
+    ].join(''),
     [
         '-map', '[out]',
-        //'-map', '[aout]',
+        '-map', '[aout]',
         '-c:v', 'libx264',
         '-c:a', 'aac',
         '-ac', '2',
