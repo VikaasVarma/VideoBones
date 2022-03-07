@@ -150,41 +150,42 @@ export default defineComponent({
         {
         type: 'startEngine', 
         data: {
-            outputType: "preview",
-            videoInputs: [
-            {
-                file: join("../recordings", "video1.webm"),
-                startTime: 0.02,
-                position: {left: 0, top: 0},
-                resolution: {width: 1280, height: 720}
-            },
-            {
-                file: join("../recordings", "video2.webm"),
-                startTime: 0.02,
-                position: {left: "w0", top: 0},
-                resolution: {width: 1280, height: 720}
-            },
-            {
-                file: join("../recordings", "video3.webm"),
-                startTime: 0.02,
-                position: {left: 0, top: "h0"},
-                resolution: {width: 1280, height: 720}
-            },
-            {
-                file: join("../recordings", "video4.webm"),
-                startTime: 0.02,
-                position: {left: "w0", top: "h0"},
-                resolution: {width: 1280, height: 720}
-            },
+        outputType: "preview",
+        videoInputs: [
+          {
+            files: ["video1.webm", "video2.webm", "video3.webm"].map(
+                (file) => join("../recordings", (file))
+            ),
+            screenStyle: "|..",
+            resolution: [
+                {width: 1280, height: 1440},
+                {width: 1280, height: 720},
+                {width: 1280, height: 720},
             ],
-            audioInputs:[
-            /*{
-                file: join("../recordings", "audio1.webm"),
-                startTime: 0.02,
-                volume: 255,
-            },*/
-            ]
-        }
+            interval: [0, 1.5]
+          },
+          {
+            files: ["video1.webm", "video2.webm", "video3.webm", "video4.webm"].map(
+                (file) => join("../recordings", (file))
+            ),
+            screenStyle: "....",
+            interval: [1.5, 3],
+            resolution: [
+                {width: 1280, height: 720},
+                {width: 1280, height: 720},
+                {width: 1280, height: 720},
+                {width: 1280, height: 720}
+            ],
+          }
+        ],
+        audioInputs:[
+          /*{
+            file: join("../recordings", "audio1.webm"),
+            startTime: 0.02,
+            volume: 255,
+          },*/
+        ]
+      }
         })
         });
     },

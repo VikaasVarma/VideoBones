@@ -53,7 +53,7 @@ app.on('window-all-closed', function () {
 // Code to open the project when the FOLDER ICON on the
 // "OnOpenPage" gets pressed
 
-ipcMain.handle('open-project-clicked', async() => {
+ipcMain.handle('open-project-clicked', async () => {
   let curr_projects: any;
 
   async function employFileSelector() {
@@ -66,6 +66,7 @@ ipcMain.handle('open-project-clicked', async() => {
     return { failed: true, alert: false, output: '' };
   }
   const possible_projects = await curr_projects.filter((item: any) => item.projectPath === selected_attr.filePaths[0]);
+
 
   if (possible_projects.length <= 0) {
     try {
