@@ -87,7 +87,7 @@ ipcMain.handle('create-project-clicked', async(event, projectName) => {
       .then(async handle => {
         await config.openProject(handle);
         config.setOption('audioTracks', []);
-        config.setOption('clickTracks', []);
+        config.setOption('videoTracks', []);
       });
     return { failed: false, alert: false, output: '' };
 

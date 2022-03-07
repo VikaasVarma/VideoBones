@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 
+import { join } from 'path';
 import { ipcRenderer } from 'electron';
 
 interface MetronomeOptions {
@@ -66,25 +67,11 @@ export function generateMetronome({
   });
   const wav = new Blob([ wavBytes ], { type: 'audio/wav' });
 
-  // Get number to append to file names
-  let clickTracks = 1;
-  ipcRenderer.invoke('get-option', 'clickTracks').then(function(recordings: string) {
-    JSON.parse(recordings).forEach(() =>  {
-      clickTracks++;
-    });
-  });
-
+  // Save the metronome file in the temp directory
   wav.arrayBuffer().then(buffer => {
-    ipcRenderer.invoke('add-recording', 'metronome' + clickTracks + '.wav').then((filePath: string) => {
-      fs.writeFile(filePath, new Uint8Array(buffer), err => {
+    ipcRenderer.invoke('get-temp-directory').then((dir: string) => {
+      fs.writeFile(join(dir, 'metronome_' + bpm + 'bpm.wav'), new Uint8Array(buffer), err => {
         if (err) throw err;
-      });
-
-      // Update the audioTracks option to hold the new audio track
-      ipcRenderer.invoke('get-option', 'clickTracks').then((option: string) => {
-        const copy = <string[]> JSON.parse(option);
-        copy.push('metronome' + clickTracks + '.wav');
-        ipcRenderer.send('set-option', 'clickTracks', copy);
       });
     });
   });
