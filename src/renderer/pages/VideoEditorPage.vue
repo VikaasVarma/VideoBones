@@ -131,9 +131,11 @@ export default defineComponent({
                 stream_url.value = "http://localhost:"+port.toString()+"/stream.mpd"
             }
         })
+        function record() {
+            context.emit('recording');
+        }
 
-        return {stream_url, tracks, clickTracks, addNewClickTrack, openSingleVideoEditor, setScreenStyle, drag, track_data, playhead, mouse_down, addNewTrack}
-        
+        return {addNewClickTrack, addNewTrack, clickTracks, drag, mouse_down, openSingleVideoEditor, playhead, record, setScreenStyle, track_data, tracks, stream_url}
 
     },
     created() {
@@ -182,7 +184,7 @@ export default defineComponent({
         })
         });
     },
-    emits: ["open-single-editor", "open-recording-page"]
+    emits: ["open-single-editor", "open-recording-page", "recording"]
 });
 </script>
 
