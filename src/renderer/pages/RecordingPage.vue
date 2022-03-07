@@ -125,6 +125,7 @@ export default defineComponent({
 
         const playbackTracks = <HTMLDivElement> this.$refs.playbackTracks;
         const audioTracks = <HTMLAudioElement[]> [];
+        // @ts-ignore
         for (const node of [...playbackTracks.childNodes]) {
           // Get inputs that have been checked
           if ((<HTMLElement> node).tagName === "INPUT" && (<HTMLInputElement> node).checked) {
