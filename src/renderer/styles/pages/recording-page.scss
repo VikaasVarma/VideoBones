@@ -1,37 +1,39 @@
 .recording-grid {
-	display: grid;
-  grid-column-gap: 20px;
-  grid-row-gap: 20px;
-  grid-template-columns: 2fr 1fr 2fr;
-  margin: 20px;
+	display: grid;  
+	grid-column-gap: 20px;
+	grid-row-gap: 20px;
+	grid-template-columns: 2fr 1fr 2fr;
+	margin: 20px;
 
-  video {
-    background-color: white;
-    border: 5px solid $color-middleground;
-    border-radius: 10px;
-    grid-column: 1 / 4;
-    grid-row: 1 / 2;
-    margin: auto;
-    transform: scaleX(-1);
-  }
+	video {
+		background-color: white;
+		border: 5px solid $color-middleground;
+		border-radius: 10px;
+		grid-column: 1 / 4;
+		grid-row: 1 / 2;
+		margin: auto;
+		transform: scaleX(-1);
+	}
 
-  & > select[ref=audioDevices] {
-    grid-column: 1 / 2;
-    grid-row: 3 / 4;
-  }
+	& > select[ref="audioDevices"] {
+		grid-column: 1 / 2;
+		grid-row: 3 / 4;
+	}
 
-  & > select[ref=videoDevices] {
-    grid-column: 3 / 4;
-    grid-row: 3 / 4;
-  }
-
-	.row {
-		grid-column: 1 / span 3;
+	& > select[ref="videoDevices"] {
+		grid-column: 3 / 4;
+		grid-row: 3 / 4;
 	}
 
 	.vu {
 		height: 12px;
-		background-image: linear-gradient(to right, #2ECC40 0%, #2ECC40 75%, #FF851B 90%, #FF4136 100%);
+		background-image: linear-gradient(
+			to right,
+			#2ecc40 0%,
+			#2ecc40 75%,
+			#ff851b 90%,
+			#ff4136 100%
+		);
 		background-size: 100% 100%;
 		border-radius: 4px;
 		background-repeat: no-repeat;
@@ -39,44 +41,43 @@
 }
 
 .recording-button {
-  background: none;
-  border: 2px solid white;
-  border-radius: $scaling-factor * 30px;
-  display: flex;
-  grid-column: 2 / 3;
-  grid-row: 3 / 4;
-  height: $scaling-factor * 60px;
-  margin: auto;
-  width: $scaling-factor * 60px;
+	background: none;
+	border: 2px solid white;
+	border-radius: $scaling-factor * 30px;
+	display: flex;
+	grid-column: 2 / 3;
+	grid-row: 3 / 4;
+	height: $scaling-factor * 60px;
+	margin: auto;
+	width: $scaling-factor * 60px;
 
-  & > div {
-    background-color: red;
-    border-radius: $scaling-factor * 5px;
-    height: $scaling-factor * 27px;
-    margin: auto;
-    transition: border-radius 100ms ease-out,
-      width 100ms ease-out,
-      height 100ms ease-out;
-    width: $scaling-factor * 27px;
-  }
+	& > div {
+		background-color: red;
+		border-radius: $scaling-factor * 5px;
+		height: $scaling-factor * 27px;
+		margin: auto;
+		transition: border-radius 100ms ease-out, width 100ms ease-out,
+			height 100ms ease-out;
+		width: $scaling-factor * 27px;
+	}
 }
 
 .not-recording-button {
   @extend .recording-button;
 
-  & > div {
-    border-radius: $scaling-factor * 18px;
-    height: $scaling-factor * 36px;
-    width: $scaling-factor * 36px;
-  }
+	& > div {
+		border-radius: $scaling-factor * 18px;
+		height: $scaling-factor * 36px;
+		width: $scaling-factor * 36px;
+	}
 }
 
 .image-container {
-  height: fit-content;
-  padding: 0;
+	height: fit-content;
+	padding: 0;
 
-  & > img {
-    display: inline;
-    height: 50px;
-  }
+	& > img {
+		display: inline;
+		height: 50px;
+	}
 }

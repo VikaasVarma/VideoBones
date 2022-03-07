@@ -29,6 +29,10 @@
 	}
 }
 
+.add-item-container {
+	cursor: pointer;
+}
+
 .grid-container {
 	height: 100%;
 	grid-template-columns: 9fr 2.5fr;
@@ -72,6 +76,10 @@
 		:not(h2) {
 			font-size: 11px;
 			font-weight: lighter;
+		}
+
+		h3 {
+			width: fit-content;
 		}
 	}
 }

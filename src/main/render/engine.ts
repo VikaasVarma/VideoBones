@@ -2,7 +2,6 @@ import { AudioInput, EngineOptions, VideoInput } from './types';
 import { ChildProcessByStdio, spawn } from 'child_process';
 import { getPath } from './ffmpeg';
 import { getTempDirectory } from '../storage/config';
-import { join } from 'path';
 import { Readable } from 'stream';
 
 function buildArgs({
@@ -23,39 +22,59 @@ function buildArgs({
   videoInputs = [] as VideoInput[]
 }: EngineOptions): string[] {
   // The holy ffmpeg argument builder
-  return videoInputs.map((input: VideoInput) => [ '-ss', (startTime + input.startTime).toString(), '-i', input.file ]).flat(1).concat(audioInputs.map((input:AudioInput) => [ '-ss', (startTime + input.startTime).toString(), '-i', input.file ]).flat(1).concat([
-    '-filter_complex',
+  console.log(videoInputs);
+  const cumsum = ((sum: number) => (value: VideoInput) => {sum += value.files.length; return sum - value.files.length})(0);
+  let offset = videoInputs.map(cumsum);
+
+  function screenStyle_to_layout(screenStyle: string) {
+    switch(screenStyle) {
+        case "....":
+            return "0_0|w0_0|0_h0|w0_h0";
+        case "|..":
+            return "0_0|w0_0|w0_h1";
+        case "_..":
+            return "0_0|0_h0|w1_h0";
+        default:
+            throw Error("Fuck you: invalid screenstyle")
+    }
+  }
+
+  // eslint-disable-next-line function-paren-newline
+  let args: string[] = (<string[]>[]).concat(
+    [outputType === 'preview' ? '-re' : ''],
+    videoInputs.map(input => input.files.map((file) => ['-i', file])).flat(2),
+    audioInputs.map(input => input.files.map((file) => ['-i', file])).flat(2),
+    ['-filter_complex', videoInputs.map((input, i) => ([
+        input.resolution.map((res, j) => `[${offset[i] + j}:v]setpts=PTS-STARTPTS,scale=${res.width}x${res.height},trim=${input.interval[0]}:${input.interval[1]}[input${offset[i] + j}];`).join(''),
+        `${input.files.map((_,j) => `[input${offset[i] + j}]`).join('')}xstack=inputs=${input.files.length}:layout=${screenStyle_to_layout(input.screenStyle)}[matrix${i}];`,
+        `[matrix${i}]scale=${outputResolution.width}:${outputResolution.height},setsar=1:1[v${i}];`
+    ].join(''))).join('') + `${videoInputs.map((_,i) => `[v${i}]`).join('')}concat[out]`],
     [
-      videoInputs.map((input: VideoInput, i: number) => `[${i}:v]setpts=PTS-STARTPTS,volume=${input.volume || 256},scale=${input.resolution.width}x${input.resolution.height}[input${i}];`).join(''),
-      `${videoInputs.map((__: VideoInput, i: number) => `[input${i}]`)}xstack=inputs=${videoInputs.length}:layout=${videoInputs.map((input: VideoInput) => `${input.position.left}_${input.position.top}`).join('|')}[matrix];`,
-      outputType === 'thumbnail' ? `[matrix]fps=${thumbnailEvery}[pr];` : '',
-      `[${outputType === 'thumbnail' ? '[pr]' : '[matrix]'}]scale=${outputResolution.width}:${outputResolution.height},setsar=1:1[out];`,
-      audioInputs.map((input: AudioInput, i: number) => `[${i + videoInputs.length}:a]setpts=PTS-STARTPTS,volume=${input.volume || 256}[ainput${i}];`).join(''),
-      audioInputs.map((input:AudioInput, i:number) => `[ainput${i}]`).join(''), `amerge=inputs=${audioInputs.length}[aout];`
-    ].join(''),
-    '-map', '[out]',
-    '-map', '[aout]',
-    '-c:v', 'libx264',
-    '-c:a', 'aac',
-    '-ac', '2',
-    '-ar', audioSampleRate.toString(),
-    '-x264opts', `keyint=${framesPerSecond}:min-keyint=${framesPerSecond}:no-scenecut`,
-    '-f', 'dash',
-    //'-min_seg_duration', '2000000',
-    '-b:v', videoBitRate,
-    '-b:a', audioBitRate,
-    '-preset', outputType === 'render' ? 'medium' : 'ultrafast',
-    '-tune', 'zerolatency',
-    '-maxrate', videoBitRate,
-    '-bufsize', bufferSize,
-    outputType === 'preview' ? '-re' : '',
-    '-v', 'info',
-    '-aspect', aspectRatio,
-    '-vol', outputVolume.toString(),
-    '-metadata', 'description="Made with VideoBones"',
-    '-stats',
-    join(getTempDirectory(), outputType === 'render' ? outputFile : (outputType === 'thumbnail' ? 'thumb%04d.png' : previewManifest))
-  ]));
+        '-map', '[out]',
+        //'-map', '[aout]',
+        '-c:v', 'libx264',
+        '-c:a', 'aac',
+        '-ac', '2',
+        '-ar', audioSampleRate.toString(),
+        '-x264opts', `keyint=${framesPerSecond}:min-keyint=${framesPerSecond}:no-scenecut`,
+        '-f', 'dash',
+        //'-min_seg_duration', '2000000',
+        '-b:v', videoBitRate,
+        '-b:a', audioBitRate,
+        '-preset', outputType === 'render' ? 'medium' : 'ultrafast',
+        '-tune', 'zerolatency',
+        '-maxrate', videoBitRate,
+        '-bufsize', bufferSize,
+        '-v', 'info',
+        '-aspect', aspectRatio,
+        '-vol', outputVolume.toString(),
+        '-metadata', 'description="Made with VideoBones"',
+        '-stats',
+        outputType === 'render' ? outputFile : (outputType === 'thumbnail' ? 'thumb%04d.png' : previewManifest)
+    ]
+  )
+    console.log(args);
+    return args;
 }
 
 let ffmpeg: ChildProcessByStdio<null, Readable, null> | null;
@@ -67,6 +86,7 @@ export function start(
 ) {
   if (ffmpeg) {
     ffmpeg.kill();
+    ffmpeg = null;
   }
 
   const bin = getPath();
@@ -74,7 +94,8 @@ export function start(
   console.log(bin, args);
 
   if (bin) {
-    ffmpeg = spawn(bin, args, { stdio: [ 'ignore', 'pipe', process.stderr ] });
+    console.log(getTempDirectory());
+    ffmpeg = spawn(bin, args, { cwd: getTempDirectory(), stdio: [ 'ignore', 'pipe', process.stderr ] });
     ffmpeg.stdout.on('data', data => {
       console.log(data);
       statusCallback(data.toString(), 0);
