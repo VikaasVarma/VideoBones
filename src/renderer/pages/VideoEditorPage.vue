@@ -85,6 +85,7 @@ import { ipcRenderer } from 'electron';
 import { join } from 'path';
 import VideoPlayer from '../components/VideoPlayer.vue'
 import { generateMetronome } from '../util/metronome'
+import {VideoInput} from '../../main/render/types'
 
 export default defineComponent({
     name: "VideoEditorPage",
@@ -139,54 +140,72 @@ export default defineComponent({
             context.emit('recording');
         }
 
-        return {addNewClickTrack, addNewTrack, clickTracks, drag, mouse_down, openSingleVideoEditor, playhead, record, setScreenStyle, track_data, tracks, stream_url}
+        function saveVideoTransitions(data:VideoInput[]) {
+            ipcRenderer.send('set-option', 'video-transitions', data)
+        }
+
+        // Tries to load the saved video transitions object
+        // if it doesn't exist it returns an empty list
+        async function loadVideoTransitions() : Promise<VideoInput[]> {
+            await ipcRenderer.invoke("get-option", 'video-transition').then(
+                (loadedTransitions) => { return loadedTransitions} 
+            ).catch()
+            return []
+        }
+
+
+        return {loadVideoTransitions, addNewClickTrack, addNewTrack, clickTracks, drag, mouse_down, openSingleVideoEditor, playhead, record, setScreenStyle, track_data, tracks, stream_url}
 
 
     },
     created() {
 
-        ipcRenderer.invoke('get-recordings-directory').then( (dir) => {
-        ipcRenderer.send('asynchronous-message', 
-        {
-        type: 'startEngine', 
-        data: {
-        outputType: "preview",
-        videoInputs: [
-          {
-            files: ["video1.webm", "video2.webm", "video3.webm"].map(
-                (file) => join("../recordings", (file))
-            ),
-            screenStyle: "|..",
-            resolution: [
-                {width: 1280, height: 1440},
-                {width: 1280, height: 720},
-                {width: 1280, height: 720},
-            ],
-            interval: [0, 1.5]
-          },
-          {
-            files: ["video1.webm", "video2.webm", "video3.webm", "video4.webm"].map(
-                (file) => join("../recordings", (file))
-            ),
-            screenStyle: "....",
-            interval: [1.5, 3],
-            resolution: [
-                {width: 1280, height: 720},
-                {width: 1280, height: 720},
-                {width: 1280, height: 720},
-                {width: 1280, height: 720}
-            ],
-          }
-        ],
-        audioInputs:[
-          /*{
-            file: join("../recordings", "audio1.webm"),
-            startTime: 0.02,
-            volume: 255,
-          },*/
-        ]
-      }
-        })
+        ipcRenderer.invoke('get-recordings-directory').then( async (dir) => {
+            
+            let videoTransitions = await this.loadVideoTransitions()
+
+            videoTransitions = [
+                    {
+                        files: ["video1.webm", "video2.webm", "video3.webm"].map(
+                            (file) => join("../recordings", (file))
+                        ),
+                        screenStyle: "|..",
+                        resolution: [
+                            {width: 1280, height: 1440},
+                            {width: 1280, height: 720},
+                            {width: 1280, height: 720},
+                        ],
+                        interval: [0, 1.5]
+                    },
+                    {
+                        files: ["video1.webm", "video2.webm", "video3.webm", "video4.webm"].map(
+                            (file) => join("../recordings", (file))
+                        ),
+                        screenStyle: "....",
+                        interval: [1.5, 3],
+                        resolution: [
+                            {width: 1280, height: 720},
+                            {width: 1280, height: 720},
+                            {width: 1280, height: 720},
+                            {width: 1280, height: 720}
+                        ],
+                    }
+                ]
+
+            ipcRenderer.send('asynchronous-message', 
+            {   
+                type: 'startEngine', 
+                data: {
+                    outputType: "preview",
+                    videoInputs: videoTransitions,
+                    audioInputs:[
+                    /*{
+                        file: join("../recordings", "audio1.webm"),
+                        startTime: 0.02,
+                        volume: 255,
+                    },*/]
+                }
+            })
         });
     },
     emits: ["open-single-editor", "open-recording-page", "recording"]
