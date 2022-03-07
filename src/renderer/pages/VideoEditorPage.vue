@@ -25,31 +25,26 @@
 
             <menu class="vertical-options-menu">
                 
-                <div>
+                <div id="track-selection-menu">
                     <h2 class="section-title">Tracks</h2>
-                    <div class="tickbox-container">
-                        <input type="checkbox" class="tickbox"/>
-                        <h3>Track 1</h3>
-                    </div>
-                    <div class="tickbox-container">
-                        <input type="checkbox" class="tickbox"/>
-                        <h3>Track 2</h3>
-                    </div>
-                    <div class="add-item-container" @click="record()">
+                    <track-selector v-for="track in tracks" :key="track.trackName" :trackName="track.trackName" />
+
+                    <div @click="addNewTrack()" class="add-item-container">
+
                         <img src="../../../assets/images/addIcon.png">
                         <h3>Add New Track</h3>
                     </div>
                 </div>
                 <div>
                     <h2 class="section-title">Metronome</h2>
-                    <div class="metronome-container">
-                        <h2>{{bpm}}</h2>
-                        <div>
-                            <img @click="incBpm()" src="../../../assets/images/arrow.svg">
-                            <img @click="decBpm()" src="../../../assets/images/arrow.svg" style="transform: scaleY(-1)">
-                        </div>
+                    <div class="tickbox-container">
+                        <input type="checkbox" class="tickbox"/>
+                        <h3>Play While Recording</h3>
                     </div>
-                    <div class="add-item-container" @click="createMetronome()">
+
+                    <metronome-component v-for="metronome in clickTracks" :key="metronome.initialBpm" />
+
+                    <div @click="addNewClickTrack()" class="add-item-container">
                         <img src="../../../assets/images/addIcon.png">
                         <h3>New Clicker Track</h3>
                     </div>
@@ -82,7 +77,10 @@
 </template>
 
 <script lang="ts">
+import { stringify } from 'querystring';
 import { defineComponent, ref } from 'vue';
+import TrackSelector from '../components/TrackSelector.vue';
+import MetronomeComponent from '../components/MetronomeComponent.vue';
 import { ipcRenderer } from 'electron';
 import { join } from 'path';
 import VideoPlayer from '../components/VideoPlayer.vue'
@@ -90,11 +88,13 @@ import { generateMetronome } from '../util/metronome'
 
 export default defineComponent({
     name: "VideoEditorPage",
-    components: {
-        VideoPlayer
-    },
+    components: { TrackSelector, MetronomeComponent, VideoPlayer },
     setup(props, context) {
-        let bpm = ref(80)
+        
+        var tracks = ref([
+            {trackName : "Track 0"}, 
+        ])
+        let clickTracks = ref([{ initialBpm : 80}])
         let screenStyle = ref(0)
         let playhead = ref(.6)
         let mouse_down = ref(false)
@@ -109,8 +109,6 @@ export default defineComponent({
         }
 
         function openSingleVideoEditor () { context.emit("open-single-editor") }
-        function incBpm() { bpm.value += 1 }
-        function decBpm() { bpm.value -= 1 }
         function setScreenStyle(style: number) { screenStyle.value = style }
 
         function drag(event: any, mouse_down: boolean) {
@@ -119,6 +117,14 @@ export default defineComponent({
                 var x = event.clientX;
                 playhead.value = Math.min(1, Math.max(0, (x - timeline.x) / timeline.width))
             }
+        }
+        
+        function addNewClickTrack() {
+            clickTracks.value.push({ initialBpm : 80 })
+        }
+
+        function addNewTrack () {
+            tracks.value.push({trackName: "Track " + (tracks.value.length + 0).toString()})
         }
 
         ipcRenderer.addListener('asynchronous-reply',  (event, args) => {
@@ -132,10 +138,8 @@ export default defineComponent({
             context.emit('recording');
         }
 
-        function createMetronome() {
-            generateMetronome({ bpm: bpm.value });
-        }
-        return {bpm, createMetronome, decBpm, drag, incBpm, mouse_down, playhead, record, setScreenStyle, track_data, openSingleVideoEditor, stream_url}
+        return {addNewClickTrack, addNewTrack, clickTracks, drag, mouse_down, openSingleVideoEditor, playhead, record, setScreenStyle, track_data, tracks, stream_url}
+
 
     },
     created() {
@@ -184,7 +188,8 @@ export default defineComponent({
         })
         });
     },
-    emits: ["open-single-editor", "recording"]
+    emits: ["open-single-editor", "open-recording-page", "recording"]
+
 });
 </script>
 
