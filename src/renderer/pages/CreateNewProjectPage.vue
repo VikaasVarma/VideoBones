@@ -6,7 +6,7 @@
 
             <div style="grid-column: 1 / 3; grid-row: 1 / 2;" class="named-input-container">
                 <h3>Project Name</h3>
-                <input id="project-name-input" placeholder="Ex: Gangnam Style TikTok" type="text">
+                <input id="project-name-input" placeholder="Ex: Gangnam Style A Capella" type="text">
             </div>
 
             <div style="grid-column: 1 / 2; grid-row: 2 / 3;">

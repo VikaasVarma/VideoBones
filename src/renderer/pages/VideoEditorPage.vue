@@ -30,6 +30,7 @@
                     <track-selector v-for="track in tracks" :key="track.trackName" :trackName="track.trackName" />
 
                     <div @click="addNewTrack()" class="add-item-container">
+
                         <img src="../../../assets/images/addIcon.png">
                         <h3>Add New Track</h3>
                     </div>
@@ -83,6 +84,7 @@ import MetronomeComponent from '../components/MetronomeComponent.vue';
 import { ipcRenderer } from 'electron';
 import { join } from 'path';
 import VideoPlayer from '../components/VideoPlayer.vue'
+import { generateMetronome } from '../util/metronome'
 
 export default defineComponent({
     name: "VideoEditorPage",
@@ -131,11 +133,13 @@ export default defineComponent({
                 stream_url.value = "http://localhost:"+port.toString()+"/stream.mpd"
             }
         })
+        
         function record() {
             context.emit('recording');
         }
 
         return {addNewClickTrack, addNewTrack, clickTracks, drag, mouse_down, openSingleVideoEditor, playhead, record, setScreenStyle, track_data, tracks, stream_url}
+
 
     },
     created() {
@@ -185,6 +189,7 @@ export default defineComponent({
         });
     },
     emits: ["open-single-editor", "open-recording-page", "recording"]
+
 });
 </script>
 
