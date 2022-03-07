@@ -42,19 +42,19 @@ export default defineComponent({
         videoInputs: [
           {
             files: ["video1.webm", "video2.webm", "video3.webm"].map(
-                (file) => join("../recordings" + (file))
+                (file) => join("../recordings", (file))
             ),
             screenStyle: "|..",
             resolution: [
                 {width: 1280, height: 1440},
                 {width: 1280, height: 720},
-                {width: 1280, height: 720}
+                {width: 1280, height: 720},
             ],
             interval: [0, 1.5]
           },
           {
             files: ["video5.webm", "video4.webm", "video3.webm", "video2.webm"].map(
-                (file) => join("../recordings" + (file))
+                (file) => join("../recordings", (file))
             ),
             screenStyle: "....",
             interval: [1.5, 3],
