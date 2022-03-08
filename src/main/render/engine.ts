@@ -6,6 +6,7 @@ import { getPath } from './ffmpeg';
 import { getTempDirectory } from '../storage/config';
 import { join } from 'path';
 import { Readable } from 'stream';
+import { join } from 'path';
 
 function buildArgs({
   aspectRatio = '16:9',
