@@ -56,7 +56,7 @@
             v-for="track in tracks"
             :key="track.trackName"
             :track-name="track.trackName"
-            @doubleclick="openSingleVideoEditor(track.trackName)"
+            @doubleclick="$emit('open-single-editor', track.trackName)"
           />
 
           <div class="add-item-container" @click="$emit('open-recording-page')">
@@ -70,7 +70,7 @@
           </h2>
           <div
             :class="['screen-style', screenStyle === 0 ? 'selected' : '']"
-            @click="screenStyle = 0"
+            @click="setScreenStyle(0)"
           >
             <div style="grid-column: 1 / 2; grid-row: 1 / 2;" />
             <div style="grid-column: 2 / 3; grid-row: 1 / 2;" />
@@ -79,7 +79,7 @@
           </div>
           <div
             :class="['screen-style', screenStyle === 1 ? 'selected' : '']"
-            @click="screenStyle = 1"
+            @click="setScreenStyle(1)"
           >
             <div style="grid-column: 1 / 3; grid-row: 1 / 2;" />
             <div style="grid-column: 1 / 2; grid-row: 2 / 3;" />
@@ -87,7 +87,7 @@
           </div>
           <div
             :class="['screen-style', screenStyle === 2 ? 'selected' : '']"
-            @click="screenStyle = 2"
+            @click="setScreenStyle(2)"
           >
             <div style="grid-column: 1 / 2; grid-row: 1 / 2;" />
             <div style="grid-column: 1 / 2; grid-row: 2 / 3;" />
@@ -115,7 +115,6 @@ export default defineComponent({
   components: { MetronomeComponent, TrackSelector, VideoPlayer },
   emits: [ 'open-recording-page', 'open-single-editor' ],
   setup(props, context) {
-
         interface Track {
             trackName: string;
         }
@@ -136,9 +135,6 @@ export default defineComponent({
           ]
         };
 
-        function openSingleVideoEditor(file: string) {
-          context.emit('open-single-editor', file);
-        }
         function setScreenStyle(style: number) {
           screenStyle.value = style;
         }
@@ -158,7 +154,7 @@ export default defineComponent({
           }
         });
 
-        return { activeSegment, drag, metronome, mouse_down, openSingleVideoEditor,
+        return { activeSegment, drag, metronome, mouse_down,
           playhead, screenStyle, setScreenStyle, stream_url, track_data, tracks };
 
   },
