@@ -31,6 +31,10 @@
 
             <menu class="vertical-options-menu">
                 
+                <div>
+                    <h2 class="section-title">Metronome</h2>
+                    <metronome-component ref="metronome" />
+                </div>
                 <div id="track-selection-menu">
                     <h2 class="section-title">Tracks</h2>
                     <track-selector v-for="track in tracks" :key="track.trackName" :trackName="track.trackName" />
@@ -39,10 +43,6 @@
                         <img src="../../../assets/images/addIcon.png">
                         <h3>Add New Track</h3>
                     </div>
-                </div>
-                <div>
-                    <h2 class="section-title">Metronome</h2>
-                    <metronome-component ref="metronome" />
                 </div>
                 <div>
                     <h2 class="section-title">Screen Styles</h2>
