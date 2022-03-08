@@ -14,7 +14,7 @@
   <video-editor-page
     v-else-if="pageDisplayed === 'video-editor-page'"
     @open-recording-page="pageDisplayed = 'recording-page'"
-    @open-single-editor="pageDisplayed = 'single-video-editor-page'"
+    @open-single-editor="openSingleEditor"
   />
 
   <single-video-editor-page
@@ -54,6 +54,11 @@ export default defineComponent({
     return {
       pageDisplayed: 'on-open-page'
     };
+  },
+  methods: {
+    openSingleEditor(track: string) {
+      this.pageDisplayed = 'single-video-editor-page';
+    }
   }
 });
 </script>
