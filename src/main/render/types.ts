@@ -18,7 +18,9 @@ class AudioInput {
   file: string;
   startTime: number;
   volume: number;
-  reverb_active: 'Off'|'Low'|'High';
+  reverb_active: 'Off'|'On';
+  reverb_delay_identifier:number;  //in ms 
+  reverb_decay_identifier:number;   //between 0 and 1
   declick_active: boolean;
   declip_active: boolean;
 
@@ -26,7 +28,9 @@ class AudioInput {
     file: string,
     startTime = 0,
     volume = 1.0,
-    reverb_active: 'Off'|'Low'|'High' = 'Off',
+    reverb_active: 'Off'|'On' = 'Off',
+    reverb_delay:number = 0,
+    reverb_dacay:number = 0,
     declick_active = true,
     declip_active = true
   ){
@@ -34,6 +38,8 @@ class AudioInput {
     this.startTime = startTime;
     this.volume = volume;
     this.reverb_active = reverb_active;
+    this.reverb_delay_identifier = reverb_delay;
+    this.reverb_decay_identifier = reverb_dacay;
     this.declick_active = declick_active;
     this.declip_active = declip_active;
   }
@@ -56,10 +62,32 @@ class AudioInput {
 
   getReverbArgs(): string{
     let s = '';
-    if (this.reverb_active === 'High'){
-      s = 'aecho=0.8:0.9:500:0.5,';
-    } else if (this.reverb_active === 'Low'){
-      s = 'aecho=0.8:0.88:60:0.4,';
+    // if (this.reverb_active === 'High'){
+    //   s = 'aecho=0.8:0.9:500:0.5,';
+    // } else if (this.reverb_active === 'Low'){
+    //   s = 'aecho=0.8:0.88:60:0.4,';
+    // }
+    if(this.reverb_active){
+      s = 'acho=0.8:0.9:';
+      //add delays args 
+      let s_delays:string = '';
+      let i:number = 0;
+      while(i<10){
+        s_delays += `${(i+1)*this.reverb_delay_identifier}`;
+        if(i<9) s_delays+= '|'; 
+        i++;
+      }
+
+      //add decays args
+      i=0;
+      let power:number = 1.0;
+      let s_decays:string = '';
+      while(i<10){
+        s_decays += `${Math.pow(this.reverb_decay_identifier,power)}`;
+        if(i<9) s_decays+='|';
+        i++;
+        power+=0.6;
+      }
     }
     return s;
   }

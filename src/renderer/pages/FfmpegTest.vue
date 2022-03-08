@@ -9,6 +9,7 @@ import { defineComponent, Ref } from 'vue'
 import { join } from 'path';
 import { ref } from 'vue'
 import { AudioInput } from '../../main/render/types';
+import { isUndefined } from 'util';
 
 export default defineComponent({
   name: "FfmpegTest",
@@ -69,11 +70,11 @@ export default defineComponent({
         ],
         audioInputs:[
           new AudioInput(join("../recordings", "audio1.webm"),
-            1.0,255,'High',true,true),
+            1.0,255,'On',400,0.7,true,true),
           new AudioInput(join("../recordings", "audio2.webm"),
-            0.2,255,'Low',false,false),
+            0.2,255,'On',200,0.5,false,false),
           new AudioInput(join("../recordings", "audio3.webm"),
-            2.0,255,'Off',false,true),
+            2.0,255,'Off',undefined,undefined,false,true),
         ]
       }
     })
