@@ -56,7 +56,8 @@
             v-for="track in tracks"
             :key="track.trackName"
             :track-name="track.trackName"
-            @doubleclick="$emit('open-single-editor', track.trackName)"
+            @edit-clicked="$emit('open-single-editor', track.trackName)"
+            @delete-clicked="deleteTrack(track.trackName)"
           />
 
           <div class="add-item-container" @click="$emit('open-recording-page')">
@@ -114,7 +115,7 @@ export default defineComponent({
   name: 'VideoEditorPage',
   components: { MetronomeComponent, TrackSelector, VideoPlayer },
   emits: [ 'open-recording-page', 'open-single-editor' ],
-  setup(props, context) {
+  setup() {
         interface Track {
             trackName: string;
         }
@@ -139,6 +140,12 @@ export default defineComponent({
           screenStyle.value = style;
         }
 
+        function deleteTrack(trackName: string) {
+          tracks.value = tracks.value.filter(track => track.trackName !== trackName);
+          // TODO actually remove the tracks
+          ipcRenderer.send('remove-recording', trackName);
+        }
+
         function drag(event: MouseEvent, mouse_down: boolean) {
           if (mouse_down) {
             const timeline = document.querySelectorAll('.timeline')[0].getBoundingClientRect();
@@ -154,7 +161,7 @@ export default defineComponent({
           }
         });
 
-        return { activeSegment, drag, metronome, mouse_down,
+        return { activeSegment, deleteTrack, drag, metronome, mouse_down,
           playhead, screenStyle, setScreenStyle, stream_url, track_data, tracks };
 
   },
