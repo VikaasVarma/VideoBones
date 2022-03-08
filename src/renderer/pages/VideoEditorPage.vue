@@ -46,18 +46,18 @@
                 </div>
                 <div>
                     <h2 class="section-title">Screen Styles</h2>
-                    <div class="screen-style" @click="setScreenStyle(0)">
+                    <div :class="['screen-style', screenStyle === 0 ? 'selected' : '']" @click="setScreenStyle(0)">
                         <div style="grid-column: 1 / 2; grid-row: 1 / 2;"></div>
                         <div style="grid-column: 2 / 3; grid-row: 1 / 2;"></div>
                         <div style="grid-column: 1 / 2; grid-row: 2 / 3;"></div>
                         <div style="grid-column: 2 / 3; grid-row: 2 / 3;"></div>
                     </div>
-                    <div class="screen-style" @click="setScreenStyle(1)">
+                    <div :class="['screen-style', screenStyle === 1 ? 'selected' : '']" @click="setScreenStyle(1)">
                         <div style="grid-column: 1 / 3; grid-row: 1 / 2;"></div>
                         <div style="grid-column: 1 / 2; grid-row: 2 / 3;"></div>
                         <div style="grid-column: 2 / 3; grid-row: 2 / 3;"></div>
                     </div>
-                    <div class="screen-style" @click="setScreenStyle(2)">
+                    <div :class="['screen-style', screenStyle === 2 ? 'selected' : '']" @click="setScreenStyle(2)">
                         <div style="grid-column: 1 / 2; grid-row: 1 / 2;"></div>
                         <div style="grid-column: 1 / 2; grid-row: 2 / 3;"></div>
                         <div style="grid-column: 2 / 3; grid-row: 1 / 3;"></div>
@@ -130,13 +130,10 @@ export default defineComponent({
                 }
         })
 
-        return {record, metronome, drag, mouse_down, openSingleVideoEditor, playhead, setScreenStyle, track_data, tracks, stream_url}
+        return {record, metronome, drag, mouse_down, openSingleVideoEditor, playhead, screenStyle, setScreenStyle, track_data, tracks, stream_url}
 
     },
     created() {
-
-        console.log("Running created ()");
-
         let self = this;
         ipcRenderer.on('thumbnail-reply', (event, args) => {
             let new_timeline_images = new Array<string>(self.timeline_segments_count);
