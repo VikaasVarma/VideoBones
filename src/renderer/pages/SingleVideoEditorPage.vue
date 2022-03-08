@@ -25,11 +25,18 @@
 
             <menu class="vertical-options-menu">
                 <div>
-                    <h2 class="section-title">Video Effects</h2>
-                    <div class="tickbox-container">
+                    <h3  class="section-title">Audio Effects</h3 >
+                    
+                    <slider-component slider_name="Reverb" />
+                    <slider-component slider_name="Decay" />
+
+                    <slider-component slider_name="dsa" />
+                    <slider-component slider_name="dsa" />
+
+                    <!-- <div class="tickbox-container">
                         <input type="checkbox" class="tickbox"/>
                         <h3>Something Else</h3>
-                    </div>
+                    </div> -->
 
                 </div>
 
@@ -48,8 +55,10 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
+import SliderComponent from '../components/SliderComponent.vue';
 
 export default defineComponent({
+  components: { SliderComponent },
     name: "single-video-editor-page",
     setup(props, context) {
         return {}
