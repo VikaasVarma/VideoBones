@@ -31,8 +31,6 @@
   "homepage": "https://github.com/VikaasVarma/VideoBones#readme",
   "dependencies": {
     "@fontsource/inter": "^4.5.4",
-    "@fontsource/numans": "^4.5.3",
-    "@fontsource/open-sans": "^4.5.5",
     "ffmpeg-static": "^5.0.0",
     "shaka-player": "^3.3.1",
     "vue": "^3.2.31"
