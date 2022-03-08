@@ -1,15 +1,16 @@
 module.exports = {
-  'extends': [ 'stylelint-config-recommended-vue/scss' ],
-  'overrides': [
+  extends: ['stylelint-config-recommended-vue/scss'],
+  ignoreFiles: ['node_modules/**'],
+  overrides: [
     {
-      'customSyntax': 'postcss-scss',
-      'extends': [ 'stylelint-config-standard-scss', 'stylelint-config-recommended-scss' ],
-      'files': [ '**/*.scss', '*.scss' ],
-      'plugins': [ 'stylelint-order', 'stylelint-high-performance-animation', 'stylelint-scss' ]
+      customSyntax: 'postcss-scss',
+      extends: ['stylelint-config-standard-scss', 'stylelint-config-recommended-scss'],
+      files: ['**/*.scss', '*.scss'],
+      plugins: ['stylelint-order', 'stylelint-high-performance-animation', 'stylelint-scss']
     }
   ],
-  'plugins': [ 'stylelint-order', 'stylelint-high-performance-animation' ],
-  'rules': {
+  plugins: ['stylelint-order', 'stylelint-high-performance-animation'],
+  rules: {
     'at-rule-name-case': 'lower',
     'at-rule-name-space-after': 'always-single-line',
     'at-rule-no-unknown': null,
@@ -25,11 +26,12 @@ module.exports = {
     'declaration-block-trailing-semicolon': 'always',
     'declaration-colon-space-after': 'always',
     'declaration-colon-space-before': 'never',
+    'declaration-no-important': true,
     'function-name-case': 'lower',
-    'function-no-unknown': [ true, { 'ignoreFunctions': [ 'v-bind' ] }],
+    'function-no-unknown': [true, { ignoreFunctions: ['v-bind'] }],
     'indentation': 2,
     'length-zero-no-unit': true,
-    'max-empty-lines': 1,
+    'max-empty-lines': 2,
     'max-line-length': 120,
     'max-nesting-depth': 5,
     'media-feature-colon-space-after': 'always',
@@ -47,16 +49,16 @@ module.exports = {
     'no-extra-semicolons': true,
     'no-missing-end-of-source-newline': true,
     'number-leading-zero': 'never',
-    'order/order': [ 'custom-properties', 'declarations', 'at-rules', 'rules' ],
+    'order/order': ['custom-properties', 'declarations', 'at-rules', 'rules'],
     'order/properties-alphabetical-order': true,
-    'plugin/no-low-performance-animation-properties': [ true, { 'ignore': 'paint-properties' }],
+    'plugin/no-low-performance-animation-properties': [true, { ignore: 'paint-properties' }],
     'property-no-unknown': true,
-    'rule-empty-line-before': 'always',
+    'rule-empty-line-before': ['always', { except: ['after-single-line-comment'] }],
     'scss/at-rule-no-unknown': true,
     'scss/at-use-no-unnamespaced': true,
     'scss/dollar-variable-colon-space-after': 'always',
     'scss/dollar-variable-colon-space-before': 'never',
-    'scss/dollar-variable-first-in-block': [ true, { 'ignore': [ 'comments', 'imports' ] }],
+    'scss/dollar-variable-first-in-block': [true, { ignore: ['comments', 'imports'] }],
     'scss/dollar-variable-no-missing-interpolation': true,
     'scss/dollar-variable-no-namespaced-assignment': true,
     'scss/no-global-function-names': true,
@@ -65,16 +67,16 @@ module.exports = {
     'selector-attribute-operator-space-before': 'never',
     'selector-attribute-quotes': 'never',
     'selector-combinator-space-before': 'always',
-    'selector-id-pattern': '^(__nuxt|[a-zA-Z]*(-[a-zA-Z0-9]+)*)$',
+    'selector-id-pattern': '^(__)?[a-zA-Z]+(-[a-zA-Z0-9]+)*$',
     'selector-list-comma-newline-after': 'always-multi-line',
     'selector-list-comma-newline-before': 'never-multi-line',
-    'selector-list-comma-space-after': 'always',
+    'selector-list-comma-space-after': 'always-single-line',
     'selector-list-comma-space-before': 'never',
-    'selector-pseudo-element-no-unknown': [ true, { 'ignorePseudoElements': [ 'v-deep' ] }],
+    'selector-pseudo-element-no-unknown': [true, { ignorePseudoElements: ['v-deep'] }],
     'selector-type-case': 'lower',
     'shorthand-property-no-redundant-values': true,
     'string-quotes': 'single',
     'unit-no-unknown': true,
     'value-keyword-case': 'lower'
   }
-}
+};
