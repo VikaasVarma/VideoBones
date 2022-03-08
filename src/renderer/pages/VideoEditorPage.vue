@@ -1,3 +1,4 @@
+
 <template id="SingleVideoEditorPage">
     <div @mouseup="mouse_down = false" @mousemove="drag($event, mouse_down)" >
         <menu class="grid-container" style="margin: auto;">
@@ -28,14 +29,25 @@
                     <h2 class="section-title">Tracks</h2>
                     <track-selector v-for="track in tracks" :key="track.trackName" :trackName="track.trackName" />
 
-                    <div @click="record()" class="add-item-container">
+                    <div @click="addNewTrack()" class="add-item-container">
+
                         <img src="../../../assets/images/addIcon.png">
                         <h3>Add New Track</h3>
                     </div>
                 </div>
                 <div>
                     <h2 class="section-title">Metronome</h2>
-                    <metronome-component :key="metronome.initialBpm" ref="metronome" />
+                    <div class="tickbox-container">
+                        <input type="checkbox" class="tickbox"/>
+                        <h3>Play While Recording</h3>
+                    </div>
+
+                    <metronome-component v-for="metronome in clickTracks" :key="metronome.initialBpm" />
+
+                    <div @click="addNewClickTrack()" class="add-item-container">
+                        <img src="../../../assets/images/addIcon.png">
+                        <h3>New Clicker Track</h3>
+                    </div>
                 </div>
                 <div>
                     <h2 class="section-title">Screen Styles</h2>
@@ -65,20 +77,25 @@
 </template>
 
 <script lang="ts">
+import { stringify } from 'querystring';
 import { defineComponent, ref } from 'vue';
 import TrackSelector from '../components/TrackSelector.vue';
 import MetronomeComponent from '../components/MetronomeComponent.vue';
 import { ipcRenderer } from 'electron';
-import VideoPlayer from '../components/VideoPlayer.vue';
 import { join } from 'path';
+import VideoPlayer from '../components/VideoPlayer.vue'
+import { generateMetronome } from '../util/metronome'
+import {VideoInput} from '../../main/render/types'
 
 export default defineComponent({
     name: "VideoEditorPage",
     components: { TrackSelector, MetronomeComponent, VideoPlayer },
     setup(props, context) {
         
-        var tracks = ref(<object[]> [])
-        let metronome = ref({ initialBpm : 80})
+        var tracks = ref([
+            {trackName : "Track 0"}, 
+        ])
+        let clickTracks = ref([{ initialBpm : 80}])
         let screenStyle = ref(0)
         let playhead = ref(.6)
         let mouse_down = ref(false)
@@ -93,6 +110,7 @@ export default defineComponent({
         }
 
         function openSingleVideoEditor () { context.emit("open-single-editor") }
+
         function setScreenStyle(style: number) { screenStyle.value = style }
 
         function drag(event: any, mouse_down: boolean) {
@@ -102,9 +120,13 @@ export default defineComponent({
                 playhead.value = Math.min(1, Math.max(0, (x - timeline.x) / timeline.width))
             }
         }
-    
-        function record () {
-            context.emit('open-recording-page');
+        
+        function addNewClickTrack() {
+            clickTracks.value.push({ initialBpm : 80 })
+        }
+
+        function addNewTrack () {
+            tracks.value.push({trackName: "Track " + (tracks.value.length + 0).toString()})
         }
 
         ipcRenderer.addListener('asynchronous-reply',  (event, args) => {
@@ -113,65 +135,81 @@ export default defineComponent({
                 stream_url.value = "http://localhost:"+port.toString()+"/stream.mpd"
             }
         })
+        
+        function record() {
+            context.emit('recording');
+        }
 
-        return {record, metronome, drag, mouse_down, openSingleVideoEditor, playhead, setScreenStyle, track_data, tracks, stream_url}
+        function saveVideoTransitions(data:VideoInput[]) {
+            ipcRenderer.send('set-option', 'video-transitions', data)
+        }
+
+        // Tries to load the saved video transitions object
+        // if it doesn't exist it returns an empty list
+        async function loadVideoTransitions() : Promise<VideoInput[]> {
+            await ipcRenderer.invoke("get-option", 'video-transition').then(
+                (loadedTransitions) => { return loadedTransitions} 
+            ).catch()
+            return []
+        }
+
+
+        return {loadVideoTransitions, addNewClickTrack, addNewTrack, clickTracks, drag, mouse_down, openSingleVideoEditor, playhead, record, setScreenStyle, track_data, tracks, stream_url}
 
 
     },
     created() {
 
-        console.log("Running created ()");
-        ipcRenderer.invoke('get-recordings-directory').then( (dir) => {
-        ipcRenderer.send('asynchronous-message', 
-        {
-        type: 'startEngine', 
-        data: {
-            outputType: "preview",
-            videoInputs: [
-            {
-                file: join("../recordings", "video1.webm"),
-                startTime: 0.02,
-                position: {left: 0, top: 0},
-                resolution: {width: 1280, height: 720}
-            },
-            {
-                file: join("../recordings", "video2.webm"),
-                startTime: 0.02,
-                position: {left: "w0", top: 0},
-                resolution: {width: 1280, height: 720}
-            },
-            {
-                file: join("../recordings", "video3.webm"),
-                startTime: 0.02,
-                position: {left: 0, top: "h0"},
-                resolution: {width: 1280, height: 720}
-            },
-            {
-                file: join("../recordings", "video4.webm"),
-                startTime: 0.02,
-                position: {left: "w0", top: "h0"},
-                resolution: {width: 1280, height: 720}
-            },
-            ],
-            audioInputs:[
-            /*{
-                file: join("../recordings", "audio1.webm"),
-                startTime: 0.02,
-                volume: 255,
-            },*/
-            ]
-        }
-        })
+        ipcRenderer.invoke('get-recordings-directory').then( async (dir) => {
+            
+            let videoTransitions = await this.loadVideoTransitions()
+
+            videoTransitions = [
+                    {
+                        files: ["video1.webm", "video2.webm", "video3.webm"].map(
+                            (file) => join("../recordings", (file))
+                        ),
+                        screenStyle: "|..",
+                        resolution: [
+                            {width: 1280, height: 1440},
+                            {width: 1280, height: 720},
+                            {width: 1280, height: 720},
+                        ],
+                        interval: [0, 1.5]
+                    },
+                    {
+                        files: ["video1.webm", "video2.webm", "video3.webm", "video4.webm"].map(
+                            (file) => join("../recordings", (file))
+                        ),
+                        screenStyle: "....",
+                        interval: [1.5, 3],
+                        resolution: [
+                            {width: 1280, height: 720},
+                            {width: 1280, height: 720},
+                            {width: 1280, height: 720},
+                            {width: 1280, height: 720}
+                        ],
+                    }
+                ]
+
+            ipcRenderer.send('asynchronous-message', 
+            {   
+                type: 'startEngine', 
+                data: {
+                    outputType: "preview",
+                    videoInputs: videoTransitions,
+                    audioInputs:[
+                    /*{
+                        file: join("../recordings", "audio1.webm"),
+                        startTime: 0.02,
+                        volume: 255,
+                    },*/]
+                }
+            })
         });
     },
-    async mounted() {
-        ipcRenderer.invoke('get-option', 'videoTracks').then(videoTracks => {
-            JSON.parse(videoTracks).forEach((track: string) => {
-                this.tracks.push({trackName: track.substr(0, track.indexOf(".webm"))})
-            }) 
-        })
-    },
-    emits: ["open-single-editor", "open-recording-page"]
+    emits: ["open-single-editor", "open-recording-page", "recording"]
+
 });
 </script>
 

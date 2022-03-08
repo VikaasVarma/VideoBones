@@ -72,6 +72,7 @@ ipcMain.handle('open-project-clicked', async() => {
   }
   const possible_projects = await curr_projects.filter((item: any) => item.projectPath === selected_attr.filePaths[0]);
 
+
   if (possible_projects.length <= 0) {
     try {
       const handle = await projects.trackProject(selected_attr.filePaths[0]);
