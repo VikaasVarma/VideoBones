@@ -15,10 +15,10 @@
                     <img src="../../../assets/images/stopButton.svg">
                 </button>
 
-                <div @mousedown="mouse_down = true" class="timeline" ref="timeline" style="display:flex; overflow:hidden;">
+                <div @mousedown="mouse_down = true" class="timeline" ref="timeline" style="display: flex; overflow: hidden;">
                     <div v-for="i in timeline_images.length">
                         <div v-bind:style="`aspect-ratio: 16/9; height:${timeline_seg_height};`">
-                            <img :src="timeline_images[i-1]" alt ="loading timeline..." style="max-width:100%;max-height:100%;">
+                            <img :src="timeline_images[i-1]" alt ="loading timeline..." style="max-height: 100%; max-width: 100%;">
                         </div>
                         <div v-bind:style="`height:${timeline_seg_height}; width:5px`"/>
                     </div>
@@ -42,7 +42,7 @@
                 </div>
                 <div>
                     <h2 class="section-title">Metronome</h2>
-                    <metronome-component :key="metronome.initialBpm" ref="metronome" />
+                    <metronome-component ref="metronome" />
                 </div>
                 <div>
                     <h2 class="section-title">Screen Styles</h2>
@@ -93,7 +93,7 @@ export default defineComponent({
     },
     setup(props, context) {
         
-        var tracks = ref(<object[]> [])
+        let tracks = ref(<{trackName: string}[]> [])
         let metronome = ref({ initialBpm : 80})
         let screenStyle = ref(0)
         let playhead = ref(.6)
@@ -184,7 +184,8 @@ export default defineComponent({
     },
     async mounted() {
         ipcRenderer.invoke('get-option', 'videoTracks').then(videoTracks => {
-            JSON.parse(videoTracks).forEach((track: string) => {
+            const data = JSON.parse(videoTracks)
+            data?.forEach((track: string) => {
                 this.tracks.push({trackName: track.substr(0, track.indexOf(".webm"))})
             }) 
         })
@@ -205,6 +206,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-  @import "../styles/main.scss";
-  @import "../styles/pages/video-editor.scss";
+  @import '../styles/main';
+  @import '../styles/pages/video-editor';
 </style>
