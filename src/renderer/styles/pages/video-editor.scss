@@ -32,8 +32,7 @@
 }
 
 .grid-container {
-  grid-column-gap: 30px;
-  grid-row-gap: 13px;
+  gap: 13px 30px;
   grid-template-columns: 9fr 2.5fr;
   grid-template-rows: 90% 10%;
   height: 100%;
@@ -90,6 +89,7 @@
   grid-template-rows: 1fr 1fr;
   width: 100%;
 
+  /* stylelint-disable-next-line no-descending-specificity */
   & > div {
     border: 1px solid $color-middleground;
     height: 100%;
