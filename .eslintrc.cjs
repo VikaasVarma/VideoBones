@@ -8,7 +8,7 @@ module.exports = {
     'plugin:import/typescript',
     'plugin:unicorn/recommended'
   ],
-  ignorePatterns: [  'node_modules/', 'dist/', 'build/' ],
+  ignorePatterns: [ 'node_modules/', 'dist/', 'build/' ],
   overrides: [
     {
       env: { node: true },
@@ -62,7 +62,7 @@ module.exports = {
     'block-spacing': [ 'warn', 'always' ],
     'brace-style': [ 'error', '1tbs' ],
     'comma-dangle': [ 'warn', 'never' ],
-    'comma-spacing': [ 'warn', { after: true, before: false  }],
+    'comma-spacing': [ 'warn', { after: true, before: false }],
     'consistent-return': 'off',
     'dot-notation': [ 'error', { allowKeywords: true }],
     'eol-last': [ 'error', 'always' ],
@@ -82,7 +82,7 @@ module.exports = {
     'import/order': [ 'error', { groups: [ 'builtin', 'external', 'internal', 'parent', 'sibling', 'index', 'object', 'type' ] }],
     'indent': [ 'error', 2, { SwitchCase: 1 }],
     'key-spacing': [ 'warn', { afterColon: true, beforeColon: false, mode: 'strict' }],
-    'keyword-spacing': [ 'warn', { after: true, before: true  }],
+    'keyword-spacing': [ 'warn', { after: true, before: true }],
     'linebreak-style': [ 'error', 'unix' ],
     'lines-between-class-members': [ 'error', 'always', { exceptAfterSingleLine: true }],
     'max-len': [
@@ -151,6 +151,7 @@ module.exports = {
     'space-before-function-paren': [ 'error', { anonymous: 'never', asyncArrow: 'always', named: 'never' }],
     'space-in-parens': [ 'warn', 'never' ],
     'space-infix-ops': 'warn',
+    'unicorn/filename-case': [ 'warn', { cases: { kebabCase: true, pascalCase: true } }],
     'unicorn/no-null': 'off',
     'unicorn/numeric-separators-style': [ 'warn', { onlyIfContainsSeparator: true }],
     'unicorn/prevent-abbreviations': 'off',
@@ -161,4 +162,4 @@ module.exports = {
     'vue/order-in-components': 'warn',
     'vue/sort-keys': [ 'warn', 'asc', { caseSensitive: true, natural: true }]
   }
-}
+};
