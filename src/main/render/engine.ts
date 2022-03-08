@@ -41,7 +41,7 @@ function buildArgs({
         case '_..':
           return '0_0|0_h0|w1_h0';
         default:
-          throw Error('Fuck you: invalid screenstyle');
+          throw Error(`Invalid screenstyle ${screenStyle}`);
     }
   }
 
