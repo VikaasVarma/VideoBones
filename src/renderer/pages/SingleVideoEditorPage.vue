@@ -29,13 +29,13 @@
                     
                     <tickbox-component @click="reverb_enabled=!reverb_enabled" tickbox_text="Enable Reverb" />
 
-                    <slider-component v-if="reverb_enabled" slider_name="Delay" />
+                    <slider-component  v-if="reverb_enabled" slider_name="Delay" />
                     <slider-component v-if="reverb_enabled" slider_name="Decay" />
 
                     <tickbox-component @click="echo_enabled=!echo_enabled" tickbox_text="Enable Echo"/>
 
                     <slider-component v-if="echo_enabled" slider_name="Delay" />
-                    <slider-component v-if="echo_enabled" slider_name="Decho" />
+                    <slider-component v-if="echo_enabled" slider_name="Decay" />
 
                     <tickbox-component @click="denoise_enabled=!denoise_enabled" tickbox_text="Denoise"/>
 
@@ -67,8 +67,12 @@ export default defineComponent({
             reverb_enabled : false, 
             echo_enabled : false,
             denoise_enabled : false,
+            reverb_settings : {},
+            
         }
     }
+    // djsjahkdsa.send("reverb-settings-changed", {decay:3728, delay:3278327})
+    // djsjahkdsa.send("echo-settings-changed", {decay:3728, delay:3278327})
 });
 </script>
 
