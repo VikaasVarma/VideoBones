@@ -133,7 +133,7 @@ export default defineComponent({
         function openSingleVideoEditor(file: string) { context.emit("open-single-editor", file) }
         function setScreenStyle(style: number) { screenStyle.value = style }
 
-        function drag(event: any, mouse_down: boolean) {
+        function drag(event: MouseEvent, mouse_down: boolean) {
             if (mouse_down) {
                 var timeline = document.getElementsByClassName("timeline")[0].getBoundingClientRect()
                 var x = event.clientX;
@@ -205,8 +205,8 @@ export default defineComponent({
             })
         })
 
-        let timeline_h: any = (this.$refs.timeline as any).clientHeight;
-        let timeline_w: any = (this.$refs.timeline as any).clientWidth;
+        let timeline_h = (this.$refs.timeline as HTMLElement).clientHeight;
+        let timeline_w = (this.$refs.timeline as HTMLElement).clientWidth;
 
         this.timeline_seg_height = timeline_h;
 
