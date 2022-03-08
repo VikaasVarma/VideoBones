@@ -85,7 +85,7 @@ import { ipcRenderer } from 'electron';
 import { join } from 'path';
 import VideoPlayer from '../components/VideoPlayer.vue'
 import { generateMetronome } from '../util/metronome'
-import {VideoInput} from '../../main/render/types'
+import {VideoInput, AudioInput} from '../../main/render/types'
 
 export default defineComponent({
     name: "VideoEditorPage",
@@ -199,11 +199,8 @@ export default defineComponent({
                     outputType: "preview",
                     videoInputs: videoTransitions,
                     audioInputs:[
-                    /*{
-                        file: join("../recordings", "audio1.webm"),
-                        startTime: 0.02,
-                        volume: 255,
-                    },*/]
+                        new AudioInput(join("../recordings", "audio1.webm"),1.0,255,'On',400,0.7,true,true)
+                    ]
                 }
             })
         });

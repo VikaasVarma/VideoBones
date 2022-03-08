@@ -62,11 +62,6 @@ class AudioInput {
 
   getReverbArgs(): string{
     let s = '';
-    // if (this.reverb_active === 'High'){
-    //   s = 'aecho=0.8:0.9:500:0.5,';
-    // } else if (this.reverb_active === 'Low'){
-    //   s = 'aecho=0.8:0.88:60:0.4,';
-    // }
     if(this.reverb_active){
       s = 'acho=0.8:0.9:';
       //add delays args 
