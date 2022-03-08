@@ -42,12 +42,7 @@
                 </div>
                 <div>
                     <h2 class="section-title">Metronome</h2>
-                    <metronome-component v-for="metronome in clickTracks" :key="metronome.initialBpm" ref="metronome" />
-
-                    <div @click="addNewClickTrack()" class="add-item-container">
-                        <img src="../../../assets/images/addIcon.png">
-                        <h3>New Clicker Track</h3>
-                    </div>
+                    <metronome-component :key="metronome.initialBpm" ref="metronome" />
                 </div>
                 <div>
                     <h2 class="section-title">Screen Styles</h2>
@@ -84,9 +79,7 @@ import { ipcRenderer } from 'electron';
 import VideoPlayer from '../components/VideoPlayer.vue';
 import { join } from 'path';
 
-
 const thumbnailFrequency = '1/5';
-
 
 export default defineComponent({
     name: "VideoEditorPage",
@@ -101,7 +94,7 @@ export default defineComponent({
     setup(props, context) {
         
         var tracks = ref(<object[]> [])
-        let clickTracks = ref([{ initialBpm : 80}])
+        let metronome = ref({ initialBpm : 80})
         let screenStyle = ref(0)
         let playhead = ref(.6)
         let mouse_down = ref(false)
@@ -125,10 +118,6 @@ export default defineComponent({
                 playhead.value = Math.min(timeline.width, Math.max(0, (x - timeline.x)))
             }
         }
-        
-        function addNewClickTrack() {
-            clickTracks.value.push({ initialBpm : 80 })
-        }
 
         function record () {
             context.emit('open-recording-page');
@@ -141,8 +130,7 @@ export default defineComponent({
                 }
         })
 
-        return {addNewClickTrack, record, clickTracks, drag, mouse_down, openSingleVideoEditor, playhead, setScreenStyle, track_data, tracks, stream_url}
-
+        return {record, metronome, drag, mouse_down, openSingleVideoEditor, playhead, setScreenStyle, track_data, tracks, stream_url}
 
     },
     created() {
@@ -213,7 +201,6 @@ export default defineComponent({
 
         //this.$forceUpdate();
     },
-    emits: ["open-single-editor", "open-recording-page", "recording"]
 });
 </script>
 
