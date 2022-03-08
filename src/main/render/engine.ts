@@ -4,8 +4,8 @@ import { existsSync, mkdirSync, readdirSync, rmSync } from 'fs';
 
 import { getPath } from './ffmpeg';
 import { getTempDirectory } from '../storage/config';
-import { Readable } from 'stream';
 import { join } from 'path';
+import { Readable } from 'stream';
 
 function buildArgs({
   aspectRatio = '16:9',

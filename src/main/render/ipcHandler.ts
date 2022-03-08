@@ -18,7 +18,7 @@ export function startHandler(port: number) {
           });
           break;
         case 'getThumbnails':
-          getThumbnails(arg.data, (thumbnailFiles: string[]) => { 
+          getThumbnails(arg.data, (thumbnailFiles: string[]) => {
             event.sender.send('thumbnail-reply', { event: 'thumbnails', thumbnailFiles });
           });
           break;
