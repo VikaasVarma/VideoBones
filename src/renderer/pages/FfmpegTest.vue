@@ -69,12 +69,7 @@ export default defineComponent({
           }
         ],
         audioInputs:[
-          new AudioInput(join("../recordings", "audio1.webm"),
-            1.0,255,'On',400,0.7,true,true),
-          new AudioInput(join("../recordings", "audio2.webm"),
-            0.2,255,'On',200,0.5,false,false),
-          new AudioInput(join("../recordings", "audio3.webm"),
-            2.0,255,'Off',undefined,undefined,false,true),
+
         ]
       }
     })
