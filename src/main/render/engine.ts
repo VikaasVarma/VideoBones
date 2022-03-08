@@ -67,7 +67,8 @@ function buildArgs({
     args = filter
       .concat([
         '-preset', 'ultrafast',
-        '-aspect', aspectRatio
+        '-aspect', aspectRatio,
+        '-r', '1'
       ])
       .concat([ 'thumbs/%04d.png' ]);
   } else {
