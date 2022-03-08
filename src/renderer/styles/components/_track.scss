@@ -1,0 +1,22 @@
+@use 'sass:color';
+
+.track-container {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 1fr auto auto;
+
+  button {
+    background: transparent;
+    border: 0;
+    color: #AFAFAF;
+    cursor: pointer;
+
+    &.destructive {
+      color: color.adjust($color: #AFAFAF, $red: 120);
+    }
+  }
+
+  h3 {
+    color: white;
+  }
+}
