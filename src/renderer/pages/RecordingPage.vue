@@ -1,4 +1,10 @@
 <template>
+
+    <div class="horizontal-spacer">
+      <button @click="$emit('exit-recording')" class="button-primary">EXIT</button>
+      <h1 class="section-title">RECORDING</h1>
+    </div>
+
     <div class="recording-grid">
       <video ref=videoPreview> </video>
 
@@ -37,7 +43,7 @@ export default defineComponent({
       metronomeSources: <AudioBufferSourceNode[]> [],
     }
   },
-  emits: ["recording-end"],
+  emits: ["recording-end", "exit-recording"],
   methods: {
     // On audio device selection change
     onAudioChange(event: Event) {
@@ -97,15 +103,11 @@ export default defineComponent({
           m.connect(analyser);
           analyser.fftSize = 32;
 
-          function sigmoid(z: number) {
-            return 1 / (1 + Math.exp(-z));
-          }
-
           const vuAnimation = () => {
             let d = new Uint8Array(analyser.frequencyBinCount);
             analyser.getByteFrequencyData(d);
 
-            let volume = sigmoid(d.reduce((d1, d2) => Math.max(d1, d2)) / 255) * 100
+            let volume = ((d.sort((a,b)=>b-a)[3] / 255)**2.5) * 100
 
             this.vuClip = `polygon(0 0, ${volume}% 0, ${volume}% 100%, 0 100%)`;
             requestAnimationFrame(vuAnimation);

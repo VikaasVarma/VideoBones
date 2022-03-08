@@ -1,7 +1,10 @@
 import { AudioInput, EngineOptions, VideoInput } from './types';
 import { ChildProcessByStdio, spawn } from 'child_process';
+import { existsSync, mkdirSync, readdirSync, rmSync } from 'fs';
+
 import { getPath } from './ffmpeg';
 import { getTempDirectory } from '../storage/config';
+import { join } from 'path';
 import { Readable } from 'stream';
 
 function buildArgs({
@@ -86,12 +89,17 @@ function buildArgs({
 }
 
 let ffmpeg: ChildProcessByStdio<null, Readable, null> | null;
+let ffmpeg_thumbs: ChildProcessByStdio<null, Readable, null> | null;
 
 export function start(
   options: EngineOptions,
   statusCallback: (elapsedTime: string, donePercentage: number) => void,
   doneCallback: () => void
 ) {
+  if (options.outputType === 'thumbnail') {
+    throw Error('Invalid out type for starting engine');
+  }
+
   if (ffmpeg) {
     ffmpeg.kill();
     ffmpeg = null;
@@ -112,9 +120,47 @@ export function start(
   }
 }
 
+export function getThumbnails(
+  options: EngineOptions,
+  doneCallback: (paths: string[]) => void
+) {
+  if (options.outputType !== 'thumbnail') {
+    throw Error('Invalid out type for getThumbnails');
+  }
+
+  // clean thumbnails folder
+  const thumbs = join(getTempDirectory(), 'thumbs');
+  if (!existsSync(thumbs)) {
+    mkdirSync(thumbs);
+  }
+  readdirSync(thumbs).forEach(f => rmSync(`${thumbs}/${f}`));
+
+  if (ffmpeg_thumbs) {
+    ffmpeg_thumbs.kill();
+    ffmpeg_thumbs = null;
+  }
+
+  const bin = getPath();
+  const args = buildArgs(options);
+  console.log(bin, args);
+
+  if (bin) {
+    console.log(getTempDirectory());
+    ffmpeg_thumbs = spawn(bin, args, { cwd: getTempDirectory(), stdio: [ 'ignore', 'pipe', process.stderr ] });
+    ffmpeg_thumbs.on('exit', () => {
+      const files = readdirSync(thumbs);
+      doneCallback(files.map(f => join(thumbs, f)));
+    });
+  }
+}
+
 export function kill() {
   if (ffmpeg) {
     ffmpeg.kill();
     ffmpeg = null;
+  }
+  if (ffmpeg_thumbs) {
+    ffmpeg_thumbs.kill();
+    ffmpeg_thumbs = null;
   }
 }

@@ -63,9 +63,13 @@
       }
     }
 
-    & > :not(h2) {
-      margin-top: 10px;
-    }
+		h3 {
+			width: fit-content;
+		}
+
+		& > :not(h2) {
+			margin-top: 10px;
+		}
 
     :not(h2) {
       font-size: 11px;

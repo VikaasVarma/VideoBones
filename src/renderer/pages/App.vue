@@ -15,6 +15,7 @@
                             v-else-if="pageDisplayed === 'single-video-editor-page'"/>
 
   <recording-page @recording-end="pageDisplayed = 'video-editor-page'"
+                  @exit-recording="pageDisplayed = 'video-editor-page'"
                   v-else-if="pageDisplayed === 'recording-page'"/>
   <ffmpeg-test v-else-if="pageDisplayed === 'ffmpeg-test'"/>
 </template>
