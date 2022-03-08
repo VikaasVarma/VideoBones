@@ -4,9 +4,10 @@
 	grid-row-gap: 20px;
 	grid-template-columns: 2fr 1fr 1fr;
 	margin: 20px;
+	margin-top: 0;
 
 	video {
-		width: 80%;
+		width: 78%;
 		background-color: white;
 		border: 5px solid $color-middleground;
 		border-radius: 10px;
@@ -40,6 +41,19 @@
 		background-size: 100% 100%;
 		border-radius: 4px;
 		background-repeat: no-repeat;
+	}
+}
+
+.horizontal-spacer {
+	.button-primary {
+		margin: 5px;
+		font-size: 18px;
+		height: 80%;
+		border: 0;
+	}
+
+	h1 {
+		font-size: 30px;
 	}
 }
 

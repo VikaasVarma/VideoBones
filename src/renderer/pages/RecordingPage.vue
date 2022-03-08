@@ -1,4 +1,10 @@
 <template>
+
+    <div class="horizontal-spacer">
+      <button @click="$emit('exit-recording')" class="button-primary">EXIT</button>
+      <h1 class="section-title">RECORDING</h1>
+    </div>
+
     <div class="recording-grid">
       <video ref=videoPreview> </video>
 
@@ -37,7 +43,7 @@ export default defineComponent({
       metronomeSources: <AudioBufferSourceNode[]> [],
     }
   },
-  emits: ["recording-end"],
+  emits: ["recording-end", "exit-recording"],
   methods: {
     // On audio device selection change
     onAudioChange(event: Event) {
