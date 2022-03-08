@@ -8,7 +8,7 @@
 
 
   <video-editor-page @open-single-editor="pageDisplayed = 'single-video-editor-page'" 
-                     @recording="pageDisplayed = 'recording-page'"
+                     @open-recording-page="pageDisplayed = 'recording-page'"
                      v-else-if="pageDisplayed === 'video-editor-page'"/>
 
   <single-video-editor-page @exit-single-editor="pageDisplayed = 'video-editor-page'" 
@@ -42,7 +42,6 @@ export default defineComponent({
       let pageDisplayed = ref("on-open-page")
 
       return {props, pageDisplayed}
-
     },
 });
 </script>
