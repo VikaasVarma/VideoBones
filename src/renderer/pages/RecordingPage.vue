@@ -97,11 +97,15 @@ export default defineComponent({
           m.connect(analyser);
           analyser.fftSize = 32;
 
+          function sigmoid(z: number) {
+            return 1 / (1 + Math.exp(-z));
+          }
+
           const vuAnimation = () => {
             let d = new Uint8Array(analyser.frequencyBinCount);
             analyser.getByteFrequencyData(d);
 
-            let volume = d.reduce((d1, d2) => Math.max(d1, d2)) / 255 * 100
+            let volume = sigmoid(d.reduce((d1, d2) => Math.max(d1, d2)) / 255) * 100
 
             this.vuClip = `polygon(0 0, ${volume}% 0, ${volume}% 100%, 0 100%)`;
             requestAnimationFrame(vuAnimation);
