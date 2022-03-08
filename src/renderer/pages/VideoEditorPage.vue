@@ -91,7 +91,7 @@ import VideoPlayer from '../components/VideoPlayer.vue'
 import { generateMetronome } from '../util/metronome'
 
 
-const thumbnailFrequency = '2';
+const thumbnailFrequency = '1/5';
 
 
 export default defineComponent({
