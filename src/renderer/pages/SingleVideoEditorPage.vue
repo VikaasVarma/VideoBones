@@ -27,14 +27,17 @@
                 <div>
                     <h3  class="section-title">Audio Effects</h3 >
                     
-                    <tickbox-component @click="reverb_enabled=!reverb_enabled" />
+                    <tickbox-component @click="reverb_enabled=!reverb_enabled" tickbox_text="Enable Reverb" />
 
-                    <slider-component :v-show="reverb_enabled" slider_name="Reverb" />
-                    <slider-component :v-if="reverb_enabled" slider_name="Decay" />
+                    <slider-component v-if="reverb_enabled" slider_name="Delay" />
+                    <slider-component v-if="reverb_enabled" slider_name="Decay" />
 
-                    <slider-component :v-if="echo_enabled" slider_name="dsa1" />
-                    <slider-component :v-if="echo_enabled" slider_name="dsa2" />
+                    <tickbox-component @click="echo_enabled=!echo_enabled" tickbox_text="Enable Echo"/>
 
+                    <slider-component v-if="echo_enabled" slider_name="Delay" />
+                    <slider-component v-if="echo_enabled" slider_name="Decho" />
+
+                    <tickbox-component @click="denoise_enabled=!denoise_enabled" tickbox_text="Denoise"/>
 
                 </div>
 
@@ -52,21 +55,19 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, ref } from 'vue';
 import SliderComponent from '../components/SliderComponent.vue';
 import TickboxComponent from '../components/TickboxComponent.vue';
 
 export default defineComponent({
   components: { SliderComponent, TickboxComponent },
     name: "single-video-editor-page",
-    data () {
+    data() {
         return {
             reverb_enabled : false, 
-            echo_enabled : { type : Boolean, default : false}, 
+            echo_enabled : false,
+            denoise_enabled : false,
         }
-    },
-    setup(props, context) {
-        return {}
     }
 });
 </script>
