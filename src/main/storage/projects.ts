@@ -154,7 +154,7 @@ function createProjectDirectory(parentDirectory: string, projectName: string): P
 
   // create project directory structure
   // chain promises so subdirs are only created once their parents are avaliable
-  return fs.mkdir(projectDirectory)
+  return fs.mkdir(projectDirectory, { recursive: true })
     .then(() => {
       // make subdirs
       return fs.mkdir(path.join(projectDirectory, recordingsDirectoryName))
