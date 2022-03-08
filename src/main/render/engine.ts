@@ -1,4 +1,5 @@
 import { AudioInput, EngineOptions, VideoInput } from './types';
+import { AudioInputOption, getAudioOptions } from './AudioOption';
 import { ChildProcessByStdio, spawn } from 'child_process';
 import { existsSync, mkdirSync, readdirSync, rmSync } from 'fs';
 
@@ -42,18 +43,20 @@ function buildArgs({
     }
   }
 
+  let audioInputOptions:AudioInputOption[] = getAudioOptions();
+
   // eslint-disable-next-line function-paren-newline
   const args: string[] = (<string[]>[]).concat(
     [ outputType === 'preview' ? '-re' : '' ],
     videoInputs.map(input => input.files.map(file => [ '-i', file ])).flat(2),
-    audioInputs.map(input => '-ss ' + input.startTime.toString() + ' -i ' + input.file).join(' '),
+    audioInputOptions.map(input => '-ss ' + input.startTime.toString() + ' -i ' + input.file).join(' '),
     [
       '-filter_complex', videoInputs.map((input, i) => ([
         input.resolution.map((res, j) => `[${offset[i] + j}:v]setpts=PTS-STARTPTS,scale=${res.width}x${res.height},trim=${input.interval[0]}:${input.interval[1]}[input${offset[i] + j}];`).join(''),
         `${input.files.map((_, j) => `[input${offset[i] + j}]`).join('')}xstack=inputs=${input.files.length}:layout=${screenStyle_to_layout(input.screenStyle)}[matrix${i}];`,
         `[matrix${i}]scale=${outputResolution.width}:${outputResolution.height},setsar=1:1[v${i}];`
       ].join(''))).join('') + `${videoInputs.map((_, i) => `[v${i}]`).join('')}concat[out]`,
-      audioInputs.map((input: AudioInput, i: number) =>
+      audioInputOptions.map((input: AudioInputOption, i: number) =>
         `[${i + offset[offset.length - 1]}:a]setpts=PTS-STARTPTS,
       ${input.getDeclickArgs()}
       ${input.getDeclipArgs()}
