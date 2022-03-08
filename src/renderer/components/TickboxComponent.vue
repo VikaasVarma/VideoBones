@@ -17,7 +17,7 @@ export default defineComponent({
       
   },
   data() {
-    return {ticked : {type:Boolean, default: false}}
+    return {ticked : false}
   },
   setup() {
     return {}
