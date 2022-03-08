@@ -64,7 +64,7 @@ ipcMain.handle('browse-directory-clicked', async () => {
 ipcMain.handle('open-project-clicked', async() => {
   const curr_projects = projects.getTrackedProjects();
   const selected_attr = await dialog.showOpenDialog({ properties: [ 'openDirectory' ] });
-  
+
   if (selected_attr.canceled) {
     return { failed: true, alert: false, output: '' };
   }
@@ -104,8 +104,8 @@ ipcMain.handle('create-project-clicked', async (event, projectName, projectLocat
 
     return { failed: false, alert: false, output: '' };
 
-  } catch (err: any) {
-    if (err.message.startsWith('Project directory already exists:')) {
+  } catch (err) {
+    if ((err as Error).message.startsWith('Project directory already exists:')) {
       return { failed: true, alert: true, output: 'That project already exists.' };
     }
     return err;
