@@ -6,13 +6,13 @@
 
             <div style="grid-column: 1 / 3; grid-row: 1 / 2;" class="named-input-container">
                 <h3>Project Name</h3>
-                <input @input="updateLocation" id="project-name-input" placeholder="Ex: Gangnam Style A Capella" type="text">
+                <input @input="updateLocation()" id="project-name-input" placeholder="Ex: Gangnam Style A Capella" type="text">
             </div>
 
             <div class="named-input-container action-input-container" style="grid-column: 1 / 3; grid-row: 2 / 3;">
                 <h3 style="margin-bottom: 5px;">Project location</h3>
                 <input @input="usingDefaultPath = false" id="project-location-input" type="text">
-                <button @click="browseDirectory" class="image-container">
+                <button @click="browseDirectory()" class="image-container">
                     <img src="../../../assets/images/folderIcon.png" alt="">
                 </button>
             </div>
