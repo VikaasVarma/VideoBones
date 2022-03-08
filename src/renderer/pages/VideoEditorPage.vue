@@ -1,4 +1,3 @@
-
 <template id="SingleVideoEditorPage">
     <div @mouseup="mouse_down = false" @mousemove="drag($event, mouse_down)" >
         <menu class="grid-container" style="margin: auto;">
@@ -36,25 +35,14 @@
                     <h2 class="section-title">Tracks</h2>
                     <track-selector v-for="track in tracks" :key="track.trackName" :trackName="track.trackName" />
 
-                    <div @click="addNewTrack()" class="add-item-container">
-
+                    <div @click="record()" class="add-item-container">
                         <img src="../../../assets/images/addIcon.png">
                         <h3>Add New Track</h3>
                     </div>
                 </div>
                 <div>
                     <h2 class="section-title">Metronome</h2>
-                    <div class="tickbox-container">
-                        <input type="checkbox" class="tickbox"/>
-                        <h3>Play While Recording</h3>
-                    </div>
-
-                    <metronome-component v-for="metronome in clickTracks" :key="metronome.initialBpm" />
-
-                    <div @click="addNewClickTrack()" class="add-item-container">
-                        <img src="../../../assets/images/addIcon.png">
-                        <h3>New Clicker Track</h3>
-                    </div>
+                    <metronome-component :key="metronome.initialBpm" ref="metronome" />
                 </div>
                 <div>
                     <h2 class="section-title">Screen Styles</h2>
@@ -84,15 +72,12 @@
 </template>
 
 <script lang="ts">
-import { stringify } from 'querystring';
 import { defineComponent, ref } from 'vue';
 import TrackSelector from '../components/TrackSelector.vue';
 import MetronomeComponent from '../components/MetronomeComponent.vue';
 import { ipcRenderer } from 'electron';
+import VideoPlayer from '../components/VideoPlayer.vue';
 import { join } from 'path';
-import VideoPlayer from '../components/VideoPlayer.vue'
-import { generateMetronome } from '../util/metronome'
-import {VideoInput, AudioInput} from '../../main/render/types'
 
 const thumbnailFrequency = '1/5';
 
@@ -108,10 +93,8 @@ export default defineComponent({
     },
     setup(props, context) {
         
-        var tracks = ref([
-            {trackName : "Track 0"}, 
-        ])
-        let clickTracks = ref([{ initialBpm : 80}])
+        var tracks = ref(<object[]> [])
+        let metronome = ref({ initialBpm : 80})
         let screenStyle = ref(0)
         let playhead = ref(.6)
         let mouse_down = ref(false)
@@ -126,7 +109,6 @@ export default defineComponent({
         }
 
         function openSingleVideoEditor () { context.emit("open-single-editor") }
-
         function setScreenStyle(style: number) { screenStyle.value = style }
 
         function drag(event: any, mouse_down: boolean) {
@@ -147,26 +129,8 @@ export default defineComponent({
                     stream_url.value = "http://localhost:"+port.toString()+"/stream.mpd"
                 }
         })
-        
-        function record() {
-            context.emit('recording');
-        }
 
-        function saveVideoTransitions(data:VideoInput[]) {
-            ipcRenderer.send('set-option', 'video-transitions', data)
-        }
-
-        // Tries to load the saved video transitions object
-        // if it doesn't exist it returns an empty list
-        async function loadVideoTransitions() : Promise<VideoInput[]> {
-            await ipcRenderer.invoke("get-option", 'video-transition').then(
-                (loadedTransitions) => { return loadedTransitions} 
-            ).catch()
-            return []
-        }
-
-
-        return {loadVideoTransitions, addNewClickTrack, addNewTrack, clickTracks, drag, mouse_down, openSingleVideoEditor, playhead, record, setScreenStyle, track_data, tracks, stream_url}
+        return {record, metronome, drag, mouse_down, openSingleVideoEditor, playhead, setScreenStyle, track_data, tracks, stream_url}
 
     },
     created() {
