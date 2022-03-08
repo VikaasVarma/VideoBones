@@ -53,7 +53,7 @@ function buildArgs({
           input.resolution.map((res, j) => `[${offset[i] + j}:v]setpts=PTS-STARTPTS,scale=${res.width}x${res.height},trim=${input.interval[0]}:${input.interval[1]}[input${offset[i] + j}];`).join(''),
           `${input.files.map((_, j) => `[input${offset[i] + j}]`).join('')}xstack=inputs=${input.files.length}:layout=${screenStyle_to_layout(input.screenStyle)}[matrix${i}];`,
           `[matrix${i}]scale=${outputResolution.width}:${outputResolution.height},setsar=1:1[v${i}];`
-        ].join(''))).join('') + `${videoInputs.map((_, i) => `[v${i}]`).join('')}concat=n=${videoInputs.length}[out]`
+        ].join(''))).join('') + `${videoInputs.map((_, i) => `[v${i}]`).join('')}concat=n=${videoInputs.length},fps=${outputType === 'thumbnail' ? thumbnailEvery : framesPerSecond}[out]`
       ],
       [
         '-map', '[out]'
@@ -64,7 +64,12 @@ function buildArgs({
   let args: string[];
 
   if (outputType === 'thumbnail') {
-    args = filter.concat([ 'thumbs/%04d.png' ]);
+    args = filter
+      .concat([
+        '-preset', 'ultrafast',
+        '-aspect', aspectRatio
+      ])
+      .concat([ 'thumbs/%04d.png' ]);
   } else {
     args = [ outputType === 'preview' ? '-re' : 'REMOVED' ].concat(filter).concat([
       '-c:v', 'libx264',
