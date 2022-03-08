@@ -12,6 +12,7 @@
 
 <script lang="ts">
 import { defineComponent, ref } from "vue";
+import { generateMetronome } from '../util/metronome'
 
 export default defineComponent({
   name: "metronome-component",
@@ -22,6 +23,10 @@ export default defineComponent({
     var bpm = ref(80)
 
     return {bpm}
+  },
+  unmounted() {
+    // When we switch to the recording page, generate the metronomes
+    generateMetronome({ bpm: this.bpm });
   }
 });
 

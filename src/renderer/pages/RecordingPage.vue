@@ -70,6 +70,7 @@ export default defineComponent({
           this.videoRecorder.ondataavailable = function(event) {
             that.handleDataAvailable(event, 'video');
           };
+
           this.videoRecorder.onstop = this.download;
         })
 
@@ -111,7 +112,7 @@ export default defineComponent({
     },
     // Gets metronome audio source for play back
     async handleMetronome(fileName: string): Promise<AudioBufferSourceNode>{
-      const dir = await ipcRenderer.invoke('get-recordings-directory');
+      const dir = await ipcRenderer.invoke('get-temp-directory');
       const audioFile = path.join(dir, fileName);
 
       const audioCtx = new AudioContext();
@@ -150,14 +151,14 @@ export default defineComponent({
               this.$data.metronomeSources.push(await this.handleMetronome((<HTMLInputElement> node).value));
             } else {
               const dir = await ipcRenderer.invoke('get-recordings-directory');
-              
+
               // Create an audio element and preload it
               const audio = new Audio(path.join(dir, (<HTMLInputElement> node).value));
               audio.preload = 'auto';
               
               audioTracks.push(audio);
               playbackTracks.appendChild(audio);
-          }
+            }
           }
         }
         // Play all the new audio elements
@@ -177,9 +178,6 @@ export default defineComponent({
         this.$data.metronomeSources.forEach(source => {
           source.stop();
         })
-        
-        // Emit "recording-end" to switch page
-        this.$emit("recording-end");
       }
     },
     handleDataAvailable(event: BlobEvent, type: string) {
@@ -196,23 +194,40 @@ export default defineComponent({
     },
     download() {
       // Get number to append to file names
-      var audioTracks = 1;
-      ipcRenderer.invoke('get-option', 'audioTracks').then(function(recordings: string) {
+      var videoTracks = 1;
+      ipcRenderer.invoke('get-option', 'videoTracks').then(function(recordings: string) {
         JSON.parse(recordings).forEach(() => {
-          audioTracks++;
+          videoTracks++;
         });
       });
 
       // Write video data to file in project folder
       const videoBlob = new Blob(this.videoChunks, { type: 'video/webm' })
       videoBlob.arrayBuffer().then(async buffer => {
-        ipcRenderer.invoke('add-recording', 'video' + audioTracks + '.webm').then(filePath => {
+        ipcRenderer.invoke('add-recording', 'video' + videoTracks + '.webm').then(filePath => {
           fs.writeFile(filePath, new Uint8Array(buffer), err => {
             if (err) throw err;
           });
+
+          // Update the audioTracks option to hold the new audio track
+          ipcRenderer.invoke('get-option', 'videoTracks').then(option => {
+            var copy = JSON.parse(option);
+            copy.push('video' + videoTracks + '.webm');
+            ipcRenderer.send('set-option', 'videoTracks', copy);
+
+            // Emit "recording-end" to switch page
+            this.$emit("recording-end");
+          })
         });
       });
       this.$data.videoChunks = [];
+
+      var audioTracks = 1;
+      ipcRenderer.invoke('get-option', 'audioTracks').then(function(recordings: string) {
+        JSON.parse(recordings).forEach(() => {
+          audioTracks++;
+        });
+      });
 
       // Write audio data to file in project folder
       const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' })
@@ -233,7 +248,7 @@ export default defineComponent({
       this.$data.audioChunks = [];
     },
   },
-  mounted () {
+  async mounted () {
     const video = <HTMLVideoElement> this.$refs.videoPreview;
     const audioDevices = <HTMLSelectElement> this.$refs.audioDevices
     const videoDevices = <HTMLSelectElement> this.$refs.videoDevices
@@ -254,29 +269,39 @@ export default defineComponent({
         })
       })
 
+    // Needs to wait until the metronomes are saved because they are created on the page switch
+    await new Promise(r => setTimeout(r, 500));
+    
     // Add checkboxes for each audio and metronome track to be played back
     const playbackTracks = <HTMLDivElement> this.$refs.playbackTracks;
     ipcRenderer.invoke("get-option", "audioTracks").then((recordings: string) => {
-      ipcRenderer.invoke("get-option", "clickTracks").then((metronomes: string) => {
-        const audiofiles = (<string[]> JSON.parse(recordings)).concat(JSON.parse(metronomes));
-        audiofiles.forEach(function(file:string) {
-          var checkbox = document.createElement('input');
-          checkbox.className = 'tickbox';
-          checkbox.type = 'checkbox';
-          checkbox.value = file;
+      const audiofiles = <string[]> JSON.parse(recordings);
+      ipcRenderer.invoke("get-temp-directory").then(dir => {
 
-          var header = document.createElement('h3');
-          header.textContent = file.substr(0, file.indexOf(".w"));
+        fs.readdir(dir, (err, files) => {
+          files.forEach(file => {
+            audiofiles.push(file);
+          });
 
-          playbackTracks.appendChild(checkbox);
-          playbackTracks.appendChild(header);
+          audiofiles.forEach(function(file:string) {
+            var checkbox = document.createElement('input');
+            checkbox.className = 'tickbox';
+            checkbox.type = 'checkbox';
+            checkbox.value = file;
+
+            var header = document.createElement('h3');
+            header.textContent = file.substr(0, file.indexOf(".w"));
+
+            playbackTracks.appendChild(checkbox);
+            playbackTracks.appendChild(header);
+          });
         });
       });
     });
 
     video.autoplay = true;
     this.startStreams();
-  }
+  },
 })
 </script>
 
