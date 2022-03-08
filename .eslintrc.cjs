@@ -11,10 +11,6 @@ module.exports = {
   ignorePatterns: [ 'node_modules/', 'dist/', 'build/' ],
   overrides: [
     {
-      env: { node: true },
-      files: [ '*.ts', '*.json', '*.js' ]
-    },
-    {
       files: [ '**lint**' ],
       rules: {
         'quote-props': [ 'error', 'consistent-as-needed' ]
