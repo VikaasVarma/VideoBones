@@ -1,4 +1,4 @@
-import { kill, start } from './engine';
+import { getThumbnails, kill, start } from './engine';
 import { ipcMain } from 'electron';
 
 export function startHandler(port: number) {
@@ -15,6 +15,11 @@ export function startHandler(port: number) {
             event.sender.send('asynchronous-reply', { event: 'progress', elapsedTime, donePercentage, port });
           }, () => {
             event.sender.send('asynchronous-reply', { event: 'done', port });
+          });
+          break;
+        case 'getThumbnails':
+          getThumbnails(arg.data, (thumbnailFiles: string[]) => { 
+            event.sender.send('thumbnail-reply', { event: 'thumbnails', thumbnailFiles });
           });
           break;
         case 'stopEngine':
