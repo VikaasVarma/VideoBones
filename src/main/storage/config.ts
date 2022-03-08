@@ -284,7 +284,7 @@ function addRecording(recordingName: string): string {
 
   currentOpenProject.addRecording(recordingName);
 
-  return createProjectRecordingFile(currentOpenProject.projectHandle, recordingName)
+  return createProjectRecordingFile(currentOpenProject.projectHandle, recordingName);
 }
 
 /**

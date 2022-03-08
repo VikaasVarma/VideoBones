@@ -3,23 +3,22 @@ input {
 }
 
 .options-menu {
-	padding-bottom: 30px;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr 1.2fr;
+  padding-bottom: 30px;
+  width: 60vw;
 
-	grid-template-columns: 1fr 1fr;
-	grid-template-rows: 1fr 1fr 1.2fr;
-	width: 60vw;
+  & .button-secondary {
+    font-size: medium;
+    font-weight: 600;
+    margin: 0;
+    width: fit-content;
+  }
 
-	& .button-secondary {
-		width: fit-content;
-		font-weight: 600;
-		font-size: medium;
-		margin: 0;
-	}
-
-	& .button-primary {
-		width: fit-content;
-		margin: 0;
-		font-weight: 600;
-		white-space: nowrap;
-	}
+  & .button-primary {
+    font-weight: 600;
+    margin: 0;
+    white-space: nowrap;
+    width: fit-content;
+  }
 }

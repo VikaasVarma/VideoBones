@@ -10,70 +10,66 @@ interface EngineOptions {
   outputType: 'thumbnail' | 'preview' | 'render'; // required
   outputVolume: number;
   previewManifest: string; // Ignored unless type is preview
-  thumbnailEvery: string; // X/Y format, X images every Y seconds
-  startTime: number; // Measured in seconds
   videoBitRate: string;
   videoInputs: VideoInput[]; // required
 }
 
 class AudioInput {
-  file:string;
-  startTime:number;
+  file: string;
+  startTime: number;
   volume: number;
   reverb_active: 'Off'|'Low'|'High';
   declick_active: boolean;
   declip_active: boolean;
 
   constructor(
-    file:string,
-    startTime:number = 0,
-    volume:number = 1.0,   
-    reverb_active:'Off'|'Low'|'High' = 'Off',
-    declick_active:boolean = true,
-    declip_active:boolean = true
+    file: string,
+    startTime = 0,
+    volume = 1.0,
+    reverb_active: 'Off'|'Low'|'High' = 'Off',
+    declick_active = true,
+    declip_active = true
   ){
-    this.file=file;
-    this.startTime=startTime;
+    this.file = file;
+    this.startTime = startTime;
     this.volume = volume;
     this.reverb_active = reverb_active;
     this.declick_active = declick_active;
     this.declip_active = declip_active;
   }
 
-  getDeclickArgs():string{
-    let s:string = '';
-    if(this.declick_active){
-      s = 'adeclip=window=55:overlap=75:arorder=8:threshold=10:hsize=1000:method=add,'
+  getDeclickArgs(): string{
+    let s = '';
+    if (this.declick_active){
+      s = 'adeclip=window=55:overlap=75:arorder=8:threshold=10:hsize=1000:method=add,';
     }
     return s;
   }
 
-  getDeclipArgs():string{
-    let s:string = '';
-    if (this.declip_active) 
-      {
-        s = 'adeclip=window=55:overlap=75:arorder=8:threshold=10:hsize=1000:method=add,';
-      }
+  getDeclipArgs(): string{
+    let s = '';
+    if (this.declip_active) {
+      s = 'adeclip=window=55:overlap=75:arorder=8:threshold=10:hsize=1000:method=add,';
+    }
     return s;
   }
 
-  getReverbArgs():string{
-    let s:string = '';
-    if(this.reverb_active==='High'){
-      s = 'aecho=0.8:0.9:500:0.5,'
-    }
-    else if (this.reverb_active==='Low'){
-      s = 'aecho=0.8:0.88:60:0.4,'
+  getReverbArgs(): string{
+    let s = '';
+    if (this.reverb_active === 'High'){
+      s = 'aecho=0.8:0.9:500:0.5,';
+    } else if (this.reverb_active === 'Low'){
+      s = 'aecho=0.8:0.88:60:0.4,';
     }
     return s;
   }
 }
 
 interface VideoInput {
-  files: string[]
-  screenStyle: '....' | '|..' | '_..'
-  interval: [number, number]
-  resolution: Resolution[]
+  files: string[];
+  screenStyle: '....' | '|..' | '_..';
+  interval: [number, number];
+  resolution: Resolution[];
 }
 
 interface Resolution {
