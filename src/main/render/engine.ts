@@ -44,23 +44,22 @@ function buildArgs({
     }
   }
 
-  // eslint-disable-next-line function-paren-newline
-  const filter // eslint-disable-next-line function-paren-newline
-  = videoInputs.map((input: VideoInput) => [ '-ss', (startTime + input.startTime).toString(), '-i', input.file ]).flat(1).concat(
-    // eslint-disable-next-line function-paren-newline
-    audioInputs.map((input: AudioInput) => [ '-ss', (startTime + input.startTime).toString(), '-i', input.file ]).flat(1).concat([
-      '-filter_complex',
+  const filter
+    = (<string[]>[]).concat(
+      videoInputs.map(input => input.files.map(file => [ '-i', file ])).flat(2),
+      audioInputs.map(input => input.files.map(file => [ '-i', file ])).flat(2),
       [
-        videoInputs.map((input: VideoInput, i: number) => `[${i}:v]setpts=PTS-STARTPTS,scale=${input.resolution.width}x${input.resolution.height}[input${i}];`).join(''),
-        `${videoInputs.map((__: VideoInput, i: number) => `[input${i}]`).join('')}xstack=inputs=${videoInputs.length}:layout=${videoInputs.map((input: VideoInput) => `${input.position.left}_${input.position.top}`).join('|')}[matrix];`,
-        outputType === 'thumbnail' ? `[matrix]fps=${thumbnailEvery}[pr];` : '',
-        `${outputType === 'thumbnail' ? '[pr]' : '[matrix]'}scale=${outputResolution.width}:${outputResolution.height},setsar=1:1[out]${audioInputs.length > 0 ? ';' : ''}`
-        //audioInputs.map((input: AudioInput, i: number) => `[${i + videoInputs.length}:a]setpts=PTS-STARTPTS,volume=${input.volume || 256}[ainput${i}];`).join(''),
-        //audioInputs.map((__: AudioInput, i:number) => `[ainput${i}]`).join(''), `amerge=inputs=${audioInputs.length}[aout]`
-      ].join(''),
-      '-map', '[out]'
-      //'-map', '[aout]',
-    ]));
+        '-filter_complex', videoInputs.map((input, i) => ([
+          input.resolution.map((res, j) => `[${offset[i] + j}:v]setpts=PTS-STARTPTS,scale=${res.width}x${res.height},trim=${input.interval[0]}:${input.interval[1]}[input${offset[i] + j}];`).join(''),
+          `${input.files.map((_, j) => `[input${offset[i] + j}]`).join('')}xstack=inputs=${input.files.length}:layout=${screenStyle_to_layout(input.screenStyle)}[matrix${i}];`,
+          `[matrix${i}]scale=${outputResolution.width}:${outputResolution.height},setsar=1:1[v${i}];`
+        ].join(''))).join('') + `${videoInputs.map((_, i) => `[v${i}]`).join('')}concat[out]`
+      ],
+      [
+        '-map', '[out]'
+      //'-map', '[aout]'
+      ]
+    );
 
   let args: string[];
 

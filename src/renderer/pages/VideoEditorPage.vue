@@ -17,8 +17,11 @@
                 </button>
 
                 <div @mousedown="mouse_down = true" class="timeline" ref="timeline" style="display:flex; overflow:hidden;">
-                    <div v-for="i in timeline_images.length" v-bind:style="`aspect-ratio: 16/9; height:${timeline_seg_height};`">
-                        <img :src="timeline_images[i-1]" alt ="loading timeline..." style="max-width:100%;max-height:100%;">
+                    <div v-for="i in timeline_images.length">
+                        <div v-bind:style="`aspect-ratio: 16/9; height:${timeline_seg_height};`">
+                            <img :src="timeline_images[i-1]" alt ="loading timeline..." style="max-width:100%;max-height:100%;">
+                        </div>
+                        <div v-bind:style="`height:${timeline_seg_height}; width:5px`"/>
                     </div>
 
                     <div class="playhead" :style="`position:absolute; z-index:10; left: calc(-5px + ${playhead}px)`">
