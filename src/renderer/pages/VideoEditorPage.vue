@@ -112,7 +112,8 @@ const thumbnailFrequency = '1/5';
 
 export default defineComponent({
   name: 'VideoEditorPage',
-  components: { TrackSelector, MetronomeComponent, VideoPlayer },
+  components: { MetronomeComponent, TrackSelector, VideoPlayer },
+  emits: [ 'open-recording-page', 'open-single-editor' ],
   setup(props, context) {
 
         interface Track {
@@ -129,9 +130,9 @@ export default defineComponent({
         const track_data = {
           all_track_ids: [ 'Track_0', 'Track_1', 'Track_3', 'Track_3' ],
           timeline_splits: [
-            { endpoint: 0.3, screenStyle: '....', active_tracks: [ 0, 1, 2, 3 ] },
-            { endpoint: 0.7, screenStyle: '_..', active_tracks: [ 0, 2, 3 ] },
-            { endpoint: 1, screenStyle: '|..', active_tracks: [ 0, 1, 3 ] }
+            { active_tracks: [ 0, 1, 2, 3 ], endpoint: 0.3, screenStyle: '....'  },
+            { active_tracks: [ 0, 2, 3 ], endpoint: 0.7, screenStyle: '_..' },
+            { active_tracks: [ 0, 1, 3 ], endpoint: 1, screenStyle: '|..'  }
           ]
         };
 
@@ -157,7 +158,8 @@ export default defineComponent({
           }
         });
 
-        return { activeSegment, metronome, drag, mouse_down, openSingleVideoEditor, playhead, screenStyle, setScreenStyle, track_data, tracks, stream_url };
+        return { activeSegment, drag, metronome, mouse_down, openSingleVideoEditor,
+          playhead, screenStyle, setScreenStyle, stream_url, track_data, tracks };
 
   },
   data(): { timeline_images: string[]; timeline_seg_height: number; timeline_segments_count: number } {
@@ -168,51 +170,58 @@ export default defineComponent({
     };
   },
   created() {
-    const self = this;
     ipcRenderer.on('thumbnail-reply', (event, args) => {
-      const new_timeline_images = new Array<string>(self.timeline_segments_count);
-      for (let i = 0; i < self.timeline_segments_count; ++i) {
-        new_timeline_images[i] = args.thumbnailFiles[Math.floor((i / new_timeline_images.length) * args.thumbnailFiles.length)];
+      this.timeline_images = [];
+      for (let i = 0; i < this.timeline_segments_count; ++i) {
+        this.timeline_images.push(args.thumbnailFiles[
+          Math.floor((i / this.timeline_segments_count) * args.thumbnailFiles.length)
+        ]);
       }
-
-      (self.timeline_images as string[]) = new_timeline_images;
     });
 
     ipcRenderer.invoke('get-recordings-directory').then(dir => {
       const engineOpts = {
-        outputType: 'preview',
-        videoInputs: [
-          {
-            files: [ join('../recordings', 'video1.webm'), join('../recordings', 'video2.webm'), join('../recordings', 'video3.webm'), join('../recordings', 'video4.webm') ],
-            screenStyle: '....',
-            interval: [ 0, 10 ],
-            resolution: [{ width: 1280, height: 720 }, { width: 1280, height: 720 }, { width: 1280, height: 720 }, { width: 1280, height: 720 }]
-          }
-        ],
         audioInputs: [
-          /*{
+        /*{
                         file: join("../recordings", "audio1.webm"),
                         startTime: 0.02,
                         volume: 255,
                     },*/
         ],
-        thumbnailEvery: thumbnailFrequency
+        outputType: 'preview',
+        thumbnailEvery: thumbnailFrequency,
+        videoInputs: [
+          {
+            files: [
+              join(dir, 'video1.webm'),
+              join('../recordings', 'video2.webm'),
+              join('../recordings', 'video3.webm'),
+              join('../recordings', 'video4.webm')
+            ],
+            interval: [ 0, 10 ],
+            resolution: [
+              { height: 720, width: 1280 },
+              { height: 720, width: 1280 },
+              { height: 720, width: 1280 },
+              { height: 720, width: 1280 }
+            ],
+            screenStyle: '....'
+          }
+        ]
       };
       ipcRenderer.send(
         'asynchronous-message',
         {
-          type: 'startEngine',
-          data: engineOpts
+          data: engineOpts,
+          type: 'startEngine'
         }
       );
 
-      const thumbEngineOpts = engineOpts;
-      thumbEngineOpts.outputType = 'thumbnail';
       ipcRenderer.send(
         'asynchronous-message',
         {
-          type: 'getThumbnails',
-          data: thumbEngineOpts
+          data: { ...engineOpts, outputType: 'thumbnail' },
+          type: 'getThumbnails'
         }
       );
     });
@@ -220,9 +229,9 @@ export default defineComponent({
   async mounted() {
     ipcRenderer.invoke('get-option', 'videoTracks').then(videoTracks => {
       const data = JSON.parse(videoTracks);
-      data?.forEach((track: string) => {
+      for (const track of data) {
         this.tracks.push({ trackName: track.slice(0, Math.max(0, track.indexOf('.webm'))) });
-      });
+      }
     });
 
     const timeline_h = (this.$refs.timeline as HTMLElement).clientHeight;
