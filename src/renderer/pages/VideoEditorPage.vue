@@ -15,8 +15,15 @@
                     <img src="../../../assets/images/stopButton.svg">
                 </button>
 
-                <div @mousedown="mouse_down = true" class="timeline">
-                    <div class="playhead" :style="`left: calc(-5px + ${playhead * 100}%)`">
+                <div @mousedown="mouse_down = true" class="timeline" ref="timeline" style="display:flex; overflow:hidden;">
+                    <div v-for="i in timeline_images.length">
+                        <div v-bind:style="`aspect-ratio: 16/9; height:${timeline_seg_height};`">
+                            <img :src="timeline_images[i-1]" alt ="loading timeline..." style="max-width:100%;max-height:100%;">
+                        </div>
+                        <div v-bind:style="`height:${timeline_seg_height}; width:5px`"/>
+                    </div>
+
+                    <div class="playhead" :style="`position:absolute; z-index:10; left: calc(-5px + ${playhead}px)`">
                         <div></div> <div></div>
                     </div>
                 </div>
@@ -72,9 +79,18 @@ import { ipcRenderer } from 'electron';
 import VideoPlayer from '../components/VideoPlayer.vue';
 import { join } from 'path';
 
+const thumbnailFrequency = '1/5';
+
 export default defineComponent({
     name: "VideoEditorPage",
     components: { TrackSelector, MetronomeComponent, VideoPlayer },
+    data() : {timeline_images: string[], timeline_seg_height: number, timeline_segments_count: number } {
+        return {
+            timeline_images: [],
+            timeline_seg_height:0,
+            timeline_segments_count:0
+        }
+    },
     setup(props, context) {
         
         var tracks = ref(<object[]> [])
@@ -99,58 +115,47 @@ export default defineComponent({
             if (mouse_down) {
                 var timeline = document.getElementsByClassName("timeline")[0].getBoundingClientRect()
                 var x = event.clientX;
-                playhead.value = Math.min(1, Math.max(0, (x - timeline.x) / timeline.width))
+                playhead.value = Math.min(timeline.width, Math.max(0, (x - timeline.x)))
             }
         }
-    
+
         function record () {
             context.emit('open-recording-page');
         }
 
         ipcRenderer.addListener('asynchronous-reply',  (event, args) => {
-            let port = args.port
-            if (stream_url.value === "") {
-                stream_url.value = "http://localhost:"+port.toString()+"/stream.mpd"
-            }
+                let port = args.port
+                if (stream_url.value === "") {
+                    stream_url.value = "http://localhost:"+port.toString()+"/stream.mpd"
+                }
         })
 
         return {record, metronome, drag, mouse_down, openSingleVideoEditor, playhead, setScreenStyle, track_data, tracks, stream_url}
-
 
     },
     created() {
 
         console.log("Running created ()");
+
+        let self = this;
+        ipcRenderer.on('thumbnail-reply', (event, args) => {
+            let new_timeline_images = new Array<string>(self.timeline_segments_count);
+            for (let i = 0; i < self.timeline_segments_count; ++i) {
+                new_timeline_images[i] = args.thumbnailFiles[Math.floor((i / new_timeline_images.length) * args.thumbnailFiles.length)]
+            }
+
+            (self.timeline_images as string[]) = new_timeline_images;
+        });
+
         ipcRenderer.invoke('get-recordings-directory').then( (dir) => {
-        ipcRenderer.send('asynchronous-message', 
-        {
-        type: 'startEngine', 
-        data: {
+            const engineOpts = {
             outputType: "preview",
             videoInputs: [
             {
-                file: join("../recordings", "video1.webm"),
-                startTime: 0.02,
-                position: {left: 0, top: 0},
-                resolution: {width: 1280, height: 720}
-            },
-            {
-                file: join("../recordings", "video2.webm"),
-                startTime: 0.02,
-                position: {left: "w0", top: 0},
-                resolution: {width: 1280, height: 720}
-            },
-            {
-                file: join("../recordings", "video3.webm"),
-                startTime: 0.02,
-                position: {left: 0, top: "h0"},
-                resolution: {width: 1280, height: 720}
-            },
-            {
-                file: join("../recordings", "video4.webm"),
-                startTime: 0.02,
-                position: {left: "w0", top: "h0"},
-                resolution: {width: 1280, height: 720}
+                files: [join("../recordings", "video1.webm"), join("../recordings", "video2.webm"), join("../recordings", "video3.webm"), join("../recordings", "video4.webm")],
+                screenStyle: '....',
+                interval:[0,10],
+                resolution: [{width: 1280, height: 720},{width: 1280, height: 720},{width: 1280, height: 720},{width: 1280, height: 720}]
             },
             ],
             audioInputs:[
@@ -159,8 +164,21 @@ export default defineComponent({
                 startTime: 0.02,
                 volume: 255,
             },*/
-            ]
-        }
+            ],
+            thumbnailEvery:thumbnailFrequency
+        };
+        ipcRenderer.send('asynchronous-message', 
+        {
+          type: 'startEngine', 
+          data: engineOpts
+        });
+
+        const thumbEngineOpts = engineOpts;
+        thumbEngineOpts.outputType = 'thumbnail';
+        ipcRenderer.send('asynchronous-message', 
+        {
+          type: 'getThumbnails', 
+          data: thumbEngineOpts
         })
         });
     },
@@ -170,8 +188,19 @@ export default defineComponent({
                 this.tracks.push({trackName: track.substr(0, track.indexOf(".webm"))})
             }) 
         })
+
+        let timeline_h:any = (this.$refs.timeline as any).clientHeight;
+        let timeline_w: any = (this.$refs.timeline as any).clientWidth;
+
+        this.timeline_seg_height = timeline_h;
+
+        // TODO: update this if we change the aspect ratio
+        const timeline_seg_width = Math.floor((timeline_h / 9) * 16);
+
+        this.timeline_segments_count = Math.ceil(timeline_w / timeline_seg_width);
+
+        //this.$forceUpdate();
     },
-    emits: ["open-single-editor", "open-recording-page"]
 });
 </script>
 
