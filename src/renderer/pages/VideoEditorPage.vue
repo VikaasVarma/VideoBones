@@ -143,6 +143,7 @@ export default defineComponent({
 
         function addNewTrack () {
             tracks.value.push({trackName: "Track " + (tracks.value.length + 0).toString()})
+            context.emit("recording")
         }
 
         ipcRenderer.addListener('asynchronous-reply',  (event, args) => {
@@ -179,28 +180,10 @@ export default defineComponent({
             outputType: "preview",
             videoInputs: [
             {
-                file: join("../recordings", "video1.webm"),
-                startTime: 0.02,
-                position: {left: 0, top: 0},
-                resolution: {width: 1280, height: 720}
-            },
-            {
-                file: join("../recordings", "video2.webm"),
-                startTime: 0.02,
-                position: {left: "w0", top: 0},
-                resolution: {width: 1280, height: 720}
-            },
-            {
-                file: join("../recordings", "video3.webm"),
-                startTime: 0.02,
-                position: {left: 0, top: "h0"},
-                resolution: {width: 1280, height: 720}
-            },
-            {
-                file: join("../recordings", "video4.webm"),
-                startTime: 0.02,
-                position: {left: "w0", top: "h0"},
-                resolution: {width: 1280, height: 720}
+                files: [join("../recordings", "video1.webm"), join("../recordings", "video2.webm"), join("../recordings", "video3.webm"), join("../recordings", "video4.webm")],
+                screenStyle: '....',
+                interval:[0,10],
+                resolution: [{width: 1280, height: 720},{width: 1280, height: 720},{width: 1280, height: 720},{width: 1280, height: 720}]
             },
             ],
             audioInputs:[

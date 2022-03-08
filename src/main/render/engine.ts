@@ -53,7 +53,7 @@ function buildArgs({
           input.resolution.map((res, j) => `[${offset[i] + j}:v]setpts=PTS-STARTPTS,scale=${res.width}x${res.height},trim=${input.interval[0]}:${input.interval[1]}[input${offset[i] + j}];`).join(''),
           `${input.files.map((_, j) => `[input${offset[i] + j}]`).join('')}xstack=inputs=${input.files.length}:layout=${screenStyle_to_layout(input.screenStyle)}[matrix${i}];`,
           `[matrix${i}]scale=${outputResolution.width}:${outputResolution.height},setsar=1:1[v${i}];`
-        ].join(''))).join('') + `${videoInputs.map((_, i) => `[v${i}]`).join('')}concat[out]`
+        ].join(''))).join('') + `${videoInputs.map((_, i) => `[v${i}]`).join('')}concat=n=${videoInputs.length}[out]`
       ],
       [
         '-map', '[out]'
@@ -72,8 +72,8 @@ function buildArgs({
       '-ac', '2',
       '-ar', audioSampleRate.toString(),
       '-x264opts', `keyint=${framesPerSecond}:min-keyint=${framesPerSecond}:no-scenecut`,
-      { 'preview': '-f', 'thumbnail': 'REMOVED', 'render': '-f' }[outputType],
-      { 'preview': 'dash', 'thumbnail': 'REMOVED', 'render': 'mp4' }[outputType],
+      { 'preview': '-f', 'render': '-f' }[outputType],
+      { 'preview': 'dash', 'render': 'mp4' }[outputType],
       //'-min_seg_duration', '2000000',
       '-b:v', videoBitRate,
       '-b:a', audioBitRate,
