@@ -27,16 +27,17 @@
                 <div>
                     <h3  class="section-title">Audio Effects</h3 >
                     
-                    <slider-component slider_name="Reverb" />
-                    <slider-component slider_name="Decay" />
+                    <tickbox-component @click="reverb_enabled=!reverb_enabled" tickbox_text="Enable Reverb" />
 
-                    <slider-component slider_name="dsa" />
-                    <slider-component slider_name="dsa" />
+                    <slider-component  v-if="reverb_enabled" slider_name="Delay" />
+                    <slider-component v-if="reverb_enabled" slider_name="Decay" />
 
-                    <!-- <div class="tickbox-container">
-                        <input type="checkbox" class="tickbox"/>
-                        <h3>Something Else</h3>
-                    </div> -->
+                    <tickbox-component @click="echo_enabled=!echo_enabled" tickbox_text="Enable Echo"/>
+
+                    <slider-component v-if="echo_enabled" slider_name="Delay" />
+                    <slider-component v-if="echo_enabled" slider_name="Decay" />
+
+                    <tickbox-component @click="denoise_enabled=!denoise_enabled" tickbox_text="Denoise"/>
 
                 </div>
 
@@ -54,15 +55,24 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, ref } from 'vue';
 import SliderComponent from '../components/SliderComponent.vue';
+import TickboxComponent from '../components/TickboxComponent.vue';
 
 export default defineComponent({
-  components: { SliderComponent },
+  components: { SliderComponent, TickboxComponent },
     name: "single-video-editor-page",
-    setup(props, context) {
-        return {}
+    data() {
+        return {
+            reverb_enabled : false, 
+            echo_enabled : false,
+            denoise_enabled : false,
+            reverb_settings : {},
+            
+        }
     }
+    // djsjahkdsa.send("reverb-settings-changed", {decay:3728, delay:3278327})
+    // djsjahkdsa.send("echo-settings-changed", {decay:3728, delay:3278327})
 });
 </script>
 
