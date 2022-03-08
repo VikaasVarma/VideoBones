@@ -16,18 +16,17 @@ interface EngineOptions {
   videoInputs: VideoInput[]; // required
 }
 
-
 interface AudioInput {
-  files: string[]
-  volumes: number[]
-  interval: [number, number]
+  files: string[];
+  volumes: number[];
+  interval: [number, number];
 }
 
 interface VideoInput {
-  files: string[]
-  screenStyle: '....' | '|..' | '_..'
-  interval: [number, number]
-  resolution: Resolution[]
+  files: string[];
+  screenStyle: '....' | '|..' | '_..';
+  interval: [number, number];
+  resolution: Resolution[];
 }
 
 interface Resolution {
