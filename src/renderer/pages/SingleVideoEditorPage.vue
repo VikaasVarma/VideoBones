@@ -23,23 +23,27 @@
             </div>
 
 
-            <menu @click="test()" class="vertical-options-menu">
+            <menu class="vertical-options-menu">
                 <div>
                     <h3  class="section-title">Audio Effects</h3 >
                     
                     <tickbox-component @click="reverb_enabled=!reverb_enabled" tickbox_text="Enable Reverb" />
 
                     <slider-component  v-model:slider_value="reverb_settings.delay"
+                                        @update:slider_value="updateReverb()"
                                         v-if="reverb_enabled" slider_name="Delay" />
 
                     <slider-component v-model:slider_value="reverb_settings.decay"
+                                        @update:slider_value="updateReverb()"
                                         v-if="reverb_enabled" slider_name="Decay" />
 
                     <tickbox-component @click="echo_enabled=!echo_enabled" tickbox_text="Enable Echo"/>
 
                     <slider-component v-model:slider_value="echo_settings.delay"
+                                        @update:slider_value="updateEcho()"
                                      v-if="echo_enabled" slider_name="Delay" />
                     <slider-component v-model:slider_value="echo_settings.decay" 
+                                         @update:slider_value="updateEcho()"
                                        v-if="echo_enabled" slider_name="Decay" />
 
                     <tickbox-component @click="denoise_enabled=!denoise_enabled" tickbox_text="Denoise"/>
@@ -57,6 +61,7 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
+import { ipcRenderer, IpcRenderer } from 'electron';
 import SliderComponent from '../components/SliderComponent.vue';
 import TickboxComponent from '../components/TickboxComponent.vue';
 
@@ -74,8 +79,11 @@ export default defineComponent({
         }
     },
     methods : {
-        test () {
-            console.log(this.reverb_settings, this.echo_settings)
+        updateReverb () {
+            ipcRenderer.send('reverb-settings-changed', this.reverb_settings)
+        },
+        updateEcho() {
+            ipcRenderer.send('echo-settings-changed', this.echo_settings)
         }
     },
     // djsjahkdsa.send("reverb-settings-changed", {decay:3728, delay:3278327})
