@@ -1,11 +1,12 @@
-import { AudioInput, EngineOptions, VideoInput } from './types';
-import { ChildProcessByStdio, spawn } from 'child_process';
-import { existsSync, mkdirSync, readdirSync, rmSync } from 'fs';
+import { join } from 'node:path';
+import { ChildProcessByStdio, spawn } from 'node:child_process';
+import { existsSync, mkdirSync, readdirSync, rmSync } from 'node:fs';
 
-import { getPath } from './ffmpeg';
+import { Readable } from 'node:stream';
 import { getTempDirectory } from '../storage/config';
-import { join } from 'path';
-import { Readable } from 'stream';
+import { getPath } from './ffmpeg';
+import { AudioInput, EngineOptions, VideoInput } from './types';
+
 
 function buildArgs({
   aspectRatio = '16:9',
@@ -33,14 +34,14 @@ function buildArgs({
 
   function screenStyle_to_layout(screenStyle: string) {
     switch (screenStyle) {
-        case '....':
-          return '0_0|w0_0|0_h0|w0_h0';
-        case '|..':
-          return '0_0|w0_0|w0_h1';
-        case '_..':
-          return '0_0|0_h0|w1_h0';
-        default:
-          throw Error(`Invalid screenstyle ${screenStyle}`);
+      case '....':
+        return '0_0|w0_0|0_h0|w0_h0';
+      case '|..':
+        return '0_0|w0_0|w0_h1';
+      case '_..':
+        return '0_0|0_h0|w1_h0';
+      default:
+        throw new Error(`Invalid screenstyle ${screenStyle}`);
     }
   }
 
@@ -49,11 +50,11 @@ function buildArgs({
       videoInputs.map(input => input.files.map(file => [ '-i', file ])).flat(2),
       audioInputs.map(input => input.files.map(file => [ '-i', file ])).flat(2),
       [
-        '-filter_complex', videoInputs.map((input, i) => ([
+        '-filter_complex', `${videoInputs.map((input, i) => ([
           input.resolution.map((res, j) => `[${offset[i] + j}:v]setpts=PTS-STARTPTS,scale=${res.width}x${res.height},trim=${input.interval[0]}:${input.interval[1]}[input${offset[i] + j}];`).join(''),
           `${input.files.map((_, j) => `[input${offset[i] + j}]`).join('')}xstack=inputs=${input.files.length}:layout=${screenStyle_to_layout(input.screenStyle)}[matrix${i}];`,
           `[matrix${i}]scale=${outputResolution.width}:${outputResolution.height},setsar=1:1[v${i}];`
-        ].join(''))).join('') + `${videoInputs.map((_, i) => `[v${i}]`).join('')}concat=n=${videoInputs.length},fps=${outputType === 'thumbnail' ? thumbnailEvery : framesPerSecond}[out]`
+        ].join(''))).join('')  }${videoInputs.map((_, i) => `[v${i}]`).join('')}concat=n=${videoInputs.length},fps=${outputType === 'thumbnail' ? thumbnailEvery : framesPerSecond}[out]`
       ],
       [
         '-map', '[out]'
@@ -61,42 +62,37 @@ function buildArgs({
       ]
     );
 
-  let args: string[];
-
-  if (outputType === 'thumbnail') {
-    args = filter
-      .concat([
-        '-preset', 'ultrafast',
-        '-aspect', aspectRatio,
-        '-r', '1'
-      ])
-      .concat([ 'thumbs/%04d.png' ]);
-  } else {
-    args = [ outputType === 'preview' ? '-re' : 'REMOVED' ].concat(filter).concat([
-      '-c:v', 'libx264',
-      '-c:a', 'aac',
-      '-ac', '2',
-      '-ar', audioSampleRate.toString(),
-      '-x264opts', `keyint=${framesPerSecond}:min-keyint=${framesPerSecond}:no-scenecut`,
-      { 'preview': '-f', 'render': '-f' }[outputType],
-      { 'preview': 'dash', 'render': 'mp4' }[outputType],
-      //'-min_seg_duration', '2000000',
-      '-b:v', videoBitRate,
-      '-b:a', audioBitRate,
-      '-preset', outputType === 'render' ? 'medium' : 'ultrafast',
-      '-tune', 'zerolatency',
-      '-maxrate', videoBitRate,
-      '-bufsize', bufferSize,
-      '-v', 'info',
-      '-aspect', aspectRatio,
-      '-vol', outputVolume.toString(),
-      '-metadata', 'description="Made with VideoBones"',
-      '-stats'
-    ])
-      .concat([ outputType === 'render' ? outputFile : previewManifest ]).filter(str => {
-        return str !== 'REMOVED';
-      });
-  }
+  const args = outputType === 'thumbnail' ? [
+    ...filter,
+    '-preset', 'ultrafast',
+    '-aspect', aspectRatio,
+    '-r', '1'
+    ,  'thumbs/%04d.png'
+  ] : [
+    ...[ outputType === 'preview' ? '-re' : 'REMOVED' ].concat(filter),
+    '-c:v', 'libx264',
+    '-c:a', 'aac',
+    '-ac', '2',
+    '-ar', audioSampleRate.toString(),
+    '-x264opts', `keyint=${framesPerSecond}:min-keyint=${framesPerSecond}:no-scenecut`,
+    { 'preview': '-f', 'render': '-f' }[outputType],
+    { 'preview': 'dash', 'render': 'mp4' }[outputType],
+    //'-min_seg_duration', '2000000',
+    '-b:v', videoBitRate,
+    '-b:a', audioBitRate,
+    '-preset', outputType === 'render' ? 'medium' : 'ultrafast',
+    '-tune', 'zerolatency',
+    '-maxrate', videoBitRate,
+    '-bufsize', bufferSize,
+    '-v', 'info',
+    '-aspect', aspectRatio,
+    '-vol', outputVolume.toString(),
+    '-metadata', 'description="Made with VideoBones"',
+    '-stats'
+    ,  outputType === 'render' ? outputFile : previewManifest
+  ].filter(str => {
+    return str !== 'REMOVED';
+  });
 
   console.log(args);
   return args;
@@ -111,7 +107,7 @@ export function start(
   doneCallback: () => void
 ) {
   if (options.outputType === 'thumbnail') {
-    throw Error('Invalid out type for starting engine');
+    throw new Error('Invalid out type for starting engine');
   }
 
   if (ffmpeg) {
@@ -139,7 +135,7 @@ export function getThumbnails(
   doneCallback: (paths: string[]) => void
 ) {
   if (options.outputType !== 'thumbnail') {
-    throw Error('Invalid out type for getThumbnails');
+    throw new Error('Invalid out type for getThumbnails');
   }
 
   // clean thumbnails folder
@@ -147,7 +143,7 @@ export function getThumbnails(
   if (!existsSync(thumbs)) {
     mkdirSync(thumbs);
   }
-  readdirSync(thumbs).forEach(f => rmSync(`${thumbs}/${f}`));
+  for (const f of readdirSync(thumbs))  rmSync(`${thumbs}/${f}`);
 
   if (ffmpeg_thumbs) {
     ffmpeg_thumbs.kill();
