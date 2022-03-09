@@ -1,9 +1,9 @@
 <template id="SingleVideoEditorPage">
-    <div @mouseup="mouse_down = false" @mousemove="drag($event, mouse_down)" >
+    <div @mouseup="endTimelineDrag()" @mousemove="drag($event, mouse_down)" >
         <menu class="grid-container" style="margin: auto;">
 
             <div id="video-container">
-                <video-player v-if="stream_url != '' " :manifest-url="stream_url"/>
+                <video-player ref='fuckingVideoPlayer' v-if="stream_url != '' " :manifest-url="stream_url"/>
             </div>
 
             <div id="video-controls" class="horizontal-spacer">
@@ -15,7 +15,7 @@
                     <img src="../../../assets/images/stopButton.svg">
                 </button>
 
-                <div @mousedown="mouse_down = true" class="timeline" ref="timeline" style="display:flex; overflow:hidden;">
+                <div @mousedown="startTimelineDrag()" class="timeline" ref="timeline" style="display:flex; overflow:hidden;">
                     <div v-for="i in timeline_images.length">
                         <div v-bind:style="`aspect-ratio: 16/9; height:${timeline_seg_height};`">
                             <img :src="timeline_images[i-1]" alt ="loading timeline..." style="max-width:100%;max-height:100%;">
@@ -79,17 +79,45 @@ import { ipcRenderer } from 'electron';
 import VideoPlayer from '../components/VideoPlayer.vue';
 import { join } from 'path';
 
-const thumbnailFrequency = '1/5';
+const thumbnailFrequency = '1';
 
 export default defineComponent({
     name: "VideoEditorPage",
     components: { TrackSelector, MetronomeComponent, VideoPlayer },
-    data() : {timeline_images: string[], timeline_seg_height: number, timeline_segments_count: number } {
+    data() {
         return {
             timeline_images: [],
             timeline_seg_height:0,
-            timeline_segments_count:0
+            timeline_segments_count:0,
+            timeline_max_time: 0,
+            timeline_is_dragging: false,
         }
+    },
+    methods: {
+        drag: function (event: any, mouse_down: boolean) {
+            if (this.mouse_down) {
+                var timeline = document.getElementsByClassName("timeline")[0].getBoundingClientRect();
+                var x = event.clientX;
+                this.playhead = Math.min(timeline.width, Math.max(0, (x - timeline.x)));
+            }
+        },
+        startTimelineDrag: function() {
+            this.mouse_down = true;
+            (this.$refs.fuckingVideoPlayer as any).pausePlayback();
+        },
+        endTimelineDrag: function() {
+            if (this.mouse_down) {
+                const vidPlayer = (this.$refs.fuckingVideoPlayer as any);
+                var timeline = document.getElementsByClassName("timeline")[0].getBoundingClientRect();
+                const newPlaybackTime = (this.playhead / timeline.width) * vidPlayer.getEndTime();
+
+                vidPlayer.seekToTime(newPlaybackTime);
+
+                vidPlayer.resumePlayback();
+                this.mouse_down = false;
+            }
+        }
+
     },
     setup(props, context) {
         
@@ -110,27 +138,16 @@ export default defineComponent({
 
         function openSingleVideoEditor () { context.emit("open-single-editor") }
         function setScreenStyle(style: number) { screenStyle.value = style }
-
-        function drag(event: any, mouse_down: boolean) {
-            if (mouse_down) {
-                var timeline = document.getElementsByClassName("timeline")[0].getBoundingClientRect()
-                var x = event.clientX;
-                playhead.value = Math.min(timeline.width, Math.max(0, (x - timeline.x)))
-            }
-        }
-
-        function record () {
-            context.emit('open-recording-page');
-        }
+        function record () { context.emit('open-recording-page'); }
 
         ipcRenderer.addListener('asynchronous-reply',  (event, args) => {
-                let port = args.port
-                if (stream_url.value === "") {
-                    stream_url.value = "http://localhost:"+port.toString()+"/stream.mpd"
-                }
+            let port = args.port
+            if (stream_url.value === "") {
+                stream_url.value = "http://localhost:"+port.toString()+"/stream.mpd"
+            }
         })
 
-        return {record, metronome, drag, mouse_down, openSingleVideoEditor, playhead, setScreenStyle, track_data, tracks, stream_url}
+        return {record, metronome, mouse_down, openSingleVideoEditor, playhead, setScreenStyle, track_data, tracks, stream_url}
 
     },
     created() {
@@ -147,26 +164,38 @@ export default defineComponent({
             (self.timeline_images as string[]) = new_timeline_images;
         });
 
+
         ipcRenderer.invoke('get-recordings-directory').then( (dir) => {
             const engineOpts = {
-            outputType: "preview",
-            videoInputs: [
-            {
-                files: [join("../recordings", "video1.webm"), join("../recordings", "video2.webm"), join("../recordings", "video3.webm"), join("../recordings", "video4.webm")],
-                screenStyle: '....',
-                interval:[0,10],
-                resolution: [{width: 1280, height: 720},{width: 1280, height: 720},{width: 1280, height: 720},{width: 1280, height: 720}]
-            },
-            ],
-            audioInputs:[
-            /*{
-                file: join("../recordings", "audio1.webm"),
-                startTime: 0.02,
-                volume: 255,
-            },*/
-            ],
-            thumbnailEvery:thumbnailFrequency
-        };
+                outputType: "preview",
+                videoInputs: 
+                [
+                    {
+                        files: [join("../recordings", "video1.webm"), join("../recordings", "video2.webm"), join("../recordings", "video3.webm"), join("../recordings", "video4.webm")],
+                        screenStyle: '....',
+                        interval:[0,5],
+                        resolution: [{width: 1280, height: 720},{width: 1280, height: 720},{width: 1280, height: 720},{width: 1280, height: 720}]
+                    },
+                    {
+                        files: [join("../recordings", "video1.webm"), join("../recordings", "video2.webm"), join("../recordings", "video3.webm")],
+                        screenStyle: '|..',
+                        interval:[5,10],
+                        resolution: [{width: 1280, height: 1440},{width: 1280, height: 720},{width: 1280, height: 720}]
+                    }
+                ],
+                audioInputs:[
+                /*{
+                    file: join("../recordings", "audio1.webm"),
+                    startTime: 0.02,
+                    volume: 255,
+                },*/
+                ],
+                thumbnailEvery:thumbnailFrequency
+            };
+
+        // the max time for the timeline is the end of the last video interval, which is the length of the whole video
+        this.timeline_max_time = engineOpts.videoInputs[engineOpts.videoInputs.length-1].interval[1];
+
         ipcRenderer.send('asynchronous-message', 
         {
           type: 'startEngine', 
@@ -200,7 +229,18 @@ export default defineComponent({
         this.timeline_segments_count = Math.ceil(timeline_w / timeline_seg_width);
 
         //this.$forceUpdate();
-    },
+
+        const playheadUpdate = () => {
+            if (this.$refs['fuckingVideoPlayer'] !== undefined && !this.mouse_down) {
+                var timeline = document.getElementsByClassName("timeline")[0].getBoundingClientRect()
+                const vidPlayer = (this.$refs.fuckingVideoPlayer as any);
+                const playheadx = (vidPlayer.getCurrentTime() / vidPlayer.getEndTime()) * timeline.width;
+
+                this.playhead = (playheadx);
+            }
+        }
+        window.setInterval(playheadUpdate, 0.1);
+    }
 });
 </script>
 
