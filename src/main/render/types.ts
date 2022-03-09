@@ -37,7 +37,9 @@ interface VideoData {
     file: string,
     interval: [number, number],
     position: Position,
-    resolution: Resolution
+    resolution: Resolution,
+    crop_size: Resolution,
+    crop_offset: Position
 }
 
 interface Resolution {

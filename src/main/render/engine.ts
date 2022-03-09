@@ -87,7 +87,9 @@ function buildArgs({
                 file: file,
                 interval: input.interval,
                 position: { top: layout[i].x, left: layout[i].y },
-                resolution: { width: input.resolutions[i].width * layout[i].resizeRatio!, height: input.resolutions[i].height * layout[i].resizeRatio! }
+                resolution: { width: input.resolutions[i].width * layout[i].resizeRatio!, height: input.resolutions[i].height * layout[i].resizeRatio! },
+                crop_size: { width: 0, height: 0 },
+                crop_offset: { top: 0, left: 0 }
             })
         })
         videoData.push(data)
@@ -120,8 +122,8 @@ function buildArgs({
 
   function videoSetup(videoData: VideoData[][]): string[] {
       return videoData.map((screen) => screen.map((input) => {
-          let [i, j, width, height] = [input.id[0], input.id[1], input.resolution.width, input.resolution.height]
-          return `[v${i}${j}]scale=${width}x${height}[i${i}${j}]`
+          let [i, j, res, c_size, c_offset] = [input.id[0], input.id[1], input.resolution, input.crop_size, input.crop_offset]
+          return `[v${i}${j}]scale=${res.width}x${res.height},crop=${c_size.width}:${c_size.height}:${c_offset.left}:${c_offset.top}[i${i}${j}]`
       })).flat(1)
   }
 
