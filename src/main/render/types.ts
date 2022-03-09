@@ -1,6 +1,3 @@
-/**
- * Packages all the parameters for a run of the render process.
- */
 interface EngineOptions {
   aspectRatio: string; // A:B format, e.g. 16:9
   audioBitRate: string;
@@ -19,9 +16,6 @@ interface EngineOptions {
   videoInputs: VideoInput[]; // required
 }
 
-/**
- * Specifies an audio track for the player.
- */
 interface AudioInput {
   files: string[];
   volumes: number[];
