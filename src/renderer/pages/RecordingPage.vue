@@ -40,7 +40,7 @@ export default defineComponent({
       audioChunks: <Blob[]> [],
       recording: false,
       vuClip: "",
-      metronomeSources: <AudioBufferSourceNode[]> [],
+      metronomeSource: new AudioBufferSourceNode(new AudioContext()),
     }
   },
   emits: ["recording-end", "exit-recording"],
@@ -150,11 +150,11 @@ export default defineComponent({
         const playbackTracks = <HTMLDivElement> this.$refs.playbackTracks;
         const audioTracks = <HTMLAudioElement[]> [];
         // @ts-ignore
-        for (const node of [...playbackTracks.childNodes]) {
+        for (const node of [ ...playbackTracks.childNodes ] as HTMLElement[]) {
           // Get inputs that have been checked
           if ((<HTMLElement> node).tagName === "INPUT" && (<HTMLInputElement> node).checked) {
             if ((<HTMLInputElement> node).value.includes('.wav')) {
-              this.$data.metronomeSources.push(await this.handleMetronome((<HTMLInputElement> node).value));
+              this.$data.metronomeSource = await this.handleMetronome((<HTMLInputElement> node).value);
             } else {
               const dir = await ipcRenderer.invoke('get-recordings-directory');
 
@@ -171,9 +171,7 @@ export default defineComponent({
         audioTracks.forEach(audio => {
           audio.play();
         });
-        this.$data.metronomeSources.forEach(source => {
-          source.start(0);
-        })
+        this.$data.metronomeSource.start(0);
 
         this.videoRecorder.start();
         this.audioRecorder.start();
@@ -181,9 +179,7 @@ export default defineComponent({
         this.audioRecorder.stop();
         this.videoRecorder.stop();
 
-        this.$data.metronomeSources.forEach(source => {
-          source.stop();
-        })
+        this.$data.metronomeSource.stop();
       }
     },
     handleDataAvailable(event: BlobEvent, type: string) {
@@ -252,7 +248,7 @@ export default defineComponent({
         });
       });
       this.$data.audioChunks = [];
-    },
+    }
   },
   async mounted () {
     const video = <HTMLVideoElement> this.$refs.videoPreview;
@@ -307,8 +303,8 @@ export default defineComponent({
 
     video.autoplay = true;
     this.startStreams();
-  },
-})
+  }
+});
 </script>
 
 <style lang="scss" scoped>

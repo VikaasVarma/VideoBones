@@ -1,12 +1,13 @@
 // Note - using american colour spelling. Sorry );
 // Arranged in order of darkness going down
 // These need a renaming I know...
-$color-background: #282c33;
-$color-outline: #30333c;
+$color-background: #282C33;
+$color-outline: #30333C;
 $color-middleground: #404451;
-$color-purple: #8367c7;
+$color-purple: #8367C7;
+$color-light: #A8A8A8;
 
 // Controls size of the elements relative to the figma design size done both to
 // allow changes when figma sizes are changed and to make elements bigger
 // and easier to inspect during development
-$scaling-factor: 0.7;
+$scaling-factor: .7;
