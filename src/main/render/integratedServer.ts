@@ -1,7 +1,6 @@
 import { join } from 'node:path';
 import { open, readFile } from 'node:fs/promises';
 import { createServer } from 'node:http';
-import { promisify } from 'node:util';
 import { getTempDirectory } from '../storage/config';
 
 /**
