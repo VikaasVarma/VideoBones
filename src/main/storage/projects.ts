@@ -54,6 +54,7 @@ const handles = {
    *
    * Allows us to chain future writes to the handles file after this promise is resolved.
    */
+  currentHandlesFileWritePromise: Promise.resolve(),
   array: existsSync(projectHandlesFile)
     ? (() => {
       const json = JSON.parse(readFileSync(projectHandlesFile).toString());
@@ -73,7 +74,18 @@ const handles = {
       return out;
     })()
     : [],
-  currentHandlesFileWritePromise: Promise.resolve(),
+  write: function() {
+    const doWrite = () => {
+      return fs.writeFile(projectHandlesFile, JSON.stringify(this.array));
+    };
+    this.currentHandlesFileWritePromise = this.currentHandlesFileWritePromise.then(
+      doWrite,
+      error => {
+        console.log(`Previous handles write failed, reason: ${error}`);
+        return doWrite();
+      }
+    );
+  },
   push: function(handle: ProjectHandle) {
     this.array.push(handle);
     this.write();
@@ -94,18 +106,6 @@ const handles = {
     this.array.splice(indexToRemove, 1);
 
     this.write();
-  },
-  write: function() {
-    const doWrite = () => {
-      return fs.writeFile(projectHandlesFile, JSON.stringify(this.array));
-    };
-    this.currentHandlesFileWritePromise = this.currentHandlesFileWritePromise.then(
-      doWrite,
-      error => {
-        console.log(`Previous handles write failed, reason: ${error}`);
-        return doWrite();
-      }
-    );
   }
 };
 
@@ -146,7 +146,7 @@ function createProject(parentDirectory: string, projectName: string): Promise<Pr
  */
 function createProjectDirectory(parentDirectory: string, projectName: string): Promise<string> {
 
-  const projectDirectory = path.format({  base: projectName, dir: parentDirectory });
+  const projectDirectory = path.format({ dir: parentDirectory, base: projectName });
 
   if (existsSync(projectDirectory)) {
     throw new Error(`Project directory already exists: ${projectDirectory}`);

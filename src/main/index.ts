@@ -1,5 +1,4 @@
-import { fileURLToPath } from 'node:url';
-import { dirname, join } from 'node:path';
+import { join } from 'node:path';
 import { app, BrowserWindow, dialog, ipcMain } from 'electron';
 import * as config from '../main/storage/config';
 import * as projects from '../main/storage/projects';
@@ -8,8 +7,6 @@ import { startHandler, stopHandler } from './render/ipcHandler';
 import { startIntegratedServer, stopIntegratedServer } from './render/integratedServer';
 import { startStorageHandlers } from './storage/ipcHandler';
 
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
 
 let mainWindow: BrowserWindow | null = null;
 
@@ -20,14 +17,14 @@ let mainWindow: BrowserWindow | null = null;
  */
 async function createWindow() {
   mainWindow = new BrowserWindow({
+    width: 1920,
     height: 1080,
-    title: 'Video Bones',
     webPreferences: {
       // preload: path.join(__dirname, 'preload.ts')
-      contextIsolation: false,
-      nodeIntegration: true
+      nodeIntegration: true,
+      contextIsolation: false
     },
-    width: 1920
+    title: 'Video Bones'
   });
 
   const serverPort = await startIntegratedServer();
@@ -85,7 +82,7 @@ ipcMain.handle('open-project-clicked', async () => {
   const selected_attr = await dialog.showOpenDialog({ properties: [ 'openDirectory' ] });
 
   if (selected_attr.canceled) {
-    return { alert: false, failed: true, output: '' };
+    return { failed: true, alert: false, output: '' };
   }
   const possible_projects = curr_projects?.filter((item: projects.ProjectHandle) =>
     item.projectPath === selected_attr.filePaths[0]);
@@ -96,13 +93,13 @@ ipcMain.handle('open-project-clicked', async () => {
       await config.openProject(handle);
       mainWindow?.setTitle(`${handle.projectName} - Video Bones`);
     } catch {
-      return { alert: true, failed: true, output: 'Please select a Project file' };
+      return { failed: true, alert: true, output: 'Please select a Project file' };
     }
   } else {
     await config.openProject(possible_projects[0]);
     mainWindow?.setTitle(`${possible_projects[0].projectName} - Video Bones`);
   }
-  return { alert: false, failed: false, output: '' };
+  return { failed: false, alert: false, output: '' };
 
 });
 
@@ -130,11 +127,11 @@ ipcMain.handle('create-project-clicked', async (event, projectName, projectLocat
 
     mainWindow?.setTitle(`${projectName} - Video Bones`);
 
-    return { alert: false, failed: false, output: '' };
+    return { failed: false, alert: false, output: '' };
 
   } catch (error) {
     if ((error as Error).message.startsWith('Project directory already exists:')) {
-      return { alert: true, failed: true, output: 'That project already exists.' };
+      return { failed: true, alert: true, output: 'That project already exists.' };
     }
     return error;
   }

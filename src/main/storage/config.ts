@@ -49,11 +49,12 @@ class ConfigBuilder {
   // ctor sets required members of Config
   constructor(projectName: string) {
     this._config = {
-      options: {},
+      version: 1,
       projectName: projectName,
+
       // set defaults
       recordings: [],
-      version: 1
+      options: {}
     };
   }
 
