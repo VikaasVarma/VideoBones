@@ -42,9 +42,6 @@ export default defineComponent({
     player
       .load(this.manifestUrl)
       .catch(this.onError);
-    
-    // reduce the buffering amt to hopefully speed up preview starting
-    player.configure('streaming.bufferingGoal', 2);
   },
   methods: {
     onError(error: Error) {
