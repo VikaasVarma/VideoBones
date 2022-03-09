@@ -1,3 +1,6 @@
+/**
+ * Packages all the parameters for a run of the render process.
+ */
 interface EngineOptions {
   aspectRatio: string; // A:B format, e.g. 16:9
   audioBitRate: string;
@@ -16,6 +19,15 @@ interface EngineOptions {
   videoInputs: VideoInput[]; // required
 }
 
+/**
+ * Specifies audio tracks for a segment of the final render.
+ *
+ * Can be many audio files, along with a volume.
+ * All the audio tracks in a single AudioInput are first volume scaled with their respective volume,
+ * then overlayed and finally trimmed to the interval.
+ * The AudioInput interface in mainly used in single editor page to passing a message to back end, 
+ * the audiooptions will record them and apply the effect.
+ */
 interface AudioInput{
   file: string;
   startTime: number;
@@ -27,6 +39,15 @@ interface AudioInput{
   declip_active: boolean;
 }
 
+/**
+ * Specifies video tracks for a segment of the final render.
+ *
+ * Can be many video files, each with an associated Resolution.
+ * We also have a screen style, which describes (in an abstract way) how the videos will be layed out in the render.
+ *
+ * All the videos in a single VideoInput are trimmed to the interval,
+ * then transformed to conform to the layout specified in screenStyle.
+ */
 interface VideoInput {
   files: string[];
   screenStyle: '....' | '|..' | '_..';

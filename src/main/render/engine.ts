@@ -8,6 +8,8 @@ import { AudioInput, EngineOptions, VideoInput } from './types';
 import { AudioInputOption, getAudioOptions } from './AudioOption';
 
 
+const thumbnailResolutionDivisor = 4;
+
 function buildArgs({
   aspectRatio = '16:9',
   audioBitRate = '320k',
@@ -16,7 +18,7 @@ function buildArgs({
   bufferSize = '32M',
   framesPerSecond = 60,
   outputFile = 'output.mp4',
-  outputResolution = { width: 1920, height: 1080 },
+  outputResolution = { height: 1080, width: 1920  },
   outputType,
   outputVolume = 256,
   previewManifest = 'stream.mpd',

@@ -1,6 +1,6 @@
+import { existsSync, readFileSync } from 'node:fs';
 import * as fs from 'node:fs/promises';
 
-import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { app } from 'electron';
 import { readDirectoryConfig, recordingsDirectoryName, tempDirectoryName } from './storage';
@@ -54,7 +54,6 @@ const handles = {
    *
    * Allows us to chain future writes to the handles file after this promise is resolved.
    */
-  currentHandlesFileWritePromise: Promise.resolve(),
   array: existsSync(projectHandlesFile)
     ? (() => {
       const json = JSON.parse(readFileSync(projectHandlesFile).toString());
@@ -74,18 +73,7 @@ const handles = {
       return out;
     })()
     : [],
-  write: function() {
-    const doWrite = () => {
-      return fs.writeFile(projectHandlesFile, JSON.stringify(this.array));
-    };
-    this.currentHandlesFileWritePromise = this.currentHandlesFileWritePromise.then(
-      doWrite,
-      error => {
-        console.log(`Previous handles write failed, reason: ${error}`);
-        return doWrite();
-      }
-    );
-  },
+  currentHandlesFileWritePromise: Promise.resolve(),
   push: function(handle: ProjectHandle) {
     this.array.push(handle);
     this.write();
@@ -106,6 +94,18 @@ const handles = {
     this.array.splice(indexToRemove, 1);
 
     this.write();
+  },
+  write: function() {
+    const doWrite = () => {
+      return fs.writeFile(projectHandlesFile, JSON.stringify(this.array));
+    };
+    this.currentHandlesFileWritePromise = this.currentHandlesFileWritePromise.then(
+      doWrite,
+      error => {
+        console.log(`Previous handles write failed, reason: ${error}`);
+        return doWrite();
+      }
+    );
   }
 };
 
@@ -146,7 +146,7 @@ function createProject(parentDirectory: string, projectName: string): Promise<Pr
  */
 function createProjectDirectory(parentDirectory: string, projectName: string): Promise<string> {
 
-  const projectDirectory = path.format({ dir: parentDirectory, base: projectName });
+  const projectDirectory = path.format({  base: projectName, dir: parentDirectory });
 
   if (existsSync(projectDirectory)) {
     throw new Error(`Project directory already exists: ${projectDirectory}`);

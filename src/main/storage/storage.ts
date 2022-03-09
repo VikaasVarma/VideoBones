@@ -101,9 +101,6 @@ export function writeDirectoryConfig(directory: string, cfg: Config): Promise<vo
   const cfgString = JSON.stringify(cfg);
 
   return fs.writeFile(file, cfgString)
-    .then(() => {
-      return fs.truncate(file, Buffer.byteLength(cfgString));
-    })
     .catch(error => {
       throw new Error(`Failed to write directory config, reason: ${error}`);
     });

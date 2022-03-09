@@ -2,6 +2,9 @@ import { arch, platform } from 'node:os';
 import { join } from 'node:path';
 
 
+/**
+ * @returns The full system path to ffmpeg.exe
+ */
 export function getPath() {
   if (process.env.FFMPEG_BIN) {
     module.exports = process.env.FFMPEG_BIN;

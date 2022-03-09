@@ -4,7 +4,6 @@ import * as projects from '../storage/projects';
 
 
 // Defines a bunch of ipc handlers for all the storage stuff
-
 export function startStorageHandlers() {
   ipcMain.addListener('create-project', (event, parentDirectory: string, projectName: string) => {
     return  projects.createProject(parentDirectory, projectName);
