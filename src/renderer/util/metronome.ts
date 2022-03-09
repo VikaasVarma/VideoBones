@@ -70,7 +70,7 @@ export function generateMetronome({
   // Save the metronome file in the temp directory
   wav.arrayBuffer().then(buffer => {
     ipcRenderer.invoke('get-temp-directory').then((dir: string) => {
-      fs.writeFile(join(dir, 'metronome.wav'), new Uint8Array(buffer), err => {
+      fs.writeFile(join(dir, 'metronome_' + bpm + 'bpm.wav'), new Uint8Array(buffer), err => {
         if (err) throw err;
       });
     });
