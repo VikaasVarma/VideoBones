@@ -1,12 +1,4 @@
 <template>
-  <div class="horizontal-spacer">
-    <button class="button-primary" @click="$emit('exit-recording')">
-      EXIT
-    </button>
-    <h1 class="section-title">
-      RECORDING
-    </h1>
-  </div>
 
   <div class="recording-grid">
     <video ref="videoPreview" />
