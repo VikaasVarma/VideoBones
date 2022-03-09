@@ -40,7 +40,7 @@ export default defineComponent({
       audioChunks: <Blob[]> [],
       recording: false,
       vuClip: "",
-      metronomeSources: <AudioBufferSourceNode[]> [],
+      metronomeSource: new AudioBufferSourceNode(new AudioContext()),
     }
   },
   emits: ["recording-end", "exit-recording"],
@@ -154,7 +154,7 @@ export default defineComponent({
           // Get inputs that have been checked
           if ((<HTMLElement> node).tagName === "INPUT" && (<HTMLInputElement> node).checked) {
             if ((<HTMLInputElement> node).value.includes('.wav')) {
-              this.$data.metronomeSources.push(await this.handleMetronome((<HTMLInputElement> node).value));
+              this.$data.metronomeSource = await this.handleMetronome((<HTMLInputElement> node).value);
             } else {
               const dir = await ipcRenderer.invoke('get-recordings-directory');
 
@@ -171,9 +171,7 @@ export default defineComponent({
         audioTracks.forEach(audio => {
           audio.play();
         });
-        this.$data.metronomeSources.forEach(source => {
-          source.start(0);
-        })
+        this.$data.metronomeSource.start(0);
 
         this.videoRecorder.start();
         this.audioRecorder.start();
@@ -181,9 +179,7 @@ export default defineComponent({
         this.audioRecorder.stop();
         this.videoRecorder.stop();
 
-        this.$data.metronomeSources.forEach(source => {
-          source.stop();
-        })
+        this.$data.metronomeSource.stop();
       }
     },
     handleDataAvailable(event: BlobEvent, type: string) {
@@ -199,6 +195,10 @@ export default defineComponent({
       this.$emit("recording-end");
     },
     download() {
+      // If user hits the Exit button during recording 
+      if (this.recording) {
+        return;
+      }
       // Get number to append to file names
       var videoTracks = 1;
       ipcRenderer.invoke('get-option', 'videoTracks').then(function(recordings: string) {
@@ -308,7 +308,7 @@ export default defineComponent({
     video.autoplay = true;
     this.startStreams();
   },
-  // On page change, turn off video streams
+  // On page change, turn stop video and audio streams 
   beforeUnmount() {
     const video = <HTMLVideoElement> this.$refs.videoPreview;
     const stream = <MediaStream> video.srcObject;
@@ -316,6 +316,8 @@ export default defineComponent({
     stream.getTracks().forEach(track => {
       track.stop();
     });
+
+    this.metronomeSource.stop();
   }
 })
 </script>
