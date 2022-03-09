@@ -7,17 +7,17 @@
 
     <div class="recording-grid">
       <video ref=videoPreview> </video>
+      <menu class="vertical-options-menu">
+        <div class="row tickbox-container" ref=playbackTracks> </div>
+      </menu>
 
       <div class="row vu" ref="vu" :style="{ clipPath : vuClip }"></div>
 
-      <select class=dropdown ref=audioDevices @change="onAudioChange($event)"> </select>
-
+      <select id="audioDevices" class="dropdown" ref=audioDevices @change="onAudioChange($event)"> </select>
+        
       <div :class="recording ? 'recording-button' : 'not-recording-button'" @click="recordOnClick()"> <div></div> </div>
       
-      <select class=dropdown ref=videoDevices @change="onVideoChange($event)"> </select>
-
-      <h2 class="row">Playback Audio Tracks</h2>
-      <div class="row tickbox-container" ref=playbackTracks> </div>
+      <select id="videoDevices" class="dropdown" ref=videoDevices @change="onVideoChange($event)"> </select>
     </div>
 
 </template>
