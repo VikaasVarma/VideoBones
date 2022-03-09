@@ -1,12 +1,4 @@
 <template>
-  <div class="horizontal-spacer">
-    <button class="button-primary" @click="$emit('exit-recording')">
-      EXIT
-    </button>
-    <h1 class="section-title">
-      RECORDING
-    </h1>
-  </div>
 
   <div class="recording-grid">
     <video ref="videoPreview" />
@@ -33,7 +25,6 @@
       <div :class="recording ? 'recording-button' : 'not-recording-button'" @click="recordOnClick()"> <div></div> </div>
       
       <select id="videoDevices" class="dropdown" ref=videoDevices @change="onVideoChange($event)"> </select>
-
   </div>
 </template>
 
