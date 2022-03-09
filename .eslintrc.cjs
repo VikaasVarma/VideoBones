@@ -73,7 +73,7 @@ module.exports = {
     'import/no-duplicates': 'error',
     'import/no-named-default': 'error',
     'import/no-unassigned-import': 'error',
-    'import/no-unresolved': [ 'error', { ignore: [ '#app', 'node:fs', 'node:url' ] }],
+    'import/no-unresolved': [ 'error', { ignore: [ '#app', 'node:child_process', 'node:fs', 'node:path', 'node:url' ] }],
     'import/no-webpack-loader-syntax': 'error',
     'import/order': [ 'error', { groups: [ 'builtin', 'external', 'internal', 'parent', 'sibling', 'index', 'object', 'type' ] }],
     'indent': [ 'error', 2, { SwitchCase: 1 }],
