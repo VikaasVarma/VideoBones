@@ -97,7 +97,7 @@ export default defineComponent({
 
             previewCurrentTime: 0,
             previewEndTime: 0,
-            previewPaused: false,
+            previewPaused: true,
             previewPausedBeforeSeek: false
         }
     },
@@ -170,13 +170,15 @@ export default defineComponent({
         function setScreenStyle(style: number) { screenStyle.value = style }
         function record () { context.emit('open-recording-page'); }
 
-        ipcRenderer.addListener('asynchronous-reply',  (event, args) => {
-            console.log(args.event);
-            let port = args.port
-            if (stream_url.value === "") {
-                stream_url.value = "http://localhost:"+port.toString()+"/stream.mpd"
+        ipcRenderer.addListener('engine-progress',  (event, args) => {
+            // if the preview has rendered more than 2 secs, start the preview viewer
+            if (args.renderedTime > 2) {
+                let port = args.port
+                if (stream_url.value === "") {
+                    stream_url.value = "http://localhost:"+port.toString()+"/stream.mpd"
+                }
             }
-        })
+        });        
 
         return {record, metronome, mouse_down, openSingleVideoEditor, playhead, setScreenStyle, track_data, tracks, stream_url}
 
@@ -224,22 +226,20 @@ export default defineComponent({
                 thumbnailEvery:thumbnailFrequency
             };
 
-        // the max time for the timeline is the end of the last video interval, which is the length of the whole video
-        this.timeline_max_time = engineOpts.videoInputs[engineOpts.videoInputs.length-1].interval[1];
+            // the max time for the timeline is the end of the last video interval, which is the length of the whole video
+            this.timeline_max_time = engineOpts.videoInputs[engineOpts.videoInputs.length-1].interval[1];
 
-        ipcRenderer.send('asynchronous-message', 
-        {
-          type: 'startEngine', 
-          data: engineOpts
-        });
+            ipcRenderer.send('start-engine', 
+            {
+                data: engineOpts
+            });
 
-        const thumbEngineOpts = engineOpts;
-        thumbEngineOpts.outputType = 'thumbnail';
-        ipcRenderer.send('asynchronous-message', 
-        {
-          type: 'getThumbnails', 
-          data: thumbEngineOpts
-        })
+            ipcRenderer.send('get-thumbnails', 
+            {
+                data: {...engineOpts, outputType: 'thumbnail'}
+            });
+
+            this.previewEndTime = engineOpts.videoInputs[engineOpts.videoInputs.length - 1].interval[1]
         });
     },
     async mounted() {
@@ -248,6 +248,9 @@ export default defineComponent({
                 this.tracks.push({trackName: track.substr(0, track.indexOf(".webm"))})
             }) 
         })
+
+        // start the preview paused
+        //this.previewPause();
 
         let timeline_h:any = (this.$refs.timeline as any).clientHeight;
         let timeline_w: any = (this.$refs.timeline as any).clientWidth;
@@ -261,13 +264,17 @@ export default defineComponent({
 
         //this.$forceUpdate();
 
+        ipcRenderer.addListener('engine-done',  (event, args) => {
+            // if the preview has rendered more than 2 secs, start the preview viewer
+            this.previewEndTime = (this.$refs.fuckingVideoPlayer as any).getEndTime();
+        });
+
         const playheadUpdate = () => {
             if (this.$refs['fuckingVideoPlayer'] !== undefined && !this.mouse_down && !this.previewPaused) {
                 var timeline = document.getElementsByClassName("timeline")[0].getBoundingClientRect()
                 const vidPlayer = (this.$refs.fuckingVideoPlayer as any);
 
                 this.previewCurrentTime = vidPlayer.getCurrentTime();
-                this.previewEndTime = vidPlayer.getEndTime();
 
                 const playheadx = (this.previewCurrentTime / vidPlayer.getEndTime()) * timeline.width;
 

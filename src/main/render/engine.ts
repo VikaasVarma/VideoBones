@@ -68,6 +68,7 @@ function buildArgs({
     ...filter,
     '-preset', 'ultrafast',
     '-aspect', aspectRatio,
+    '-progress', '-', '-nostats', // get it to print stats
     '-r', '1'
     ,  'thumbs/%04d.png'
   ] : [
@@ -107,7 +108,7 @@ let ffmpeg_thumbs: ChildProcessByStdio<null, Readable, null> | null;
 
 export function start(
   options: EngineOptions,
-  statusCallback: (elapsedTime: string, donePercentage: number) => void,
+  statusCallback: (renderedTime: number) => void,
   doneCallback: () => void
 ) {
   if (options.outputType === 'thumbnail') {
@@ -127,8 +128,10 @@ export function start(
     console.log(getTempDirectory());
     ffmpeg = spawn(bin, args, { cwd: getTempDirectory(), stdio: [ 'ignore', 'pipe', process.stderr ] });
     ffmpeg.stdout.on('data', data => {
-      console.log(data);
-      statusCallback(data.toString(), 0);
+      const values = data.toString().split(/\n|=/);
+      const i = values.indexOf('out_time_ms') + 1;
+      const doneTime = values[i] / 2000;
+      statusCallback(doneTime);
     });
     ffmpeg.on('exit', doneCallback);
   }
@@ -161,7 +164,7 @@ export function getThumbnails(
   if (bin) {
     console.log(getTempDirectory());
     ffmpeg_thumbs = spawn(bin, args, { cwd: getTempDirectory(), stdio: [ 'ignore', 'pipe', process.stderr ] });
-    ffmpeg_thumbs.on('exit', () => {
+    ffmpeg_thumbs.on('exit', function() {
       const files = readdirSync(thumbs);
       doneCallback(files.map(f => join(thumbs, f)));
     });
