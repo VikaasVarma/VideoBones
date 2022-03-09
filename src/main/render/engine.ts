@@ -31,10 +31,10 @@ function buildArgs({
     sum += value.files.length; return sum - value.files.length;
   })(0);
   const offset = videoInputs.map(cumsum);
-  const videoCount:number[] = videoInputs.map(videoArray=>videoArray.files.length);
-  let videoSum:number = 0;
-  for(let i=0; i<videoCount.length; i++){
-    videoSum+=videoCount[i];
+  const videoCount: number[] = videoInputs.map(videoArray => videoArray.files.length);
+  let videoSum: number = 0;
+  for (let n of videoCount){
+    videoSum += n;
   }
 
   function screenStyle_to_layout(screenStyle: string) {
@@ -55,30 +55,24 @@ function buildArgs({
   const filter
     = (<string[]>[]).concat(
       videoInputs.map(input => input.files.map(file => [ '-i', file ])).flat(2),
-      audioInputOptions.map(input => ['-i',input.file]).flat(1),
+      audioInputOptions.map(input => [ '-i', input.file ]).flat(1),
       [
         '-filter_complex',
-        // audioInputOptions.map((input: AudioInputOption, i: number) =>
-        //   `,[${i}:a]${input.getDeclickArgs()}${input.getDeclipArgs()}${input.getReverbArgs()}}[ainput${i}];`
-        //   ).join(''),
-        //   audioInputOptions.length === 0 ?'' : audioInputOptions.map((_,i:number)=>`[ainput${i}]`).join('')+'amerge=inputs='+audioInputOptions.length+'[aout];',
          `${videoInputs.map((input, i) => (
           [
           input.resolution.map((res, j) => `[${offset[i] + j}:v]setpts=PTS-STARTPTS,scale=${res.width}x${res.height},trim=${input.interval[0]}:${input.interval[1]}[input${offset[i] + j}];`).join(''),
           `${input.files.map((_, j) => `[input${offset[i] + j}]`).join('')}xstack=inputs=${input.files.length}:layout=${screenStyle_to_layout(input.screenStyle)}[matrix${i}];`,
           `[matrix${i}]scale=${outputResolution.width}:${outputResolution.height},setsar=1:1[v${i}];`
         ].join(''))).join('')  }`
-        +
-        audioInputOptions.map((input: AudioInputOption, i: number) =>
-          `[${i+videoSum}:a]${input.getDeclickArgs()}${input.getDeclipArgs()}${input.getReverbArgs()},aformat=fltp:44100:stereo,volume=1.0 [ainput${i}];`
-          ).join('')
-          +`${videoInputs.map((_, i) => `[v${i}]`).join('')}concat=n=${videoInputs.length},fps=${outputType === 'thumbnail' ? thumbnailEvery : framesPerSecond}[out];`
-          + 
-        [audioInputOptions.length === 0 ?'' : audioInputOptions.map((_,i:number)=>`[ainput${i}]`).join('')+'amerge=inputs='+audioInputOptions.length+'[aout]']
+        +audioInputOptions.map((input: AudioInputOption, i: number) =>
+          `[${i+videoSum}:a]${input.getDeclickArgs()}${input.getDeclipArgs()}${input.getReverbArgs()},aformat=fltp:44100:stereo,volume=1.0 [ainput${i}];`)
+          .join('')
+        +`${videoInputs.map((_, i) => `[v${i}]`).join('')}concat=n=${videoInputs.length},fps=${outputType === 'thumbnail' ? thumbnailEvery : framesPerSecond}[out];`
+        + [audioInputOptions.length === 0 ? '' : audioInputOptions.map((_,i:number) => `[ainput${i}]`).join('') + 'amerge=inputs='+audioInputOptions.length + '[aout]']
      ],
       [
         '-map', '[out]',
-        '-map','[aout]'
+        '-map', '[aout]'
       ]
     );
   const args = outputType === 'thumbnail' ? [

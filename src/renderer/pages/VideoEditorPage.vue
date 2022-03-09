@@ -101,6 +101,7 @@ import TrackSelector from '../components/TrackSelector.vue';
 import MetronomeComponent from '../components/MetronomeComponent.vue';
 import VideoPlayer from '../components/VideoPlayer.vue';
 
+
 const thumbnailFrequency = '1';
 
 export default defineComponent({
@@ -167,7 +168,6 @@ export default defineComponent({
       ipcRenderer.send(
         'asynchronous-message',
         {
-          type: 'audioOptions',
           data: {
             file: join(dir,'audio1.webm'),
             startTime: 0,
@@ -177,15 +177,15 @@ export default defineComponent({
             reverb_decay_identifier: 0.5,
             declick_active: true,
             declip_active: true
-          }
+          },
+          type: 'audioOptions'
         }
       );
       ipcRenderer.send(
         'asynchronous-message',
         {
-          type: 'audioOptions',
           data: {
-            file: join(dir,'audio2.webm'),
+            file: join(dir, 'audio2.webm'),
             startTime: 0,
             volume: 0,
             reverb_active: true,
@@ -193,15 +193,15 @@ export default defineComponent({
             reverb_decay_identifier: 0.5,
             declick_active: false,
             declip_active: true
-          }
+          },
+          type: 'audioOptions'
         }
       );
       ipcRenderer.send(
         'asynchronous-message',
         {
-          type: 'audioOptions',
           data: {
-            file: join(dir,'audio3.webm'),
+            file: join(dir, 'audio3.webm'),
             startTime: 0,
             volume: 0,
             reverb_active: true,
@@ -209,7 +209,8 @@ export default defineComponent({
             reverb_decay_identifier: 0.6,
             declick_active: true,
             declip_active: true
-          }
+          },
+          type: 'audioOptions',
         }
       );
       const engineOpts = {
