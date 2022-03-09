@@ -129,8 +129,6 @@ export default defineComponent({
       );
     }
   }
-  // djsjahkdsa.send("reverb-settings-changed", {decay:3728, delay:3278327})
-  // djsjahkdsa.send("echo-settings-changed", {decay:3728, delay:3278327})
 });
 </script>
 
