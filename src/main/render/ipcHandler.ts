@@ -24,7 +24,7 @@ export function startHandler(port: number) {
           event.sender.send('thumbnail-reply', { event: 'thumbnails', thumbnailFiles });
         });
         break;
-      case 'audioOptons':
+      case 'audioOptions':
         addAudioOption(arg.data);
         break;
       case 'stopEngine':

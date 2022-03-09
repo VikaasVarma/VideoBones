@@ -36,7 +36,7 @@ export class AudioInputOption implements AudioInput{
   getDeclickArgs(): string{
     let s = '';
     if (this.declick_active){
-      s = 'adeclip=window=55:overlap=75:arorder=8:threshold=10:hsize=1000:method=add,';
+      s = 'adeclick=55:75:2:2:2:add,';
     }
     return s;
   }
@@ -44,7 +44,7 @@ export class AudioInputOption implements AudioInput{
   getDeclipArgs(): string{
     let s = '';
     if (this.declip_active) {
-      s = 'adeclip=window=55:overlap=75:arorder=8:threshold=10:hsize=1000:method=add,';
+      s = 'adeclip=55:75:8:10:1000:a,';
     }
     return s;
   }
@@ -52,9 +52,9 @@ export class AudioInputOption implements AudioInput{
   getReverbArgs(): string{
     let s = '';
     if (this.reverb_active){
-      s = 'acho=0.8:0.9:';
+      s = 'aecho=0.8:0.9:';
       //add delays args
-      let s_delays = '';
+      let s_delays:string = '';
       let i = 0;
       while (i < 10){
         s_delays += `${(i + 1) * this.reverb_delay_identifier}`;
@@ -65,25 +65,24 @@ export class AudioInputOption implements AudioInput{
       //add decays args
       i = 0;
       let power = 1;
-      let s_decays = '';
+      let s_decays:string = '';
       while (i < 10){
         s_decays += `${Math.pow(this.reverb_decay_identifier, power)}`;
         if (i < 9) s_decays += '|';
         i++;
         power += 0.6;
       }
+      s += s_delays +':' +s_decays;
     }
     return s;
   }
 }
 
-const audioOptions: AudioInputOption[] = [];
+let audioOptions: AudioInputOption[] = [];
 
 export function addAudioOption(option: AudioInput): void{
-  //the file field will be discarded, so can leave it blank at front end
-  const realFile = `audio${config.getRecordingsList().length / 2}.webm`;
   audioOptions.push(new AudioInputOption(
-    realFile,
+    option.file,
     option.startTime,
     option.volume,
     option.reverb_active,

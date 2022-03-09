@@ -164,6 +164,54 @@ export default defineComponent({
     });
 
     ipcRenderer.invoke('get-recordings-directory').then(dir => {
+      ipcRenderer.send(
+        'asynchronous-message',
+        {
+          type: 'audioOptions',
+          data: {
+            file: join(dir,'audio1.webm'),
+            startTime: 0,
+            volume: 0,
+            reverb_active: true,
+            reverb_delay_identifier: 500,
+            reverb_decay_identifier: 0.5,
+            declick_active: true,
+            declip_active: true
+          }
+        }
+      );
+      ipcRenderer.send(
+        'asynchronous-message',
+        {
+          type: 'audioOptions',
+          data: {
+            file: join(dir,'audio2.webm'),
+            startTime: 0,
+            volume: 0,
+            reverb_active: true,
+            reverb_delay_identifier: 900,
+            reverb_decay_identifier: 0.5,
+            declick_active: false,
+            declip_active: true
+          }
+        }
+      );
+      ipcRenderer.send(
+        'asynchronous-message',
+        {
+          type: 'audioOptions',
+          data: {
+            file: join(dir,'audio3.webm'),
+            startTime: 0,
+            volume: 0,
+            reverb_active: true,
+            reverb_delay_identifier: 200,
+            reverb_decay_identifier: 0.6,
+            declick_active: true,
+            declip_active: true
+          }
+        }
+      );
       const engineOpts = {
         audioInputs: [
         /*{

@@ -103,7 +103,7 @@ export default defineComponent({
         {
           type: ' audioOptions',
           data: {
-            file: '',
+            file: this.video_name,
             startTime: 0,
             volume: 255,
             reverb_active: this.reverb_enabled,
@@ -121,7 +121,7 @@ export default defineComponent({
         {
           type: ' audioOptions',
           data: {
-            file: '',
+            file: this.video_name,
             startTime: 0,
             volume: 255,
             reverb_active: this.reverb_enabled,
