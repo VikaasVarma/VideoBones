@@ -37,7 +37,7 @@ interface AudioInput {
  *
  * Can be many video files, each with an associated Resolution.
  * We also have a screen style, which describes (in an abstract way) how the videos will be layed out in the render.
- *
+ * 
  * All the videos in a single VideoInput are trimmed to the interval,
  * then transformed to conform to the layout specified in screenStyle.
  */
