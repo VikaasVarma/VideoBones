@@ -142,7 +142,6 @@ export default defineComponent({
 
         function deleteTrack(trackName: string) {
           tracks.value = tracks.value.filter(track => track.trackName !== trackName);
-          // TODO actually remove the tracks
           ipcRenderer.send('remove-recording', trackName);
         }
 
