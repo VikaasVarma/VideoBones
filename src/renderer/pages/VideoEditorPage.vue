@@ -131,7 +131,7 @@ export default defineComponent({
           }
         });
 
-        return { track_data, stream_url, tracks };
+        return { stream_url, track_data, tracks };
 
   },
   data() {
