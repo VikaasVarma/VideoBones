@@ -11,7 +11,7 @@
           <img v-else src="../../../assets/images/stopButton.svg">
         </button>
 
-        <div style="align-items: center; display: flex; justify-content: center;">
+        <div style="align-items: center; color: white; display: flex; justify-content: center;">
           {{ previewCurrentTime.toFixed(2) }} <br> / <br> {{ previewEndTime.toFixed(2) }}
         </div>
 
@@ -131,7 +131,7 @@ export default defineComponent({
           }
         });
 
-        return { track_data, tracks };
+        return { track_data, stream_url, tracks };
 
   },
   data() {
@@ -147,7 +147,6 @@ export default defineComponent({
       previewPausedBeforeSeek: false,
 
       screenStyle: 0,
-      stream_url: '',
 
       timeline_images: ([] as string[]),
       timeline_max_time: 0,
@@ -257,7 +256,7 @@ export default defineComponent({
         this.seekToPlayhead();
 
         this.previewCurrentTime = (this.playhead / timeline.width)
-        * (this.$refs.previewPlayer as HTMLVideoElement).duration;
+        * (this.$refs.previewPlayer as any).getEndTime();
       }
     },
     endTimelineDrag: function() {
@@ -271,12 +270,12 @@ export default defineComponent({
     playheadUpdate() {
       if (this.$refs.previewPlayer && !this.mouse_down && !this.previewPaused) {
         const timeline = document.querySelectorAll('.timeline')[0].getBoundingClientRect();
-        const vidPlayer = (this.$refs.previewPlayer as HTMLVideoElement);
+        const vidPlayer = (this.$refs.previewPlayer as any);
 
-        this.previewCurrentTime = vidPlayer.currentTime;
-        this.previewEndTime = vidPlayer.duration;
+        this.previewCurrentTime = vidPlayer.getCurrentTime();
+        this.previewEndTime = vidPlayer.getEndTime();
 
-        const playheadx = (this.previewCurrentTime / vidPlayer.duration) * timeline.width;
+        const playheadx = (this.previewCurrentTime / vidPlayer.getEndTime()) * timeline.width;
 
         this.playhead = (playheadx);
 
@@ -288,20 +287,20 @@ export default defineComponent({
     previewPlay(playing: boolean) {
       this.previewPaused = !playing;
       if (this.$refs.previewPlayer) {
-        const previewElement = (this.$refs.previewPlayer as HTMLVideoElement);
+        const previewElement = (this.$refs.previewPlayer as any);
         if (playing) {
-          previewElement.play();
+          previewElement.resumePlayback();
         } else {
-          previewElement.pause();
+          previewElement.pausePlayback();
         }
       }
     },
     seekToPlayhead() {
-      const vidPlayer = (this.$refs.previewPlayer as HTMLVideoElement);
+      const vidPlayer = (this.$refs.previewPlayer as any);
       const timeline = document.querySelectorAll('.timeline')[0].getBoundingClientRect();
-      const newPlaybackTime = (this.playhead / timeline.width) * vidPlayer.duration;
+      const newPlaybackTime = (this.playhead / timeline.width) * vidPlayer.getEndTime();
 
-      vidPlayer.fastSeek(newPlaybackTime);
+      vidPlayer.seekToTime(newPlaybackTime);
     },
     setScreenStyle(style: number) {
       this.screenStyle = style;
