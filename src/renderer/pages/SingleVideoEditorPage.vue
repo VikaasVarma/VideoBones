@@ -96,8 +96,8 @@ export default defineComponent({
       ipcRenderer.send(
         'asynchronous-message',
         {
-          type:' audioOptions',
-          data:{
+          type: ' audioOptions',
+          data: {
             file: '',
             startTime: 0,
             volume: 255,
@@ -105,17 +105,17 @@ export default defineComponent({
             reverb_delay_identifier: this.reverb_settings.delay,
             reverb_decay_indentifier: this.reverb_settings.decay,
             declick_active: this.denoise_enabled,
-            declip_active: this.denoise_enabled 
+            declip_active: this.denoise_enabled
           }
         }
       );
     },
     updateReverb() {
       ipcRenderer.send(
-        'asynchronous-message', 
+        'asynchronous-message',
         {
-          type:' audioOptions',
-          data:{
+          type: ' audioOptions',
+          data: {
             file: '',
             startTime: 0,
             volume: 255,
@@ -123,7 +123,7 @@ export default defineComponent({
             reverb_delay_identifier: this.reverb_settings.delay,
             reverb_decay_indentifier: this.reverb_settings.decay,
             declick_active: this.denoise_enabled,
-            declip_active: this.denoise_enabled 
+            declip_active: this.denoise_enabled
           }
         }
       );

@@ -1,11 +1,12 @@
+import { join } from 'node:path';
+import { app, BrowserWindow, dialog, ipcMain } from 'electron';
 import * as config from '../main/storage/config';
 import * as projects from '../main/storage/projects';
 
-import { app, BrowserWindow, dialog, ipcMain } from 'electron';
 import { startHandler, stopHandler } from './render/ipcHandler';
 import { startIntegratedServer, stopIntegratedServer } from './render/integratedServer';
-import { join } from 'path';
 import { startStorageHandlers } from './storage/ipcHandler';
+
 
 let mainWindow: BrowserWindow | null = null;
 
@@ -39,14 +40,14 @@ async function createWindow() {
 app.whenReady().then(() => {
   createWindow();
 
-  app.on('activate', function () {
+  app.on('activate', function() {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
     }
   });
 });
 
-app.on('window-all-closed', function () {
+app.on('window-all-closed', function() {
   mainWindow = null;
   stopHandler();
   app.quit();
@@ -61,7 +62,7 @@ ipcMain.handle('browse-directory-clicked', async () => {
   return selected.filePaths[0];
 });
 
-ipcMain.handle('open-project-clicked', async() => {
+ipcMain.handle('open-project-clicked', async () => {
   const curr_projects = projects.getTrackedProjects();
   const selected_attr = await dialog.showOpenDialog({ properties: [ 'openDirectory' ] });
 
@@ -104,10 +105,10 @@ ipcMain.handle('create-project-clicked', async (event, projectName, projectLocat
 
     return { failed: false, alert: false, output: '' };
 
-  } catch (err) {
-    if ((err as Error).message.startsWith('Project directory already exists:')) {
+  } catch (error) {
+    if ((error as Error).message.startsWith('Project directory already exists:')) {
       return { failed: true, alert: true, output: 'That project already exists.' };
     }
-    return err;
+    return error;
   }
 });

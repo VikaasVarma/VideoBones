@@ -1,81 +1,76 @@
 <template>
-  <video-player v-if="stream_url != '' " :manifest-url="stream_url"/>
+  <video-player v-if="stream_url != '' " :manifest-url="stream_url" />
 </template>
 
 <script lang="ts">
-import VideoPlayer from '../components/VideoPlayer.vue'
-import { ipcRenderer } from "electron";
-import { defineComponent, Ref } from 'vue'
-import { join } from 'path';
-import { ref } from 'vue'
+import { join } from 'node:path';
+import { isUndefined } from 'node:util';
+import { ipcRenderer } from 'electron';
+import { defineComponent, Ref, ref } from 'vue';
+import VideoPlayer from '../components/VideoPlayer.vue';
 import { AudioInput } from '../../main/render/types';
-import { isUndefined } from 'util';
+
 
 export default defineComponent({
-  name: "FfmpegTest",
+  name: 'FfmpegTest',
   components: {
-    VideoPlayer,
-  },
-  data() {
-    return {
-    }
+    VideoPlayer
   },
   setup() {
-    let stream_url = ref('')
+    const stream_url = ref('');
 
     ipcRenderer.addListener('asynchronous-reply',  (event, args) => {
-      let port = args.port
-      if (stream_url.value === "") {
-        stream_url.value = "http://localhost:"+port.toString()+"/stream.mpd"
+      const port = args.port;
+      if (stream_url.value === '') {
+        stream_url.value = `http://localhost:${port.toString()  }/stream.mpd`;
       }
-    })
+    });
 
-    return {stream_url}
+    return { stream_url };
+  },
+  data() {
+    return {};
   },
   created() {
 
-    console.log("Running created ()");
-    ipcRenderer.invoke('get-recordings-directory').then( (dir) => {
-      ipcRenderer.send('asynchronous-message', 
-    {
-      type: 'startEngine', 
-      data: {
-        outputType: "preview",
-        videoInputs: [
-          {
-            files: ["video1.webm", "video2.webm", "video3.webm"].map(
-                (file) => join("../recordings", (file))
-            ),
-            screenStyle: "|..",
-            resolution: [
-                {width: 1280, height: 1440},
-                {width: 1280, height: 720},
-                {width: 1280, height: 720},
+    console.log('Running created ()');
+    ipcRenderer.invoke('get-recordings-directory').then(dir => {
+      ipcRenderer.send(
+        'asynchronous-message',
+        {
+          type: 'startEngine',
+          data: {
+            outputType: 'preview',
+            videoInputs: [
+              {
+                files: [ 'video1.webm', 'video2.webm', 'video3.webm' ].map(file => join('../recordings', (file))),
+                screenStyle: '|..',
+                resolution: [
+                  { width: 1280, height: 1440 },
+                  { width: 1280, height: 720 },
+                  { width: 1280, height: 720 }
+                ],
+                interval: [ 0, 1.5 ]
+              },
+              {
+                files: [ 'video5.webm', 'video4.webm', 'video3.webm', 'video2.webm' ].map(file => join('../recordings', (file))),
+                screenStyle: '....',
+                interval: [ 1.5, 3 ],
+                resolution: [
+                  { width: 1280, height: 720 },
+                  { width: 1280, height: 720 },
+                  { width: 1280, height: 720 },
+                  { width: 1280, height: 720 }
+                ]
+              }
             ],
-            interval: [0, 1.5]
-          },
-          {
-            files: ["video5.webm", "video4.webm", "video3.webm", "video2.webm"].map(
-                (file) => join("../recordings", (file))
-            ),
-            screenStyle: "....",
-            interval: [1.5, 3],
-            resolution: [
-                {width: 1280, height: 720},
-                {width: 1280, height: 720},
-                {width: 1280, height: 720},
-                {width: 1280, height: 720}
-            ],
+            audioInputs: []
           }
-        ],
-        audioInputs:[
-
-        ]
-      }
-    })
+        }
+      );
     });
   }
-})
+});
 </script>
 
 <style lang="scss" scoped>

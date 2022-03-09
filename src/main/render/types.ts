@@ -21,8 +21,8 @@ interface AudioInput{
   startTime: number;
   volume: number;
   reverb_active: boolean;
-  reverb_delay_identifier:number;  //in ms 
-  reverb_decay_identifier:number;   //between 0 and 1
+  reverb_delay_identifier: number;  //in ms
+  reverb_decay_identifier: number;   //between 0 and 1
   declick_active: boolean;
   declip_active: boolean;
 }

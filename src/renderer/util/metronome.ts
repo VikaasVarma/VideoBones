@@ -1,7 +1,8 @@
-import * as fs from 'fs';
+import * as fs from 'node:fs';
 
-import { join } from 'path';
+import { join } from 'node:path';
 import { ipcRenderer } from 'electron';
+
 
 interface MetronomeOptions {
   bpm: number;
@@ -70,7 +71,7 @@ export function generateMetronome({
   // Save the metronome file in the temp directory
   wav.arrayBuffer().then(buffer => {
     ipcRenderer.invoke('get-temp-directory').then((dir: string) => {
-      fs.writeFile(join(dir, 'metronome_' + bpm + 'bpm.wav'), new Uint8Array(buffer), err => {
+      fs.writeFile(join(dir, `metronome_${  bpm  }bpm.wav`), new Uint8Array(buffer), err => {
         if (err) throw err;
       });
     });
@@ -82,7 +83,7 @@ function getWavBytes(buffer: ArrayBufferLike, options: WavOptions) {
   const type = options.isFloat ? Float32Array : Uint16Array;
   const numFrames = buffer.byteLength / type.BYTES_PER_ELEMENT;
 
-  const headerBytes = getWavHeader(Object.assign({}, options, { numFrames }));
+  const headerBytes = getWavHeader({ ...options, numFrames });
   const wavBytes = new Uint8Array(headerBytes.length + buffer.byteLength);
 
   // prepend header, then add pcmBytes

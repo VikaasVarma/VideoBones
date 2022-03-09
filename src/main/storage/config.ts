@@ -188,7 +188,7 @@ function openProject(projectHandle: ProjectHandle): Promise<void> {
  */
 function getOpenProjectHandle(): ProjectHandle {
   if (currentOpenProject === null) {
-    throw Error('No open project when calling getOpenProjectHandle.');
+    throw new Error('No open project when calling getOpenProjectHandle.');
   }
 
   return currentOpenProject.projectHandle;
@@ -241,7 +241,7 @@ function tempCleanupLoop(projectHandle: ProjectHandle, timeout: number, prevProm
  */
 function getTempDirectory() {
   if (currentOpenProject === null) {
-    throw Error('No open project when calling getTempDirectory.');
+    throw new Error('No open project when calling getTempDirectory.');
   }
 
   return getProjectTempDirectory(currentOpenProject.projectHandle);
@@ -254,7 +254,7 @@ function getTempDirectory() {
  */
 function getRecordingsDirectory() {
   if (currentOpenProject === null) {
-    throw Error('No open project when calling getRecordingsDirectory.');
+    throw new Error('No open project when calling getRecordingsDirectory.');
   }
 
   return getProjectRecordingsDirectory(currentOpenProject.projectHandle);
@@ -265,7 +265,7 @@ function getRecordingsDirectory() {
  */
 function getRecordingsList(): Readonly<Array<string>> {
   if (currentOpenProject === null) {
-    throw Error('No open project when calling getRecordingsList.');
+    throw new Error('No open project when calling getRecordingsList.');
   }
 
   return currentOpenProject.projectConfig.recordings;
@@ -279,7 +279,7 @@ function getRecordingsList(): Readonly<Array<string>> {
  */
 function addRecording(recordingName: string): string {
   if (currentOpenProject === null) {
-    throw Error('No open project when calling addRecording.');
+    throw new Error('No open project when calling addRecording.');
   }
 
   currentOpenProject.addRecording(recordingName);
@@ -297,7 +297,7 @@ function addRecording(recordingName: string): string {
  */
 function removeRecording(recordingIndex: number): void {
   if (currentOpenProject === null) {
-    throw Error('No open project when calling removeRecording.');
+    throw new Error('No open project when calling removeRecording.');
   }
 
   currentOpenProject.removeRecording(recordingIndex);
@@ -313,7 +313,7 @@ function removeRecording(recordingIndex: number): void {
  */
 function getOption(option: string): unknown {
   if (currentOpenProject === null) {
-    throw Error('No open project when calling getOption.');
+    throw new Error('No open project when calling getOption.');
   }
 
   return currentOpenProject.getConfigOption(option);
@@ -329,7 +329,7 @@ function getOption(option: string): unknown {
  */
 function setOption(option: string, value: unknown): void {
   if (currentOpenProject === null) {
-    throw Error('No open project when calling setOption.');
+    throw new Error('No open project when calling setOption.');
   }
 
   currentOpenProject.setConfigOption(option, value);
@@ -345,7 +345,7 @@ function setOption(option: string, value: unknown): void {
  */
 function removeOption(option: string): void {
   if (currentOpenProject === null) {
-    throw Error('No open project when calling removeOption.');
+    throw new Error('No open project when calling removeOption.');
   }
 
   currentOpenProject.removeConfigOption(option);

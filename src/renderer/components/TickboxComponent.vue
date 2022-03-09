@@ -1,27 +1,26 @@
 <template>
-    
-    <div @click="ticked=!ticked" class="tickbox-container">
-        <input type="checkbox" class="tickbox"/>
-        <h3>{{tickbox_text}}</h3>
-    </div>
-
+  <div class="tickbox-container" @click="ticked=!ticked">
+    <input class="tickbox" type="checkbox">
+    <h3>{{ tickbox_text }}</h3>
+  </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref } from 'vue';
+
 
 export default defineComponent({
-  name: "tickbox-component",
+  name: 'TickboxComponent',
   props: {
-      tickbox_text : String,
-      
-  },
-  data() {
-    return {ticked : false}
+    tickbox_text: String
+
   },
   setup() {
-    return {}
+    return {};
   },
+  data() {
+    return { ticked: false };
+  }
 });
 
 </script>
