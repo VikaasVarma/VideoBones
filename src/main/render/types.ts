@@ -26,7 +26,7 @@ interface EngineOptions {
  * All the audio tracks in a single AudioInput are first volume scaled with their respective volume,
  * then overlayed and finally trimmed to the interval.
  * The AudioInput interface in mainly used in single editor page to passing a message to back end, 
- * the audiooptions will record them and apply the effect.
+ * the audioOptions class will record them and apply the effect.
  */
 interface AudioInput{
   file: string;
@@ -45,6 +45,8 @@ interface AudioInput{
  * Can be many video files, each with an associated Resolution.
  * We also have a screen style, which describes (in an abstract way) how the videos will be layed out in the render.
  *
+ * In usage, @interface VideoInput comes as an array, so that the program can specify the change of screen-layout.
+ * 
  * All the videos in a single VideoInput are trimmed to the interval,
  * then transformed to conform to the layout specified in screenStyle.
  */

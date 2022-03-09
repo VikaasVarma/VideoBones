@@ -10,6 +10,12 @@ import { AudioInputOption, getAudioOptions } from './AudioOption';
 
 const thumbnailResolutionDivisor = 4;
 
+/**
+ * 
+ * @param param0 Needs a structure of EngineOptions, go to: @interface EngineOptions 
+ *  
+ * @returns all the arguements that ffmpeg needs to do the rendering job 
+ */
 function buildArgs({
   aspectRatio = '16:9',
   audioBitRate = '320k',
@@ -27,18 +33,21 @@ function buildArgs({
   videoBitRate = '6M',
   videoInputs = [] as VideoInput[]
 }: EngineOptions): string[] {
-  // The holy ffmpeg argument builder
+  //to figure out the indices for video inputs
   console.log(videoInputs);
   const cumsum = ((sum: number) => (value: VideoInput) => {
     sum += value.files.length; return sum - value.files.length;
   })(0);
   const offset = videoInputs.map(cumsum);
+
+  //to figure out the indices for audio inputs
   const videoCount: number[] = videoInputs.map(videoArray => videoArray.files.length);
   let videoSum: number = 0;
   for (let n of videoCount){
     videoSum += n;
   }
 
+  //screen style parser
   function screenStyle_to_layout(screenStyle: string) {
     switch (screenStyle) {
       case '....':
@@ -52,8 +61,11 @@ function buildArgs({
     }
   }
 
+  //the audioInput part of the EngineOption is never used, instead, it uses the records from AudioOption
   const audioInputOptions: AudioInputOption[] = getAudioOptions();
 
+  //the filter is the main part of the arguements, it specifies the rendering type,
+  //the video layout, timing and video/audio effects.
   const filter
     = (<string[]>[]).concat(
       videoInputs.map(input => input.files.map(file => [ '-i', file ])).flat(2),
@@ -115,6 +127,7 @@ function buildArgs({
 let ffmpeg: ChildProcessByStdio<null, Readable, null> | null;
 let ffmpeg_thumbs: ChildProcessByStdio<null, Readable, null> | null;
 
+//The function that will specify the engine options and start the rendering process
 export function start(
   options: EngineOptions,
   statusCallback: (elapsedTime: string, donePercentage: number) => void,
@@ -144,6 +157,7 @@ export function start(
   }
 }
 
+//the functiion that starts the engine in thumbnail mode, which takes less time
 export function getThumbnails(
   options: EngineOptions,
   doneCallback: (paths: string[]) => void

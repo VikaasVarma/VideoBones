@@ -1,8 +1,12 @@
-import * as projects from '../storage/projects';
-import * as config from '../storage/config';
 import { AudioInput } from './types';
 
-
+/**
+ * The class receives message from IPC-handler and record the audio settings that are given
+ * to each track. 
+ * 
+ * It will also generate the audio effect part of ffmpeg arguements.
+ * 
+ */
 export class AudioInputOption implements AudioInput{
   file: string;
   startTime: number;
