@@ -5,7 +5,7 @@ import { ChildProcessByStdio, spawn } from 'node:child_process';
 import { existsSync, mkdirSync, readdirSync, rmSync } from 'node:fs';
 import { getTempDirectory } from '../storage/config';
 import { getPath } from './ffmpeg';
-import { AudioInput, EngineOptions, VideoInput, VideoData, Resolution } from './types';
+import { AudioInput, EngineOptions, VideoInput, VideoData, Resolution, Position } from './types';
 
 
 const thumbnailResolutionDivisor = 4;
@@ -28,7 +28,7 @@ function buildArgs({
   videoInputs = [] as VideoInput[]
 }: EngineOptions): string[] {
   // The holy ffmpeg argument builder
-  function getTemplateSizeAndAnchors(screenStyle: string) {
+  function getTemplateSizeAndAnchors(screenStyle: string): { anchors: any[], templateSizes: any[] } {
     let templateSizes;
     let anchors;
     const screenWidth = outputResolution.width;
