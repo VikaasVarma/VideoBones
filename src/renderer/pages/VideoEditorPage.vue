@@ -104,11 +104,13 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { join } from 'node:path';
+import { defineComponent, Ref, ref } from 'vue';
 import { ipcRenderer } from 'electron';
 import TrackSelector from '../components/TrackSelector.vue';
 import MetronomeComponent from '../components/MetronomeComponent.vue';
 import VideoPlayer from '../components/VideoPlayer.vue';
+import { EngineOptions } from '../../main/render/types';
 
 
 export default defineComponent({
@@ -117,9 +119,9 @@ export default defineComponent({
   emits: [ 'open-recording-page', 'open-single-editor' ],
   setup() {
     const stream_url = ref('');
-    const engineOpts = ref({
+    const engineOpts: Ref<EngineOptions> = ref({
       audioInputs: [],
-      outputType: 'preview',
+      outputType: 'preview' as ('render' | 'thumbnail' | 'preview'),
       thumbnailEvery: '1/5',
       videoInputs: []
     });
@@ -136,6 +138,7 @@ export default defineComponent({
   data() {
     return {
       activeSegment: 0,
+      dir: '',
       draggingTrack: (null as null | HTMLElement),
       metronome: { initialBpm: 80 },
       mouse_down: false,
@@ -170,7 +173,8 @@ export default defineComponent({
       // the max time for the timeline is the end of the last video interval, which is the length of the whole video
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
-      this.timeline_max_time = this.engineOpts.videoInputs.map(i => i.intervals[1])
+      this.dir = dir;
+      this.timeline_max_time = this.engineOpts.videoInputs.map(i => i.interval[1])
       // eslint-disable-next-line unicorn/no-array-reduce
         .reduce((max, video) => Math.max(max, video), 0);
       this.getThumbnails();
@@ -222,6 +226,7 @@ export default defineComponent({
         this.seekToPlayhead();
 
         this.previewCurrentTime = (this.playhead / timeline.width)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         * (this.$refs.previewPlayer as any).getEndTime();
       }
     },
@@ -293,6 +298,7 @@ export default defineComponent({
     playheadUpdate() {
       if (this.$refs.previewPlayer && !this.mouse_down && !this.previewPaused) {
         const timeline = document.querySelectorAll('.timeline')[0].getBoundingClientRect();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const vidPlayer = (this.$refs.previewPlayer as any);
 
         this.previewCurrentTime = vidPlayer.getCurrentTime();
@@ -310,6 +316,7 @@ export default defineComponent({
     previewPlay(playing: boolean) {
       this.previewPaused = !playing;
       if (this.$refs.previewPlayer) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const previewElement = (this.$refs.previewPlayer as any);
         if (playing) {
           previewElement.resumePlayback();
@@ -319,6 +326,7 @@ export default defineComponent({
       }
     },
     seekToPlayhead() {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const vidPlayer = (this.$refs.previewPlayer as any);
       const timeline = document.querySelectorAll('.timeline')[0].getBoundingClientRect();
       const newPlaybackTime = (this.playhead / timeline.width) * vidPlayer.getEndTime();
