@@ -8,6 +8,8 @@ import { getPath } from './ffmpeg';
 import { AudioInput, EngineOptions, VideoInput } from './types';
 
 
+const thumbnailResolutionDivisor = 4;
+
 function buildArgs({
   aspectRatio = '16:9',
   audioBitRate = '320k',
@@ -51,9 +53,9 @@ function buildArgs({
       audioInputs.map(input => input.files.map(file => [ '-i', file ])).flat(2),
       [
         '-filter_complex', `${videoInputs.map((input, i) => ([
-          input.resolution.map((res, j) => `[${offset[i] + j}:v]setpts=PTS-STARTPTS,scale=${res.width}x${res.height},trim=${input.interval[0]}:${input.interval[1]}[input${offset[i] + j}];`).join(''),
+          input.resolution.map((res, j) => `[${offset[i] + j}:v]setpts=PTS-STARTPTS,scale=${res.width / (outputType === 'thumbnail' ? thumbnailResolutionDivisor : 1)}x${res.height / (outputType === 'thumbnail' ? thumbnailResolutionDivisor : 1)},trim=${input.interval[0]}:${input.interval[1]}[input${offset[i] + j}];`).join(''),
           `${input.files.map((_, j) => `[input${offset[i] + j}]`).join('')}xstack=inputs=${input.files.length}:layout=${screenStyle_to_layout(input.screenStyle)}[matrix${i}];`,
-          `[matrix${i}]scale=${outputResolution.width}:${outputResolution.height},setsar=1:1[v${i}];`
+          `[matrix${i}]scale=${outputResolution.width / (outputType === 'thumbnail' ? thumbnailResolutionDivisor : 1)}:${outputResolution.height / (outputType === 'thumbnail' ? thumbnailResolutionDivisor : 1)},setsar=1:1[v${i}];`
         ].join(''))).join('')  }${videoInputs.map((_, i) => `[v${i}]`).join('')}concat=n=${videoInputs.length},fps=${outputType === 'thumbnail' ? thumbnailEvery : framesPerSecond}[out]`
       ],
       [
