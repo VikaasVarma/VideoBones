@@ -1,24 +1,33 @@
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
+import { app, BrowserWindow, dialog, ipcMain } from 'electron';
 import * as config from '../main/storage/config';
 import * as projects from '../main/storage/projects';
 
-import { app, BrowserWindow, dialog, ipcMain } from 'electron';
 import { startHandler, stopHandler } from './render/ipcHandler';
 import { startIntegratedServer, stopIntegratedServer } from './render/integratedServer';
-import { join } from 'path';
 import { startStorageHandlers } from './storage/ipcHandler';
+
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 let mainWindow: BrowserWindow | null = null;
 
+/**
+ * Creates a new Electron browser instance, which is a new renderer process.
+ *
+ * Additionally, spins up the integrated server.
+ */
 async function createWindow() {
   mainWindow = new BrowserWindow({
-    width: 1920,
     height: 1080,
+    title: 'Video Bones',
     webPreferences: {
       // preload: path.join(__dirname, 'preload.ts')
-      nodeIntegration: true,
-      contextIsolation: false
+      contextIsolation: false,
+      nodeIntegration: true
     },
-    title: 'Video Bones'
+    width: 1920
   });
 
   const serverPort = await startIntegratedServer();
@@ -36,37 +45,47 @@ async function createWindow() {
   mainWindow.maximize();
 }
 
+/**
+ * Waits for Electron to be ready before starting the main window.
+ */
 app.whenReady().then(() => {
   createWindow();
 
-  app.on('activate', function () {
+  app.on('activate', function() {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
     }
   });
 });
 
-app.on('window-all-closed', function () {
+app.on('window-all-closed', function() {
   mainWindow = null;
   stopHandler();
   app.quit();
   stopIntegratedServer();
 });
 
-// Code to open the project when the FOLDER ICON on the
-// "OnOpenPage" gets pressed
 
+/**
+ * Creates a folder selection dialog.
+ */
 ipcMain.handle('browse-directory-clicked', async () => {
   const selected = await dialog.showOpenDialog({ properties: [ 'createDirectory', 'openDirectory' ] });
   return selected.filePaths[0];
 });
 
-ipcMain.handle('open-project-clicked', async() => {
+/**
+ * The user is attempting to open an exiting project.
+ *
+ * Create a folder seletion dialog, and then attempt to open the project in the selelcted folder.
+ * If the user selected an invalid folder (i.e one that doesnt contain a project), displays an error dialog.
+ */
+ipcMain.handle('open-project-clicked', async () => {
   const curr_projects = projects.getTrackedProjects();
   const selected_attr = await dialog.showOpenDialog({ properties: [ 'openDirectory' ] });
 
   if (selected_attr.canceled) {
-    return { failed: true, alert: false, output: '' };
+    return { alert: false, failed: true, output: '' };
   }
   const possible_projects = curr_projects?.filter((item: projects.ProjectHandle) =>
     item.projectPath === selected_attr.filePaths[0]);
@@ -77,13 +96,13 @@ ipcMain.handle('open-project-clicked', async() => {
       await config.openProject(handle);
       mainWindow?.setTitle(`${handle.projectName} - Video Bones`);
     } catch {
-      return { failed: true, alert: true, output: 'Please select a Project file' };
+      return { alert: true, failed: true, output: 'Please select a Project file' };
     }
   } else {
     await config.openProject(possible_projects[0]);
     mainWindow?.setTitle(`${possible_projects[0].projectName} - Video Bones`);
   }
-  return { failed: false, alert: false, output: '' };
+  return { alert: false, failed: false, output: '' };
 
 });
 
@@ -91,6 +110,15 @@ ipcMain.handle('get-default-project-directory', async () => {
   return join(app.getPath('documents'), 'VideoBones');
 });
 
+/**
+ * The user wants to create a new project.
+ *
+ * Sets up the new projects files using the projects module.
+ * Sets additional project options.
+ * Opens the project in the main editor when creation is succesful.
+ *
+ * Notifies the user of any errors (duplicate projects, failed to open directories, etc.)
+ */
 ipcMain.handle('create-project-clicked', async (event, projectName, projectLocation) => {
   try {
     await projects.createProject(projectLocation.replace(projectName, '') ?? join(app.getPath('documents'), 'VideoBones'), projectName)
@@ -102,12 +130,12 @@ ipcMain.handle('create-project-clicked', async (event, projectName, projectLocat
 
     mainWindow?.setTitle(`${projectName} - Video Bones`);
 
-    return { failed: false, alert: false, output: '' };
+    return { alert: false, failed: false, output: '' };
 
-  } catch (err) {
-    if ((err as Error).message.startsWith('Project directory already exists:')) {
-      return { failed: true, alert: true, output: 'That project already exists.' };
+  } catch (error) {
+    if ((error as Error).message.startsWith('Project directory already exists:')) {
+      return { alert: true, failed: true, output: 'That project already exists.' };
     }
-    return err;
+    return error;
   }
 });
