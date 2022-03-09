@@ -14,10 +14,11 @@
   <video-editor-page
     v-else-if="pageDisplayed === 'video-editor-page'"
     @open-recording-page="pageDisplayed = 'recording-page'"
-    @open-single-editor="pageDisplayed = 'single-video-editor-page'"
+    @open-single-editor="openSingleEditor"
   />
 
   <single-video-editor-page
+    :video_name="single_video"
     v-else-if="pageDisplayed === 'single-video-editor-page'"
     @exit-single-editor="pageDisplayed = 'video-editor-page'"
   />
@@ -52,8 +53,16 @@ export default defineComponent({
   },
   data() {
     return {
-      pageDisplayed: 'on-open-page'
+      pageDisplayed: 'on-open-page',
+      single_video: '',
+      // pageDisplayed: 'single-video-editor-page',
     };
+  },
+  methods: {
+    openSingleEditor(track: string) {
+      this.single_video = track
+      this.pageDisplayed = 'single-video-editor-page';
+    }
   }
 });
 </script>

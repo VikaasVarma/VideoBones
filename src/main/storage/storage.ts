@@ -7,6 +7,18 @@ import { ProjectHandle } from './projects';
 import { internal_Config as Config, internal_isConfig as isConfig } from './config';
 
 /**
+ * How long in milliseconds since last modification or access should temp files be cleaned.
+ */
+const tempDeathTimeMs = 60000;
+
+/**
+ * Regex to prevent certain files in temp from being removed.
+ *
+ * Any file in the temp folder with a name matching this regex will never be cleaned up.
+ */
+const tempDeathExclusionRegex = /$.*^/;  // currently matches nothing
+
+/**
  * Constant specifying the project subdirectory to create for recordings.
  */
 export const recordingsDirectoryName = 'recordings';
@@ -25,17 +37,6 @@ export function getProjectRecordingsDirectory(projectHandle: ProjectHandle) {
  */
 export const tempDirectoryName = 'tmp';
 
-/**
- * How long in milliseconds since last modification or access should temp files be cleaned.
- */
-const tempDeathTimeMs = 60000;
-
-/**
- * Regex to prevent certain files in temp from being removed.
- *
- * Any file in the temp folder with a name matching this regex will never be cleaned up.
- */
-const tempDeathExclusionRegex = /$^/;  // currently matches nothing
 
 export function getProjectTempDirectory(projectHandle: ProjectHandle) {
   return path.join(projectHandle.projectPath, tempDirectoryName);

@@ -1,7 +1,12 @@
 <template>
-  <div class="tickbox-container">
-    <input class="tickbox" type="checkbox">
-    <h3>{{ trackName }}</h3>
+  <div class="track-container">
+    <h3 draggable="true">{{ trackName }}</h3>
+    <button @click="$emit('edit-clicked')">
+      Edit
+    </button>
+    <button class="destructive" @click="$emit('delete-clicked')">
+      Delete
+    </button>
   </div>
 </template>
 
@@ -12,12 +17,15 @@ import { defineComponent } from 'vue';
 export default defineComponent({
   name: 'TrackSelector',
   props: {
-    trackName: String
-  }
+    trackName: {
+      type: String,
+      required: true
+    }
+  },
+  emits: [ 'edit-clicked', 'delete-clicked' ]
 });
-
 </script>
+
 <style lang="scss" scoped>
-  @import "../styles/main.scss";
-  @import "../styles/pages/video-editor.scss";
+  @import '../styles/components/_track';
 </style>

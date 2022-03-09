@@ -70,6 +70,9 @@ export default defineComponent({
         }
 
         function updateLocation() {
+            if (!usingDefaultPath) {
+                return;
+            }
             let inputButton = <HTMLInputElement>document.getElementById("project-location-input")
             inputButton.value = join(selectedDirectory, (<HTMLInputElement>document.getElementById("project-name-input")).value)
         }

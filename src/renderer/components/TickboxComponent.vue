@@ -1,6 +1,6 @@
 <template>
-  <div class="tickbox-container" @click="ticked=!ticked">
-    <input class="tickbox" type="checkbox">
+  <div class="tickbox-container">
+    <input class="tickbox" type="checkbox" @click="ticked=!ticked">
     <h3>{{ tickbox_text }}</h3>
   </div>
 </template>
