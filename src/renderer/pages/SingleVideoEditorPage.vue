@@ -93,14 +93,12 @@ export default defineComponent({
   },
   methods: {
     updateEcho() {
-      ipcRenderer.send('echo-settings-changed', this.echo_settings);
+      ipcRenderer.send('echo-settings-changed', (<any>this.echo_settings).value);
     },
     updateReverb() {
-      ipcRenderer.send('reverb-settings-changed', this.reverb_settings);
+      ipcRenderer.send('reverb-settings-changed', (<any>this.reverb_settings).value);
     }
   }
-  // djsjahkdsa.send("reverb-settings-changed", {decay:3728, delay:3278327})
-  // djsjahkdsa.send("echo-settings-changed", {decay:3728, delay:3278327})
 });
 </script>
 
