@@ -27,7 +27,7 @@ interface VideoInput {
   files: string[]
   screenStyle: '....' | '|..' | '_..'
   interval: [number, number]
-  resolution: Resolution[]
+  resolutions: Resolution[]
   crop_offsets: Resolution[]
   zoom_levels: number[]
 }
