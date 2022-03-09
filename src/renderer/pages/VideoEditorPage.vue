@@ -171,6 +171,7 @@ export default defineComponent({
         function record () { context.emit('open-recording-page'); }
 
         ipcRenderer.addListener('asynchronous-reply',  (event, args) => {
+            console.log(args.event);
             let port = args.port
             if (stream_url.value === "") {
                 stream_url.value = "http://localhost:"+port.toString()+"/stream.mpd"

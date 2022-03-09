@@ -90,6 +90,8 @@ function buildArgs({
     '-aspect', aspectRatio,
     '-vol', outputVolume.toString(),
     '-metadata', 'description="Made with VideoBones"',
+    '-probesize', '32', '-analyzeduration', '0', // optimisations, can remove if breaking
+    '-progress', '-', '-nostats', // get it to print stats
     '-stats'
     ,  outputType === 'render' ? outputFile : previewManifest
   ].filter(str => {

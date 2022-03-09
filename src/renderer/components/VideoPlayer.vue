@@ -45,6 +45,9 @@ export default defineComponent({
         (<HTMLMediaElement>this.$refs.videoPlayer).play();
       })
       .catch(this.onError);
+    
+    // reduce the buffering amt to hopefully speed up preview starting
+    player.configure('streaming.bufferingGoal', 2);
   },
   methods: {
     onError(error: Error) {
