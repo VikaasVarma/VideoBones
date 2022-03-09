@@ -80,7 +80,7 @@ let audioOptions: AudioInputOption[] = [];
 
 export function addAudioOption(option: AudioInput):void{
   //the file field will be discarded, so can leave it blank at front end
-  let realFile:string = `Audio${config.getRecordingsList().length/2}.webm`;
+  let realFile:string = `audio${config.getRecordingsList().length/2}.webm`;
   audioOptions.push(
     new AudioInputOption(
       realFile,

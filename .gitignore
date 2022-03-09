@@ -1,6 +1,7 @@
 node_modules/
 build/
 dist/
+DemoProject/tmp
 media/*
 
 .DS_Store
@@ -10,4 +11,4 @@ media/*
 .vscode/
 *-stream*.m4s
 
-TestProj/
+TestProj/*

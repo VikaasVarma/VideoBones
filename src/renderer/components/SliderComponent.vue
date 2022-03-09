@@ -2,7 +2,7 @@
     
     <div class="slider-container">
         <h3>{{slider_name}}</h3>
-        <input type="range" min="1" max="100" value="50">
+        <input @mouseup="onValueChange" type="range" min="1" max="100" :value="slider_value">
     </div>
 
 </template>
@@ -14,9 +14,15 @@ export default defineComponent({
   name: "slider-component",
   props: {
       slider_name : String,
+      slider_value : Number
   },
-  setup() {
-    return {}
+  setup(props, context) {
+
+    function onValueChange(e :any) {
+      context.emit('update:slider_value', +e.currentTarget.value)
+    }
+
+    return {onValueChange}
   },
 });
 
