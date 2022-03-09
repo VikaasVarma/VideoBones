@@ -22,73 +22,107 @@ function buildArgs({
   videoInputs = [] as VideoInput[]
 }: EngineOptions): string[] {
   // The holy ffmpeg argument builder
-  function calculateLayoutPositions(videoInput: VideoInput) {
-    let resolutions = videoInput.resolutions
-    let screenStyle = videoInput.screenStyle
-    if (resolutions.length !== screenStyle.length) { throw Error('Incorrect number of videos supplied')}
-
-    let screenWidth = outputResolution.width, screenHeight = outputResolution.height
-    let resizeData = []
-    let templateSizes = []
-
-    switch(screenStyle) {
+  function getTemplateSizeAndAnchors(screenStyle:string) {
+    let templateSizes;
+    let anchors;
+    let screenWidth = outputResolution.width;
+    let screenHeight = outputResolution.height;
+  
+    switch (screenStyle) {
       case "....":
-          templateSizes = Array(4).fill({x:screenWidth/2, y:screenHeight/2})
-
-          resizeData.push({x:0, y:0, resizeRatio:1}, 
-                          {x:screenWidth/2, y:0, resizeRatio:1}, 
-                          {x:0, y:screenHeight/2, resizeRatio:1}, 
-                          {x:screenWidth/2, y:screenHeight/2, resizeRatio:1})
-          break
-
+        templateSizes = Array(4).fill({
+          x: screenWidth / 2,
+          y: screenHeight / 2,
+        });
+  
+        anchors = [
+          { x: 0, y: 0 },
+          { x: screenWidth / 2, y: 0 },
+          { x: 0, y: screenHeight / 2 },
+          { x: screenWidth / 2, y: screenHeight / 2 },
+        ];
+        break;
+  
       case "|..":
-
-          templateSizes = [{x:screenWidth/2, y:screenHeight},
-                           {x:screenWidth/2, y:screenHeight/2},
-                           {x:screenWidth/2, y:screenHeight/2}]
-
-          resizeData.push({x:0, y:0, resizeRatio:1}, 
-                           {x:resolutions[0].width, y:0, resizeRatio:1}, 
-                           {x:resolutions[0].width, y:resolutions[1].height, resizeRatio:1})
-          break
-
+        templateSizes = [
+          { x: screenWidth / 2, y: screenHeight },
+          { x: screenWidth / 2, y: screenHeight / 2 },
+          { x: screenWidth / 2, y: screenHeight / 2 },
+        ];
+  
+        anchors = [
+          { x: 0, y: 0 },
+          { x: screenWidth / 2, y: 0 },
+          { x: screenWidth / 2, y: screenHeight / 2 },
+        ];
+        break;
+  
       case "_..":
-
-          templateSizes = [{x:screenWidth, y:screenHeight/2},
-                           {x:screenWidth/2, y:screenHeight/2},
-                           {x:screenWidth/2, y:screenHeight/2}]
-
-          resizeData.push({x:0, y:0, resizeData:1}, {x:0, y:resolutions[0].height, resizeData:1}, 
-                                         {x:resolutions[1].width, y:resolutions[0].height, resizeData:1})
-          break
-
+        templateSizes = [
+          { x: screenWidth, y: screenHeight / 2 },
+          { x: screenWidth / 2, y: screenHeight / 2 },
+          { x: screenWidth / 2, y: screenHeight / 2 },
+        ];
+  
+        anchors = [
+          { x: 0, y: 0 },
+          { x: 0, y: screenHeight / 2 },
+          { x: screenWidth / 2, y: screenHeight / 2 },
+        ];
+        break;
+  
       default:
-          throw Error("Fuck you: invalid screenstyle")
+        throw Error("Fuck you: invalid screenstyle");
     }
-
-    for (let i = 0; i < resolutions.length; i++) {
-      let res = resolutions[i]
-      let xRatio = res.width / templateSizes[i].x, yRatio = res.height / templateSizes[i].y
-      resizeData[i].resizeRatio = (xRatio > yRatio) ? 1 / xRatio : 1 / yRatio
+    return { anchors, templateSizes };
+  }
+  
+  function calculateLayout(videoInput:VideoInput) {
+    const screenStyle = videoInput.screenStyle
+    console.log("\n\n\n"+screenStyle+"\n\n\n")
+    if (videoInput.files.length !== screenStyle.length) {
+      throw Error("Incorrect number of videos supplied");
     }
-    return resizeData
+    let video_resolutions = videoInput.resolutions;
+    let template_data = getTemplateSizeAndAnchors(screenStyle);
+    let video_anchors = template_data.anchors;
+    let real_resolutions = [];
+  
+    for (let i = 0; i < videoInput.files.length; i++) {
+      let res = video_resolutions[i];
+      let res_ratio = Math.min(
+        res.width / template_data.templateSizes[i].x,
+        res.height / template_data.templateSizes[i].y
+      );
+      real_resolutions.push({
+        width: res.width / res_ratio,
+        height: res.height / res_ratio,
+      });
+    }
+    return {video_anchors, 
+            real_resolutions,
+            layout_resolutions:template_data.templateSizes
+          }
   }
   
   function genVideoData(videoInputs: VideoInput[], videoDict: Map<string, number>): VideoData[][] {
     let videoData: VideoData[][] = []
     let appearances: { [file: string]: number } = {};
     for (let input of videoInputs) {
-        let data: VideoData[] = []
-        input.files.map((file, i) => {
-            let layout = calculateLayoutPositions(input)
+      let data: VideoData[] = []
+      input.files.map((file, i) => {
+            let layout = calculateLayout(input)
+
+            // console.log("\n\n\n",layout, "\n\n\n")
+
             appearances[file] = (appearances[file] ?? 0) + 1
             data.push({
                 id: [videoDict.get(file)!, appearances[file] - 1],
                 file: file,
                 interval: input.interval,
-                position: { top: layout[i].x, left: layout[i].y },
-                resolution: { width: input.resolutions[i].width * layout[i].resizeRatio!, height: input.resolutions[i].height * layout[i].resizeRatio! },
-                crop_size: { width: 0, height: 0 },
+                position: { top: layout.video_anchors[i].y, left: layout.video_anchors[i].x },
+                resolution: { width: layout.real_resolutions[i].width, height:  layout.real_resolutions[i].height },
+                crop_size: {  width: layout.real_resolutions[i].width, height:  layout.real_resolutions[i].height},
                 crop_offset: { top: 0, left: 0 }
             })
         })
