@@ -148,6 +148,7 @@ module.exports = {
     'space-in-parens': [ 'warn', 'never' ],
     'space-infix-ops': 'warn',
     'unicorn/filename-case': [ 'warn', { cases: { kebabCase: true, pascalCase: true } }],
+    'unicorn/no-array-for-each': 'off',
     'unicorn/no-null': 'off',
     'unicorn/numeric-separators-style': [ 'warn', { onlyIfContainsSeparator: true }],
     'unicorn/prevent-abbreviations': 'off',
