@@ -1,38 +1,38 @@
 <template id="SingleVideoEditorPage">
-
-  <div @mousemove="drag($event, mouse_down)" @mouseup="endTimelineDrag()">
+  <div @mousemove="drag($event)" @mouseup="endTimelineDrag()">
     <menu class="grid-container" style="margin: auto;">
       <div id="video-container">
-        <video-player ref='fuckingVideoPlayer' v-if="stream_url != '' " :manifest-url="stream_url"/>
+        <video-player v-if="stream_url != '' " ref="previewPlayer" :manifest-url="stream_url" />
       </div>
 
       <div id="video-controls" class="horizontal-spacer">
-                <button v-show="previewPaused" @click="previewPlay()" class="image-container">
-                    <img src="../../../assets/images/playButton.svg">
-                </button>
+        <button class="image-container" @click="previewPlay(previewPaused)">
+          <img v-if="previewPaused" src="../../../assets/images/playButton.svg">
+          <img v-else src="../../../assets/images/stopButton.svg">
+        </button>
 
-                <button v-show="!previewPaused" @click="previewPause()" class="image-container">
-                    <img src="../../../assets/images/stopButton.svg">
-                </button>
+        <div style="align-items: center; display: flex; justify-content: center;">
+          {{ previewCurrentTime.toFixed(2) }} <br> / <br> {{ previewEndTime.toFixed(2) }}
+        </div>
 
-                <div style="display: flex; justify-content: center; align-items: center;">
-                    {{ previewCurrentTime.toFixed(2) }} <br> / <br> {{ previewEndTime.toFixed(2) }}
-                </div>  
-
-                <div @mousedown="startTimelineDrag()" class="timeline" ref="timeline" style="display:flex; overflow:hidden;">
-                    <div v-for="i in timeline_images.length">
-                        <div v-bind:style="`aspect-ratio: 16/9; height:${timeline_seg_height};`">
-                            <img :src="timeline_images[i-1]" alt ="loading timeline..." style="max-width:100%;max-height:100%;">
-                        </div>
-                        <div v-bind:style="`height:${timeline_seg_height}; width:5px`"/>
-                    </div>
-
-                    <div class="playhead" :style="`position:absolute; z-index:10; left: calc(-5px + ${playhead}px)`">
-                        <div></div> <div></div>
-                    </div>
-                </div>
-
+        <div
+          ref="timeline"
+          class="timeline"
+          style="display: flex; overflow: hidden;"
+          @mousedown="startTimelineDrag()"
+        >
+          <div v-for="i in timeline_images.length" :key="i">
+            <div :style="`aspect-ratio: 16/9; height:${timeline_seg_height};`">
+              <img alt="loading timeline..." :src="timeline_images[i - 1]" style="max-height: 100%; max-width: 100%;">
             </div>
+            <div :style="`height:${timeline_seg_height}; width:5px`" />
+          </div>
+
+          <div class="playhead" :style="`position:absolute; z-index:10; left: calc(-5px + ${playhead}px)`">
+            <div /> <div />
+          </div>
+        </div>
+      </div>
 
       <menu class="vertical-options-menu">
         <div>
@@ -49,8 +49,8 @@
             v-for="track in tracks"
             :key="track.trackName"
             :track-name="track.trackName"
-            @edit-clicked="$emit('open-single-editor', track.trackName)"
             @delete-clicked="deleteTrack(track.trackName)"
+            @edit-clicked="$emit('open-single-editor', track.trackName)"
           />
 
           <div class="add-item-container" @click="$emit('open-recording-page')">
@@ -108,80 +108,12 @@ export default defineComponent({
   name: 'VideoEditorPage',
   components: { MetronomeComponent, TrackSelector, VideoPlayer },
   emits: [ 'open-recording-page', 'open-single-editor' ],
-  data() {
-        return {
-            timeline_images: ([] as string[]),
-            timeline_seg_height:0,
-            timeline_segments_count:0,
-            timeline_max_time: 0,
-
-            previewCurrentTime: 0,
-            previewEndTime: 0,
-            previewPaused: false,
-            previewPausedBeforeSeek: false
-        }
-    },
-    methods: {
-        drag: function (event: any, mouse_down: boolean) {
-            if (this.mouse_down) {
-                var timeline = document.getElementsByClassName("timeline")[0].getBoundingClientRect();
-                var x = event.clientX;
-                this.playhead = Math.min(timeline.width, Math.max(0, (x - timeline.x)));
-
-                // I've done this for now so that the preview seeks while you drag the playhead
-                // this may not be performant as we seek on every mousemove event, and this line can be removed to revert to just seeking after the drag has ended
-                // however, i think this is more useful as user sees in the big picture what they are seeking over
-                this.seekToPlayhead();
-
-                // @ts-ignore
-                this.previewCurrentTime = (this.playhead / timeline.width) * (this.$refs.fuckingVideoPlayer as any).getEndTime();
-            }
-        },
-        startTimelineDrag: function() {
-            this.mouse_down = true;
-            this.previewPausedBeforeSeek = this.previewPaused;
-            this.previewPause();
-        },
-        endTimelineDrag: function() {
-            if (this.mouse_down) {
-                this.seekToPlayhead();
-
-                if (!this.previewPausedBeforeSeek) this.previewPlay();
-                this.mouse_down = false;
-            }
-        },
-        seekToPlayhead() {
-            const vidPlayer = (this.$refs.fuckingVideoPlayer as any);
-            var timeline = document.getElementsByClassName("timeline")[0].getBoundingClientRect();
-            const newPlaybackTime = (this.playhead / timeline.width) * vidPlayer.getEndTime();
-
-            vidPlayer.seekToTime(newPlaybackTime);
-        },
-        previewPlay() {
-            if (this.$refs.fuckingVideoPlayer !== undefined) {
-                (this.$refs.fuckingVideoPlayer as any).resumePlayback();
-                this.previewPaused = false;
-            }
-        },
-        previewPause() {
-            if (this.$refs.fuckingVideoPlayer !== undefined) {
-                (this.$refs.fuckingVideoPlayer as any).pausePlayback();
-                this.previewPaused = true;
-            }
-        }
-
-    },
   setup() {
         interface Track {
             trackName: string;
         }
 
-        const activeSegment = ref(0);
         const tracks = ref([] as Track[]);
-        const metronome = ref({ initialBpm: 80 });
-        const screenStyle = ref(0);
-        const playhead = ref(0.6);
-        const mouse_down = ref(false);
         const stream_url = ref('');
         const track_data = {
           all_track_ids: [ 'Track_0', 'Track_1', 'Track_3', 'Track_3' ],
@@ -192,23 +124,6 @@ export default defineComponent({
           ]
         };
 
-        function setScreenStyle(style: number) {
-          screenStyle.value = style;
-        }
-
-        function deleteTrack(trackName: string) {
-          tracks.value = tracks.value.filter(track => track.trackName !== trackName);
-          ipcRenderer.send('remove-recording', trackName);
-        }
-
-        function drag(event: MouseEvent, mouse_down: boolean) {
-          if (mouse_down) {
-            const timeline = document.querySelectorAll('.timeline')[0].getBoundingClientRect();
-            const x = event.clientX;
-            playhead.value = Math.min(timeline.width, Math.max(0, (x - timeline.x)));
-          }
-        }
-
         ipcRenderer.addListener('asynchronous-reply', (event, args) => {
           const port = args.port;
           if (stream_url.value === '') {
@@ -216,9 +131,29 @@ export default defineComponent({
           }
         });
 
-        return { activeSegment, deleteTrack, drag, metronome, mouse_down,
-          playhead, screenStyle, setScreenStyle, stream_url, track_data, tracks };
+        return { track_data, tracks };
 
+  },
+  data() {
+    return {
+      activeSegment: 0,
+      metronome: { initialBpm: 80 },
+      mouse_down: false,
+      playhead: 0.6,
+
+      previewCurrentTime: 0,
+      previewEndTime: 0,
+      previewPaused: false,
+      previewPausedBeforeSeek: false,
+
+      screenStyle: 0,
+      stream_url: '',
+
+      timeline_images: ([] as string[]),
+      timeline_max_time: 0,
+      timeline_seg_height: 0,
+      timeline_segments_count: 0
+    };
   },
   created() {
     ipcRenderer.on('thumbnail-reply', (event, args) => {
@@ -242,22 +177,28 @@ export default defineComponent({
         outputType: 'preview',
         thumbnailEvery: thumbnailFrequency,
         videoInputs: [
-                    {
-                        files: [join("../recordings", "video1.webm"), join("../recordings", "video2.webm"), join("../recordings", "video3.webm"), join("../recordings", "video4.webm")],
-                        screenStyle: '....',
-                        interval:[0,5],
-                        resolution: [{width: 1280, height: 720},{width: 1280, height: 720},{width: 1280, height: 720},{width: 1280, height: 720}]
-                    },
-                    {
-                        files: [join("../recordings", "video1.webm"), join("../recordings", "video2.webm"), join("../recordings", "video3.webm")],
-                        screenStyle: '|..',
-                        interval:[5,10],
-                        resolution: [{width: 1280, height: 1440},{width: 1280, height: 720},{width: 1280, height: 720}]
-                    }
-                ],
+          {
+            files: [
+              join(dir, 'video1.webm'), join('../recordings', 'video2.webm'),
+              join('../recordings', 'video3.webm'), join('../recordings', 'video4.webm')
+            ],
+            interval: [ 0, 5 ],
+            resolution: [
+              {  height: 720, width: 1280 }, { height: 720, width: 1280  },
+              { height: 720, width: 1280  }, { height: 720, width: 1280  }
+            ],
+            screenStyle: '....'
+          },
+          {
+            files: [ join('../recordings', 'video1.webm'), join('../recordings', 'video2.webm'), join('../recordings', 'video3.webm') ],
+            interval: [ 5, 10 ],
+            resolution: [{ height: 1440, width: 1280 }, {  height: 720, width: 1280 }, { height: 720, width: 1280 }],
+            screenStyle: '|..'
+          }
+        ]
       };
       // the max time for the timeline is the end of the last video interval, which is the length of the whole video
-        this.timeline_max_time = engineOpts.videoInputs[engineOpts.videoInputs.length-1].interval[1];
+      this.timeline_max_time = engineOpts.videoInputs[engineOpts.videoInputs.length - 1].interval[1];
       ipcRenderer.send(
         'asynchronous-message',
         {
@@ -293,29 +234,84 @@ export default defineComponent({
 
     this.timeline_segments_count = Math.ceil(timeline_w / timeline_seg_width);
 
-        //this.$forceUpdate();
+    //this.$forceUpdate();
 
-        const playheadUpdate = () => {
-            if (this.$refs['fuckingVideoPlayer'] !== undefined && !this.mouse_down && !this.previewPaused) {
-                var timeline = document.getElementsByClassName("timeline")[0].getBoundingClientRect()
-                const vidPlayer = (this.$refs.fuckingVideoPlayer as any);
+    // feels like the leas frequent we can get away with while making the playhead still seem smooth
+    window.setInterval(this.playheadUpdate, 0.1);
+  },
+  methods: {
+    deleteTrack(trackName: string) {
+      this.tracks = this.tracks.filter(track => track.trackName !== trackName);
+      ipcRenderer.send('remove-recording', trackName);
+    },
+    drag(event: MouseEvent) {
+      if (this.mouse_down) {
+        const timeline = document.querySelectorAll('.timeline')[0].getBoundingClientRect();
+        const x = event.clientX;
+        this.playhead = Math.min(timeline.width, Math.max(0, (x - timeline.x)));
 
-                this.previewCurrentTime = vidPlayer.getCurrentTime();
-                this.previewEndTime = vidPlayer.getEndTime();
+        // I've done this for now so that the preview seeks while you drag the playhead
+        // this may not be performant as we seek on every mousemove event
+        // and this line can be removed to revert to just seeking after the drag has ended
+        // however, i think this is more useful as user sees in the big picture what they are seeking over
+        this.seekToPlayhead();
 
-                const playheadx = (this.previewCurrentTime / vidPlayer.getEndTime()) * timeline.width;
+        this.previewCurrentTime = (this.playhead / timeline.width)
+        * (this.$refs.previewPlayer as HTMLVideoElement).duration;
+      }
+    },
+    endTimelineDrag: function() {
+      if (this.mouse_down) {
+        this.seekToPlayhead();
 
-                this.playhead = (playheadx);
+        if (!this.previewPausedBeforeSeek) this.previewPlay(false);
+        this.mouse_down = false;
+      }
+    },
+    playheadUpdate() {
+      if (this.$refs.previewPlayer && !this.mouse_down && !this.previewPaused) {
+        const timeline = document.querySelectorAll('.timeline')[0].getBoundingClientRect();
+        const vidPlayer = (this.$refs.previewPlayer as HTMLVideoElement);
 
-                if (this.previewCurrentTime === this.previewEndTime) {
-                    this.previewPause();
-                }
-            }
+        this.previewCurrentTime = vidPlayer.currentTime;
+        this.previewEndTime = vidPlayer.duration;
+
+        const playheadx = (this.previewCurrentTime / vidPlayer.duration) * timeline.width;
+
+        this.playhead = (playheadx);
+
+        if (this.previewCurrentTime === this.previewEndTime) {
+          this.previewPlay(true);
         }
+      }
+    },
+    previewPlay(playing: boolean) {
+      this.previewPaused = !playing;
+      if (this.$refs.previewPlayer) {
+        const previewElement = (this.$refs.previewPlayer as HTMLVideoElement);
+        if (playing) {
+          previewElement.play();
+        } else {
+          previewElement.pause();
+        }
+      }
+    },
+    seekToPlayhead() {
+      const vidPlayer = (this.$refs.previewPlayer as HTMLVideoElement);
+      const timeline = document.querySelectorAll('.timeline')[0].getBoundingClientRect();
+      const newPlaybackTime = (this.playhead / timeline.width) * vidPlayer.duration;
 
-        // feels like the leas frequent we can get away with while making the playhead still seem smooth
-        window.setInterval(playheadUpdate, 0.1);
+      vidPlayer.fastSeek(newPlaybackTime);
+    },
+    setScreenStyle(style: number) {
+      this.screenStyle = style;
+    },
+    startTimelineDrag: function() {
+      this.mouse_down = true;
+      this.previewPausedBeforeSeek = this.previewPaused;
+      this.previewPlay(true);
     }
+  }
 });
 </script>
 
