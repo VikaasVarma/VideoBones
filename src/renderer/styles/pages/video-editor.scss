@@ -47,6 +47,7 @@
   height: 100%;
   overflow: auto;
   overflow-y: scroll;
+  user-select: none;
   width: 100%;
 
   & > div {
@@ -87,13 +88,14 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 1fr 1fr;
+  place-items: stretch;
   width: 100%;
 
   /* stylelint-disable-next-line no-descending-specificity */
   & > div {
     border: 1px solid $color-middleground;
-    height: 100%;
-    width: 100%;
+    display: grid;
+    place-items: center;
 
     &:hover {
       cursor: pointer;

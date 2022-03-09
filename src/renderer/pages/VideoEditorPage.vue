@@ -1,5 +1,8 @@
 <template id="SingleVideoEditorPage">
-  <div @mousemove="drag($event)" @mouseup="endTimelineDrag()">
+  <div
+    @mousemove="drag($event)"
+    @mouseup="endDrag($event)"
+  >
     <menu class="grid-container" style="margin: auto;">
       <div id="video-container">
         <video-player v-if="stream_url != '' " ref="previewPlayer" :manifest-url="stream_url" />
@@ -50,6 +53,7 @@
             :key="track.trackName"
             :track-name="track.trackName"
             @delete-clicked="deleteTrack(track.trackName)"
+            @dragged="dragTrack($event, track.trackName)"
             @edit-clicked="$emit('open-single-editor', track.trackName)"
           />
 
@@ -83,9 +87,9 @@
             :class="['screen-style', screenStyle === 2 ? 'selected' : '']"
             @click="setScreenStyle(2)"
           >
-            <div style="grid-column: 1 / 2; grid-row: 1 / 2;" />
-            <div style="grid-column: 1 / 2; grid-row: 2 / 3;" />
-            <div style="grid-column: 2 / 3; grid-row: 1 / 3;" />
+            <div style="grid-column: 1 / 2; grid-row: 1 / 3;" />
+            <div style="grid-column: 2 / 3; grid-row: 1 / 2;" />
+            <div style="grid-column: 2 / 3; grid-row: 2 / 3;" />
           </div>
         </div>
       </menu>
@@ -137,6 +141,7 @@ export default defineComponent({
   data() {
     return {
       activeSegment: 0,
+      draggingTrack: (null as null | HTMLElement),
       metronome: { initialBpm: 80 },
       mouse_down: false,
       playhead: 0.6,
@@ -178,18 +183,18 @@ export default defineComponent({
         videoInputs: [
           {
             files: [
-              join(dir, 'video1.webm'), join('../recordings', 'video2.webm'),
-              join('../recordings', 'video3.webm'), join('../recordings', 'video4.webm')
+              join(dir, 'video1.webm'), join(dir, 'video2.webm'),
+              join(dir, 'video3.webm'), join(dir, 'video4.webm')
             ],
             interval: [ 0, 5 ],
             resolution: [
-              {  height: 720, width: 1280 }, { height: 720, width: 1280  },
-              { height: 720, width: 1280  }, { height: 720, width: 1280  }
+              { height: 720, width: 1280 }, { height: 720, width: 1280 },
+              { height: 720, width: 1280 }, { height: 720, width: 1280 }
             ],
             screenStyle: '....'
           },
           {
-            files: [ join('../recordings', 'video1.webm'), join('../recordings', 'video2.webm'), join('../recordings', 'video3.webm') ],
+            files: [ join(dir, 'video1.webm'), join(dir, 'video2.webm'), join(dir, 'video3.webm') ],
             interval: [ 5, 10 ],
             resolution: [{ height: 1440, width: 1280 }, {  height: 720, width: 1280 }, { height: 720, width: 1280 }],
             screenStyle: '|..'
@@ -244,6 +249,10 @@ export default defineComponent({
       ipcRenderer.send('remove-recording', trackName);
     },
     drag(event: MouseEvent) {
+      if (this.draggingTrack) {
+        this.draggingTrack.style.left = `${event.clientX - this.draggingTrack.clientWidth / 2}px`;
+        this.draggingTrack.style.top = `${event.clientY - this.draggingTrack.clientHeight / 2}px`;
+      }
       if (this.mouse_down) {
         const timeline = document.querySelectorAll('.timeline')[0].getBoundingClientRect();
         const x = event.clientX;
@@ -259,7 +268,46 @@ export default defineComponent({
         * (this.$refs.previewPlayer as any).getEndTime();
       }
     },
-    endTimelineDrag: function() {
+    dragTrack(event: MouseEvent, trackName: string) {
+      this.draggingTrack = document.createElement('p');
+      this.draggingTrack.textContent = trackName;
+      this.draggingTrack.classList.add('track-draggable');
+      this.draggingTrack.style.position = 'absolute';
+      this.draggingTrack.style.cursor = 'grabbing';
+      this.draggingTrack.style.color = 'white';
+      this.draggingTrack.style.fontSize = '11px';
+      this.draggingTrack.style.userSelect = 'none';
+      this.draggingTrack.addEventListener('mousemove', this.drag.bind(this));
+      this.draggingTrack.addEventListener('mouseup', this.endDrag.bind(this));
+      document.body.append(this.draggingTrack);
+      this.draggingTrack.style.left = `${event.clientX - this.draggingTrack.clientWidth / 2}px`;
+      this.draggingTrack.style.top = `${event.clientY - this.draggingTrack.clientHeight / 2}px`;
+    },
+    endDrag(event: MouseEvent) {
+      if (this.draggingTrack) {
+        this.draggingTrack.remove();
+        const boxes = [ ...document.querySelectorAll('.screen-style.selected > div') ];
+        const box = boxes.find(box => {
+          const box_rect = box.getBoundingClientRect();
+          return (
+            event.clientX >= box_rect.x
+            && event.clientX <= box_rect.x + box_rect.width
+            && event.clientY >= box_rect.y
+            && event.clientY <= box_rect.y + box_rect.height
+          );
+        });
+        if (!box) {
+          this.draggingTrack = null;
+          return;
+        }
+        for (const child of box.childNodes) {
+          child.remove();
+        }
+        box.append(this.draggingTrack);
+        this.draggingTrack.style.position = 'static';
+        this.draggingTrack.style.cursor = 'pointer';
+        this.draggingTrack = null;
+      }
       if (this.mouse_down) {
         this.seekToPlayhead();
 

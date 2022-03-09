@@ -1,6 +1,8 @@
 <template>
   <div class="track-container">
-    <h3 draggable="true">{{ trackName }}</h3>
+    <h3 class="track-draggable" @mousedown="$emit('dragged', $event)">
+      {{ trackName }}
+    </h3>
     <button @click="$emit('edit-clicked')">
       Edit
     </button>
@@ -22,7 +24,7 @@ export default defineComponent({
       required: true
     }
   },
-  emits: [ 'edit-clicked', 'delete-clicked' ]
+  emits: [ 'dragged', 'edit-clicked', 'delete-clicked' ]
 });
 </script>
 
