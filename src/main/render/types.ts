@@ -1,7 +1,7 @@
 interface EngineOptions {
   aspectRatio: string; // A:B format, e.g. 16:9
   audioBitRate: string;
-  audioInputs: AudioInput[]; // required
+  audioInputs: AudioInput[]; // not required, audio inputs are from other ways, not deleted for consistent
   audioSampleRate: number;
   bufferSize: string;
   framesPerSecond: number;
@@ -10,6 +10,8 @@ interface EngineOptions {
   outputType: 'thumbnail' | 'preview' | 'render'; // required
   outputVolume: number;
   previewManifest: string; // Ignored unless type is preview
+  thumbnailEvery: string; // X/Y format, X images every Y seconds
+  startTime: number; // Measured in seconds
   videoBitRate: string;
   videoInputs: VideoInput[]; // required
 }

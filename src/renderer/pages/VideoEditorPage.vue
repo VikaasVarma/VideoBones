@@ -78,6 +78,7 @@ import MetronomeComponent from '../components/MetronomeComponent.vue';
 import { ipcRenderer } from 'electron';
 import VideoPlayer from '../components/VideoPlayer.vue';
 import { join } from 'path';
+import { EngineOptions } from '../../main/render/types';
 
 const thumbnailFrequency = '1/5';
 
@@ -148,8 +149,19 @@ export default defineComponent({
         });
 
         ipcRenderer.invoke('get-recordings-directory').then( (dir) => {
-            const engineOpts = {
+            const engineOpts:EngineOptions = {
+            aspectRatio: '16:9',
+            audioBitRate: '320k',
+            audioSampleRate: 48000,
+            bufferSize:'32M',
+            framesPerSecond: 60,
+            outputFile:'out.mp4',
+            outputResolution:{width:1920, height:1080},
             outputType: "preview",
+            outputVolume:0,
+            previewManifest:'stream.mpd',
+            startTime:0,
+            videoBitRate:'6M',
             videoInputs: [
             {
                 files: [join("../recordings", "video1.webm"), join("../recordings", "video2.webm"), join("../recordings", "video3.webm"), join("../recordings", "video4.webm")],

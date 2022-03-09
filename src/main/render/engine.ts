@@ -61,8 +61,11 @@ function buildArgs({
       ${input.getDeclickArgs()}
       ${input.getDeclipArgs()}
       ${input.getReverbArgs()}
-      volume=${input.volume || 256}[ainput${i}];`).join(''), `amerge=inputs=${audioInputs.length}[aout];`
-    ].join(''),
+      volume=${input.volume || 256}[ainput${i}];`,
+      `${audioInputs.length===0?'':`amerge=inputs=${audioInputs.length}[aout];`}`
+      ).join(''), 
+    ].join(' '),
+    
     [
       '-map', '[out]',
       '-map', '[aout]',

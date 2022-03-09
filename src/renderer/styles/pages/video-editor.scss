@@ -51,16 +51,15 @@
 	background-color: $color-outline;
 	display: block;
 
-      &::before {
-        border: 0;
-        border-radius: 5px;
-        border-top: 3px solid $color-middleground;
-        content: '';
-        display: block;
-        height: 3px;
-        margin-bottom: 10px;
-        width: 100%;
-      }
+    &::before {
+      border: 0;
+      border-radius: 5px;
+      border-top: 3px solid $color-middleground;
+      content: '';
+      display: block;
+      height: 3px;
+      margin-bottom: 10px;
+      width: 100%;
     }
 
     & > :not(h2) {
@@ -75,7 +74,7 @@
 		h3 {
 			width: fit-content;
 		}
-	}
+
 }
 
 .screen-style {
