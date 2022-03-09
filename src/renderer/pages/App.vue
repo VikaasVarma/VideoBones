@@ -43,7 +43,6 @@ export default defineComponent({
   name: 'App',
   components: {
     CreateNewProjectPage,
-    FfmpegTest,
     OnOpenPage,
     RecordingPage,
     SingleVideoEditorPage,
