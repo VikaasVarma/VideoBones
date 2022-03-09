@@ -37,6 +37,9 @@ interface AudioInput{
   reverb_decay_identifier: number;   //between 0 and 1
   declick_active: boolean;
   declip_active: boolean;
+  echo_active: boolean;
+  echo_delay_identifier: number,
+  echo_decay_identifier: number
 }
 
 /**

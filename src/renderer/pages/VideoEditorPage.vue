@@ -172,11 +172,14 @@ export default defineComponent({
             file: join(dir,'audio1.webm'),
             startTime: 0,
             volume: 0,
-            reverb_active: true,
+            reverb_active: false,
             reverb_delay_identifier: 500,
             reverb_decay_identifier: 0.5,
             declick_active: true,
-            declip_active: true
+            declip_active: true,
+            echo_active: false,
+            echo_delay_identifier: 50,
+            echo_decay_identifier: 0.5
           },
           type: 'audioOptions'
         }
@@ -188,11 +191,14 @@ export default defineComponent({
             file: join(dir, 'audio2.webm'),
             startTime: 0,
             volume: 0,
-            reverb_active: true,
+            reverb_active: false,
             reverb_delay_identifier: 900,
             reverb_decay_identifier: 0.5,
             declick_active: false,
-            declip_active: true
+            declip_active: true,
+            echo_active: false,
+            echo_delay_identifier: 50,
+            echo_decay_identifier: 0.5
           },
           type: 'audioOptions'
         }
@@ -204,11 +210,14 @@ export default defineComponent({
             file: join(dir, 'audio3.webm'),
             startTime: 0,
             volume: 0,
-            reverb_active: true,
+            reverb_active: false,
             reverb_delay_identifier: 200,
             reverb_decay_identifier: 0.6,
             declick_active: true,
-            declip_active: true
+            declip_active: true,
+            echo_active: true,
+            echo_delay_identifier: 50,
+            echo_decay_identifier: 0.5
           },
           type: 'audioOptions',
         }

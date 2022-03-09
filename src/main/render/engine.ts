@@ -79,7 +79,7 @@ function buildArgs({
           `[matrix${i}]scale=${outputResolution.width}:${outputResolution.height},setsar=1:1[v${i}];`
         ].join(''))).join('')  }`
         +audioInputOptions.map((input: AudioInputOption, i: number) =>
-          `[${i+videoSum}:a]${input.getDeclickArgs()}${input.getDeclipArgs()}${input.getReverbArgs()},aformat=fltp:44100:stereo,volume=1.0 [ainput${i}];`)
+          `[${i+videoSum}:a]${input.getDeclickArgs()}${input.getDeclipArgs()}${input.getEchoArgs()}${input.getReverbArgs()}aformat=fltp:44100:stereo,volume=${input.volume / 256.0} [ainput${i}];`)
           .join('')
         +`${videoInputs.map((_, i) => `[v${i}]`).join('')}concat=n=${videoInputs.length},fps=${outputType === 'thumbnail' ? thumbnailEvery : framesPerSecond}[out];`
         + [audioInputOptions.length === 0 ? '' : audioInputOptions.map((_,i:number) => `[ainput${i}]`).join('') + 'amerge=inputs='+audioInputOptions.length + '[aout]']
