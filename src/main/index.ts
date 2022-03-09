@@ -1,5 +1,4 @@
-import { fileURLToPath } from 'node:url';
-import { dirname, join } from 'node:path';
+import { join } from 'node:path';
 import { app, BrowserWindow, dialog, ipcMain } from 'electron';
 import * as config from '../main/storage/config';
 import * as projects from '../main/storage/projects';
@@ -8,8 +7,6 @@ import { startHandler, stopHandler } from './render/ipcHandler';
 import { startIntegratedServer, stopIntegratedServer } from './render/integratedServer';
 import { startStorageHandlers } from './storage/ipcHandler';
 
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
 
 let mainWindow: BrowserWindow | null = null;
 
