@@ -3,6 +3,7 @@
     <div class="tickbox-container">
         <input type="checkbox" class="tickbox"/>
         <h3>{{ trackName }}</h3>
+        <button @click="$emit('delete-track', trackNumber )" class="button-close"></button>
     </div>
 
 </template>
@@ -13,8 +14,9 @@ import { defineComponent } from "vue";
 export default defineComponent({
   name: "track-selector",
   props: {
-      trackName : String
-  }
+      trackNumber : Number,
+  },
+  emits: ["delete-track"]
 });
 
 </script>

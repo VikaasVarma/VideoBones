@@ -1,4 +1,4 @@
-import { AudioInput, EngineOptions, VideoInput } from './types';
+import { AudioInput, EngineOptions, Resolution, VideoInput } from './types';
 import { ChildProcessByStdio, spawn } from 'child_process';
 import { getPath } from './ffmpeg';
 import { getTempDirectory } from '../storage/config';
@@ -25,6 +25,58 @@ function buildArgs({
   console.log(videoInputs);
   const cumsum = ((sum: number) => (value: VideoInput) => {sum += value.files.length; return sum - value.files.length})(0);
   let offset = videoInputs.map(cumsum);
+  
+  // Thought about doing it programmatically, landed on this instead
+  function calculateLayoutPositions(resolutions:Resolution[], screenStyle:string) {
+      if (resolutions.length !== screenStyle.length) { throw Error('Incorrect number of videos supplied')}
+
+    let screenWidth = outputResolution.width, screenHeight = outputResolution.height
+    let resizeData = []
+    let templateSizes = []
+
+    switch(screenStyle) {
+        case "....":
+            templateSizes = Array(4).fill({x:screenWidth/2, y:screenHeight/2})
+            
+            resizeData.push({x:0, y:0, resizeRatio:1}, 
+                            {x:screenWidth/2, y:0, resizeRatio:1}, 
+                            {x:0, y:screenHeight/2, resizeRatio:1}, 
+                            {x:screenWidth/2, y:screenHeight/2, resizeRatio:1})
+            break
+
+        case "|..":
+            
+            templateSizes = [{x:screenWidth/2, y:screenHeight},
+                             {x:screenWidth/2, y:screenHeight/2},
+                             {x:screenWidth/2, y:screenHeight/2}]
+
+            resizeData.push({x:0, y:0, resizeRatio:1}, 
+                             {x:resolutions[0].width, y:0, resizeRatio:1}, 
+                             {x:resolutions[0].width, y:resolutions[1].height, resizeRatio:1})
+            break
+            
+        case "_..":
+
+            templateSizes = [{x:screenWidth, y:screenHeight/2},
+                             {x:screenWidth/2, y:screenHeight/2},
+                             {x:screenWidth/2, y:screenHeight/2}]
+
+            resizeData.push({x:0, y:0, resizeData:1}, {x:0, y:resolutions[0].height, resizeData:1}, 
+                                           {x:resolutions[1].width, y:resolutions[0].height, resizeData:1})
+            break
+                
+        default:
+            throw Error("Fuck you: invalid screenstyle")
+    }
+    
+    for (let i = 0; i < resolutions.length; i++) {
+        let res = resolutions[i]
+        let xRatio = res.width / templateSizes[i].x, yRatio = res.height / templateSizes[i].y
+        resizeData[i].resizeRatio = (xRatio > yRatio) ? 1 / xRatio : 1 / yRatio
+    }
+    return resizeData
+  }
+
 
   function screenStyle_to_layout(screenStyle: string) {
     switch(screenStyle) {

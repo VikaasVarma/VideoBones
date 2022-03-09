@@ -28,6 +28,8 @@ interface VideoInput {
   screenStyle: '....' | '|..' | '_..'
   interval: [number, number]
   resolution: Resolution[]
+  crop_offsets: Resolution[]
+  zoom_levels: number[]
 }
 
 interface Resolution {
