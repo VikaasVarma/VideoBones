@@ -8,124 +8,59 @@
     <div class="recording-grid">
       <video ref=videoPreview> </video>
 
-      <menu class="vertical-options-menu">
-        <div class="row tickbox-container" ref=playbackTracks> </div>
-      </menu>
-  
-      <div ref="vu" class="row vu" :style="{ clipPath : vuClip }" />
+      <div class="row vu" ref="vu" :style="{ clipPath : vuClip }"></div>
 
-      <select id="audioDevices" class="dropdown" ref=audioDevices @change="onAudioChange($event)"> </select>
-        
+      <select class=dropdown ref=audioDevices @change="onAudioChange($event)"> </select>
+
       <div :class="recording ? 'recording-button' : 'not-recording-button'" @click="recordOnClick()"> <div></div> </div>
       
-      <select id="videoDevices" class="dropdown" ref=videoDevices @change="onVideoChange($event)"> </select>
+      <select class=dropdown ref=videoDevices @change="onVideoChange($event)"> </select>
 
-  </div>
+      <h2 class="row">Playback Audio Tracks</h2>
+      <div class="row tickbox-container" ref=playbackTracks> </div>
+    </div>
+
 </template>
 
 <script lang="ts">
-import * as fs from 'node:fs';
-import path from 'node:path';
-import { defineComponent } from 'vue';
+import * as fs from 'fs'
+import path from 'path'
+import { defineComponent } from 'vue'
 import { ipcRenderer } from 'electron';
 
-
 export default defineComponent({
-  name: 'RecordingPage',
-  emits: [ 'recording-end', 'exit-recording' ],
+  name: "RecordingPage",
   data() {
     return {
-      audioChunks: [] as Blob[],
-      audioDevice: 'default',
-      audioRecorder: new MediaRecorder(new MediaStream(), undefined),
-      metronomeSource: new AudioBufferSourceNode(new AudioContext()),
-      recording: false,
-      videoChunks: [] as Blob[],
-      videoDevice: 'default',
+      videoDevice: "default",
+      audioDevice: "default",
       videoRecorder: new MediaRecorder(new MediaStream(), undefined),
-      vuClip: ''
-    };
-  },
-  async mounted() {
-    const video = this.$refs.videoPreview as HTMLVideoElement;
-    const audioDevices = this.$refs.audioDevices as HTMLSelectElement;
-    const videoDevices = this.$refs.videoDevices as HTMLSelectElement;
-
-    // Adds devices onto audio and video input device menus
-    navigator.mediaDevices.enumerateDevices()
-      .then(devices => {
-        for (const device of devices) {
-          if (device.kind.toString() === 'audioinput') {
-            if (device.deviceId !== 'default' && device.deviceId !== 'communications') {
-              audioDevices.options[audioDevices.options.length] = new Option(device.label, device.deviceId);
-            }
-          } else if (device.kind.toString() === 'videoinput' && device.deviceId !== 'default') {
-            videoDevices.options[videoDevices.options.length] = new Option(device.label, device.deviceId);
-          }
-        }
-      });
-
-    // Needs to wait until the metronomes are saved because they are created on the page switch
-    await new Promise(r => setTimeout(r, 500));
-
-    // Add checkboxes for each audio and metronome track to be played back
-    const playbackTracks = this.$refs.playbackTracks as HTMLDivElement;
-    ipcRenderer.invoke('get-option', 'audioTracks').then((recordings: string) => {
-      const audiofiles = JSON.parse(recordings) as string[];
-      ipcRenderer.invoke('get-temp-directory').then(dir => {
-
-        fs.readdir(dir, (err, files) => {
-          for (const file of files) {
-            if (file.lastIndexOf('.wav') === file.length - 4) audiofiles.push(file);
-          }
-
-          audiofiles.forEach(function(file: string) {
-            const checkbox = document.createElement('input');
-            checkbox.className = 'tickbox';
-            checkbox.type = 'checkbox';
-            checkbox.value = file;
-
-            const header = document.createElement('h3');
-            header.textContent = file.slice(0, Math.max(0, file.indexOf('.w')));
-
-            playbackTracks.append(checkbox);
-            playbackTracks.append(header);
-          });
-        });
-      });
-    });
-
-    video.autoplay = true;
-    this.startStreams();
-  },
-  // On page change, turn stop video and audio streams
-  beforeUnmount() {
-    const video = this.$refs.videoPreview as HTMLVideoElement;
-    const stream = video.srcObject as MediaStream;
-
-    for (const track of stream.getTracks()) {
-      track.stop();
+      audioRecorder: new MediaRecorder(new MediaStream(), undefined),
+      videoChunks: <Blob[]> [],
+      audioChunks: <Blob[]> [],
+      recording: false,
+      vuClip: "",
+      metronomeSources: <AudioBufferSourceNode[]> [],
     }
-
-    this.metronomeSource.stop();
   },
+  emits: ["recording-end", "exit-recording"],
   methods: {
     // On audio device selection change
     onAudioChange(event: Event) {
-      this.audioDevice = (event.target as HTMLSelectElement).value;
-      this.startStreams();
+      this.audioDevice = (<HTMLSelectElement> event.target).value;
+      this.startStreams()
     },
     // On video device selection change
     onVideoChange(event: Event) {
-      this.videoDevice = (event.target as HTMLSelectElement).value;
-      this.startStreams();
+      this.videoDevice = (<HTMLSelectElement> event.target).value
+      this.startStreams()
     },
     startStreams() {
-      const video = this.$refs.videoPreview as HTMLVideoElement;
+      const video = <HTMLVideoElement> this.$refs.videoPreview;
       const videoConstraints = {
         audio: false,
         video: { width: 1280, height: 720, deviceId: this.videoDevice }
-      };
+      }
       // Get video stream
       navigator.mediaDevices.getUserMedia(videoConstraints)
         .then(stream => {
@@ -143,12 +78,12 @@ export default defineComponent({
           };
 
           this.videoRecorder.onstop = this.download;
-        });
+        })
 
       const audioConstraints = {
         audio: { deviceId: this.audioDevice },
         video: false
-      };
+      }
       // Get audio stream
       navigator.mediaDevices.getUserMedia(audioConstraints)
         .then(stream => {
@@ -159,8 +94,8 @@ export default defineComponent({
           const that = this;
           this.audioRecorder.ondataavailable = function(event) {
             that.handleDataAvailable(event, 'audio');
-          };
-
+          }
+          
           // Hooking more things up
           const ac = new AudioContext();
           const m = ac.createMediaStreamSource(stream);
@@ -169,17 +104,17 @@ export default defineComponent({
           analyser.fftSize = 32;
 
           const vuAnimation = () => {
-            const d = new Uint8Array(analyser.frequencyBinCount);
+            let d = new Uint8Array(analyser.frequencyBinCount);
             analyser.getByteFrequencyData(d);
 
-            const volume = ((d.sort((a, b) => b - a)[3] / 255) ** 2.5) * 100;
+            let volume = ((d.sort((a,b)=>b-a)[3] / 255)**2.5) * 100
 
             this.vuClip = `polygon(0 0, ${volume}% 0, ${volume}% 100%, 0 100%)`;
             requestAnimationFrame(vuAnimation);
 
           };
           requestAnimationFrame(vuAnimation);
-        });
+        })
     },
     // Gets metronome audio source for play back
     async handleMetronome(fileName: string): Promise<AudioBufferSourceNode>{
@@ -202,41 +137,43 @@ export default defineComponent({
       return source;
     },
     async recordOnClick() {
-      const audioDevices = this.$refs.audioDevices as HTMLSelectElement;
-      const videoDevices = this.$refs.videoDevices as HTMLSelectElement;
+      const audioDevices = <HTMLSelectElement> this.$refs.audioDevices;
+      const videoDevices = <HTMLSelectElement> this.$refs.videoDevices;
 
-      this.recording = !this.recording;
+      this.recording = !this.recording
       // On start recording
       if (this.recording) {
-        // Hide change device menus
-        audioDevices.style.display = 'none';
-        videoDevices.style.display = 'none';
+         // Hide change device menus
+        audioDevices.style.display = "none";
+        videoDevices.style.display = "none";
 
-        const playbackTracks = this.$refs.playbackTracks as HTMLDivElement;
-        const audioTracks = [] as HTMLAudioElement[];
+        const playbackTracks = <HTMLDivElement> this.$refs.playbackTracks;
+        const audioTracks = <HTMLAudioElement[]> [];
         // @ts-ignore
-        for (const node of playbackTracks.childNodes) {
+        for (const node of [...playbackTracks.childNodes]) {
           // Get inputs that have been checked
-          if ((node as HTMLElement).tagName === 'INPUT' && (node as HTMLInputElement).checked) {
-            if ((node as HTMLInputElement).value.includes('.wav')) {
-              this.$data.metronomeSource = await this.handleMetronome((node as HTMLInputElement).value);
+          if ((<HTMLElement> node).tagName === "INPUT" && (<HTMLInputElement> node).checked) {
+            if ((<HTMLInputElement> node).value.includes('.wav')) {
+              this.$data.metronomeSources.push(await this.handleMetronome((<HTMLInputElement> node).value));
             } else {
               const dir = await ipcRenderer.invoke('get-recordings-directory');
 
               // Create an audio element and preload it
-              const audio = new Audio(path.join(dir, (node as HTMLInputElement).value));
+              const audio = new Audio(path.join(dir, (<HTMLInputElement> node).value));
               audio.preload = 'auto';
-
+              
               audioTracks.push(audio);
-              playbackTracks.append(audio);
+              playbackTracks.appendChild(audio);
             }
           }
         }
         // Play all the new audio elements
-        for (const audio of audioTracks) {
+        audioTracks.forEach(audio => {
           audio.play();
-        }
-        this.$data.metronomeSource.start(0);
+        });
+        this.$data.metronomeSources.forEach(source => {
+          source.start(0);
+        })
 
         this.videoRecorder.start();
         this.audioRecorder.start();
@@ -244,28 +181,26 @@ export default defineComponent({
         this.audioRecorder.stop();
         this.videoRecorder.stop();
 
-        this.$data.metronomeSource.stop();
+        this.$data.metronomeSources.forEach(source => {
+          source.stop();
+        })
       }
     },
     handleDataAvailable(event: BlobEvent, type: string) {
       if (event.data.size > 0) {
         if (type === 'video') {
-          this.videoChunks.push(event.data);
+          this.videoChunks.push(event.data)
         } else if (type === 'audio') {
-          this.audioChunks.push(event.data);
+          this.audioChunks.push(event.data)
         }
       }
     },
     onRecordEnd() {
-      this.$emit('recording-end');
+      this.$emit("recording-end");
     },
     download() {
-      // If user hits the Exit button during recording
-      if (this.recording) {
-        return;
-      }
       // Get number to append to file names
-      let videoTracks = 1;
+      var videoTracks = 1;
       ipcRenderer.invoke('get-option', 'videoTracks').then(function(recordings: string) {
         JSON.parse(recordings).forEach(() => {
           videoTracks++;
@@ -273,27 +208,27 @@ export default defineComponent({
       });
 
       // Write video data to file in project folder
-      const videoBlob = new Blob(this.videoChunks, { type: 'video/webm' });
+      const videoBlob = new Blob(this.videoChunks, { type: 'video/webm' })
       videoBlob.arrayBuffer().then(async buffer => {
-        ipcRenderer.invoke('add-recording', `video${  videoTracks  }.webm`).then(filePath => {
+        ipcRenderer.invoke('add-recording', 'video' + videoTracks + '.webm').then(filePath => {
           fs.writeFile(filePath, new Uint8Array(buffer), err => {
             if (err) throw err;
           });
 
           // Update the audioTracks option to hold the new audio track
           ipcRenderer.invoke('get-option', 'videoTracks').then(option => {
-            const copy = JSON.parse(option);
-            copy.push(`video${  videoTracks  }.webm`);
+            var copy = JSON.parse(option);
+            copy.push('video' + videoTracks + '.webm');
             ipcRenderer.send('set-option', 'videoTracks', copy);
 
             // Emit "recording-end" to switch page
-            this.$emit('recording-end');
-          });
+            this.$emit("recording-end");
+          })
         });
       });
       this.$data.videoChunks = [];
 
-      let audioTracks = 1;
+      var audioTracks = 1;
       ipcRenderer.invoke('get-option', 'audioTracks').then(function(recordings: string) {
         JSON.parse(recordings).forEach(() => {
           audioTracks++;
@@ -301,25 +236,88 @@ export default defineComponent({
       });
 
       // Write audio data to file in project folder
-      const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
+      const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' })
       audioBlob.arrayBuffer().then(buffer => {
-        ipcRenderer.invoke('add-recording', `audio${  audioTracks  }.webm`).then(filePath => {
+        ipcRenderer.invoke('add-recording', 'audio' + audioTracks + '.webm').then(filePath => {
           fs.writeFile(filePath, new Uint8Array(buffer), err => {
             if (err) throw err;
           });
 
           // Update the audioTracks option to hold the new audio track
           ipcRenderer.invoke('get-option', 'audioTracks').then(option => {
-            const copy = JSON.parse(option);
-            copy.push(`audio${  audioTracks  }.webm`);
+            var copy = JSON.parse(option);
+            copy.push('audio' + audioTracks + '.webm');
             ipcRenderer.send('set-option', 'audioTracks', copy);
-          });
+          })
         });
       });
       this.$data.audioChunks = [];
-    }
+    },
+  },
+  async mounted () {
+    const video = <HTMLVideoElement> this.$refs.videoPreview;
+    const audioDevices = <HTMLSelectElement> this.$refs.audioDevices
+    const videoDevices = <HTMLSelectElement> this.$refs.videoDevices
+
+    // Adds devices onto audio and video input device menus
+    navigator.mediaDevices.enumerateDevices()
+      .then(devices => {
+        devices.forEach(device => {
+          if (device.kind.toString() === 'audioinput') {
+            if (device.deviceId !== 'default' && device.deviceId !== 'communications') {
+              audioDevices.options[audioDevices.options.length] = new Option(device.label, device.deviceId);
+            }
+          } else if (device.kind.toString() === 'videoinput') {
+            if (device.deviceId !== 'default') {
+              videoDevices.options[videoDevices.options.length] = new Option(device.label, device.deviceId);
+            }
+          }
+        })
+      })
+
+    // Needs to wait until the metronomes are saved because they are created on the page switch
+    await new Promise(r => setTimeout(r, 500));
+    
+    // Add checkboxes for each audio and metronome track to be played back
+    const playbackTracks = <HTMLDivElement> this.$refs.playbackTracks;
+    ipcRenderer.invoke("get-option", "audioTracks").then((recordings: string) => {
+      const audiofiles = <string[]> JSON.parse(recordings);
+      ipcRenderer.invoke("get-temp-directory").then(dir => {
+
+        fs.readdir(dir, (err, files) => {
+          files.forEach(file => {
+            if (file.lastIndexOf('.wav') === file.length - 4) audiofiles.push(file);
+          });
+
+          audiofiles.forEach(function(file:string) {
+            var checkbox = document.createElement('input');
+            checkbox.className = 'tickbox';
+            checkbox.type = 'checkbox';
+            checkbox.value = file;
+
+            var header = document.createElement('h3');
+            header.textContent = file.substr(0, file.indexOf(".w"));
+
+            playbackTracks.appendChild(checkbox);
+            playbackTracks.appendChild(header);
+          });
+        });
+      });
+    });
+
+    video.autoplay = true;
+    this.startStreams();
+  },
+  // On page change, turn off video streams
+  beforeUnmount() {
+    const video = <HTMLVideoElement> this.$refs.videoPreview;
+    const stream = <MediaStream> video.srcObject;
+    
+    stream.getTracks().forEach(track => {
+      track.stop();
+    });
   }
-});
+})
 </script>
 
 <style lang="scss" scoped>

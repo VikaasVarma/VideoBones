@@ -41,9 +41,6 @@ export default defineComponent({
     });
     player
       .load(this.manifestUrl)
-      .then(() => {
-        (<HTMLMediaElement>this.$refs.videoPlayer).play();
-      })
       .catch(this.onError);
   },
   methods: {
