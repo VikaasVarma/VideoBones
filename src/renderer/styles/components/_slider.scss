@@ -1,0 +1,34 @@
+.slider-container {
+	h3 {
+		margin: auto;
+		color: white;
+		font-size: 20px;
+	}
+
+	input {
+		width: 100%;
+		-webkit-appearance: none;
+		overflow: hidden;
+		border-radius: 10px;
+
+		&::-webkit-slider-runnable-track {
+			border: 1px $color-middleground solid;
+			height: 15px;
+			width: 100%;
+			background: lighten($color-middleground, 25);
+		}
+
+		&::-webkit-slider-thumb {
+			-webkit-appearance: none;
+			border: 1px black;
+			margin-top: -1px;
+			background: white;
+			height: 15px;
+			width: 15px;
+			border-radius: 10px;
+			box-shadow: -80px 0 0 70px $color-purple;
+		}
+
+		background: inherit;
+	}
+}

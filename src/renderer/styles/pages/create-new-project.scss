@@ -23,3 +23,21 @@ input {
 		white-space: nowrap;
 	}
 }
+
+.action-input-container {
+	display: grid;
+	grid-template-columns: 1fr auto;
+
+	h3 {
+		grid-column: 1 / span 2;
+	}
+
+	button {
+		height: 20px;
+
+	img {
+		width: 24px;
+		height: 20px;
+	}
+}
+}

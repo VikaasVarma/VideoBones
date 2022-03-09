@@ -1,10 +1,9 @@
+import { ipcMain } from 'electron';
 import * as config from '../storage/config';
 import * as projects from '../storage/projects';
 
-import { ipcMain } from 'electron';
 
 // Defines a bunch of ipc handlers for all the storage stuff
-
 export function startStorageHandlers() {
   ipcMain.addListener('create-project', (event, parentDirectory: string, projectName: string) => {
     return  projects.createProject(parentDirectory, projectName);
@@ -43,6 +42,18 @@ export function startStorageHandlers() {
   });
 
   ipcMain.addListener('remove-recording', (event, index: number) => {
+    const track = config.getRecordingsList()[index];
+    let videos = config.getOption('videoTracks');
+    let audios = config.getOption('audioTracks');
+
+    if (Array.isArray(videos) && videos.includes(track)) {
+      videos = videos.splice(videos.indexOf(track));
+      config.setOption('videoTracks', videos);
+    } else if (Array.isArray(audios) && audios.includes(track)) {
+      audios = audios.splice(audios.indexOf(track));
+      config.setOption('audioTracks', audios);
+    }
+
     config.removeRecording(index);
   });
 
@@ -58,7 +69,7 @@ export function startStorageHandlers() {
     config.removeOption(optionName);
   });
 
-  ipcMain.addListener('get-temp-directory', () => {
+  ipcMain.handle('get-temp-directory', () => {
     return config.getTempDirectory();
   });
 }

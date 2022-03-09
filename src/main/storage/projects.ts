@@ -1,10 +1,10 @@
-import * as fs from 'fs/promises';
+import { existsSync, readFileSync } from 'node:fs';
+import * as fs from 'node:fs/promises';
 
+import path from 'node:path';
 import { app } from 'electron';
-import { existsSync, readFileSync } from 'fs';
 import { readDirectoryConfig, recordingsDirectoryName, tempDirectoryName } from './storage';
 import { internal_initialiseProjectConfig as initialiseProjectConfig } from './config';
-import path from 'path';
 
 /**
  * Holds information on a project the app currently knows about / tracks.
@@ -54,7 +54,6 @@ const handles = {
    *
    * Allows us to chain future writes to the handles file after this promise is resolved.
    */
-  currentHandlesFileWritePromise: Promise.resolve(),
   array: existsSync(projectHandlesFile)
     ? (() => {
       const json = JSON.parse(readFileSync(projectHandlesFile).toString());
@@ -74,18 +73,7 @@ const handles = {
       return out;
     })()
     : [],
-  write: function () {
-    const doWrite = () => {
-      return fs.writeFile(projectHandlesFile, JSON.stringify(this.array));
-    };
-    this.currentHandlesFileWritePromise = this.currentHandlesFileWritePromise.then(
-      doWrite,
-      reason => {
-        console.log(`Previous handles write failed, reason: ${reason}`);
-        return doWrite();
-      }
-    );
-  },
+  currentHandlesFileWritePromise: Promise.resolve(),
   push: function(handle: ProjectHandle) {
     this.array.push(handle);
     this.write();
@@ -94,10 +82,10 @@ const handles = {
     const indexToRemove = this.array.findIndex((e: any) => {
       if (ProjectHandle.isProjectHandle(e)) {
         return handle.equals(e);
-      } else {
-        // there is a malformed entry, ignore it
-        return false;
       }
+      // there is a malformed entry, ignore it
+      return false;
+
     });
 
     if (indexToRemove === -1) return;
@@ -106,6 +94,18 @@ const handles = {
     this.array.splice(indexToRemove, 1);
 
     this.write();
+  },
+  write: function() {
+    const doWrite = () => {
+      return fs.writeFile(projectHandlesFile, JSON.stringify(this.array));
+    };
+    this.currentHandlesFileWritePromise = this.currentHandlesFileWritePromise.then(
+      doWrite,
+      error => {
+        console.log(`Previous handles write failed, reason: ${error}`);
+        return doWrite();
+      }
+    );
   }
 };
 
@@ -125,11 +125,11 @@ function createProject(parentDirectory: string, projectName: string): Promise<Pr
     return initialiseProjectConfig(projectDir, projectName)
       .then(() => {
         return trackProject(projectDir);
-      }, reason => {
-        throw Error(`Failed to write initial config, reason: ${reason}`);
+      }, error => {
+        throw new Error(`Failed to write initial config, reason: ${error}`);
       })
-      .catch(reason => {
-        throw Error(`Failed to track new project, reason: ${reason}`);
+      .catch(error => {
+        throw new Error(`Failed to track new project, reason: ${error}`);
       });
   });
 
@@ -146,15 +146,15 @@ function createProject(parentDirectory: string, projectName: string): Promise<Pr
  */
 function createProjectDirectory(parentDirectory: string, projectName: string): Promise<string> {
 
-  const projectDirectory = path.format({ dir: parentDirectory, base: projectName });
+  const projectDirectory = path.format({  base: projectName, dir: parentDirectory });
 
   if (existsSync(projectDirectory)) {
-    throw Error(`Project directory already exists: ${projectDirectory}`);
+    throw new Error(`Project directory already exists: ${projectDirectory}`);
   }
 
   // create project directory structure
   // chain promises so subdirs are only created once their parents are avaliable
-  return fs.mkdir(projectDirectory)
+  return fs.mkdir(projectDirectory, { recursive: true })
     .then(() => {
       // make subdirs
       return fs.mkdir(path.join(projectDirectory, recordingsDirectoryName))
@@ -165,8 +165,8 @@ function createProjectDirectory(parentDirectory: string, projectName: string): P
     .then(() => {
       return projectDirectory;
     })
-    .catch(reason => {
-      throw new Error(`Failed to create project directory, reason: ${reason}`);
+    .catch(error => {
+      throw new Error(`Failed to create project directory, reason: ${error}`);
     });
 }
 
@@ -178,8 +178,8 @@ function createProjectDirectory(parentDirectory: string, projectName: string): P
  */
 function trackProject(projectDirectory: string): Promise<ProjectHandle> {
 
-  const cfgPromise = readDirectoryConfig(projectDirectory).catch(reason => {
-    throw Error(`Failed to read a valid config file in directory ${projectDirectory}, reason: ${reason}`);
+  const cfgPromise = readDirectoryConfig(projectDirectory).catch(error => {
+    throw new Error(`Failed to read a valid config file in directory ${projectDirectory}, reason: ${error}`);
   });
 
   return cfgPromise.then(config => {
