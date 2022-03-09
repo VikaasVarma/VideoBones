@@ -112,158 +112,11 @@ export default defineComponent({
       track.stop();
     }
 
-    this.metronomeSource.stop();
+    if (this.metronomeSource.buffer !== null) {
+      this.metronomeSource.stop();
+    }
   },
   methods: {
-    // On audio device selection change
-    onAudioChange(event: Event) {
-      this.audioDevice = (event.target as HTMLSelectElement).value;
-      this.startStreams();
-    },
-    // On video device selection change
-    onVideoChange(event: Event) {
-      this.videoDevice = (event.target as HTMLSelectElement).value;
-      this.startStreams();
-    },
-    startStreams() {
-      const video = this.$refs.videoPreview as HTMLVideoElement;
-      const videoConstraints = {
-        audio: false,
-        video: { width: 1280, height: 720, deviceId: this.videoDevice }
-      };
-      // Get video stream
-      navigator.mediaDevices.getUserMedia(videoConstraints)
-        .then(stream => {
-          video.srcObject = stream;
-
-          // mp4/mpeg not supported by electron, though YouTube does support .webm
-          // Alternatively we can use ffmpeg to convert between file formats
-          const options = { mimeType: 'video/webm' };
-          this.videoRecorder = new MediaRecorder(stream, options);
-
-          // Set mediaRecorder funcionality
-          const that = this;
-          this.videoRecorder.ondataavailable = function(event) {
-            that.handleDataAvailable(event, 'video');
-          };
-
-          this.videoRecorder.onstop = this.download;
-        });
-
-      const audioConstraints = {
-        audio: { deviceId: this.audioDevice },
-        video: false
-      };
-      // Get audio stream
-      navigator.mediaDevices.getUserMedia(audioConstraints)
-        .then(stream => {
-          const options = { mimeType: 'audio/webm' };
-          this.audioRecorder = new MediaRecorder(stream, options);
-
-          // Set audioRecorder funcionality
-          const that = this;
-          this.audioRecorder.ondataavailable = function(event) {
-            that.handleDataAvailable(event, 'audio');
-          };
-
-          // Hooking more things up
-          const ac = new AudioContext();
-          const m = ac.createMediaStreamSource(stream);
-          const analyser = ac.createAnalyser();
-          m.connect(analyser);
-          analyser.fftSize = 32;
-
-          const vuAnimation = () => {
-            const d = new Uint8Array(analyser.frequencyBinCount);
-            analyser.getByteFrequencyData(d);
-
-            const volume = ((d.sort((a, b) => b - a)[3] / 255) ** 2.5) * 100;
-
-            this.vuClip = `polygon(0 0, ${volume}% 0, ${volume}% 100%, 0 100%)`;
-            requestAnimationFrame(vuAnimation);
-
-          };
-          requestAnimationFrame(vuAnimation);
-        });
-    },
-    // Gets metronome audio source for play back
-    async handleMetronome(fileName: string): Promise<AudioBufferSourceNode>{
-      const dir = await ipcRenderer.invoke('get-temp-directory');
-      const audioFile = path.join(dir, fileName);
-
-      const audioCtx = new AudioContext();
-      const source = audioCtx.createBufferSource();
-
-      fs.readFile(audioFile, async (err, data) => {
-        if (err) {
-          throw err;
-        } else {
-          const buf = await audioCtx.decodeAudioData(data.buffer);
-          source.buffer = buf;
-          source.loop = true;
-          source.connect(audioCtx.destination);
-        }
-      });
-      return source;
-    },
-    async recordOnClick() {
-      const audioDevices = this.$refs.audioDevices as HTMLSelectElement;
-      const videoDevices = this.$refs.videoDevices as HTMLSelectElement;
-
-      this.recording = !this.recording;
-      // On start recording
-      if (this.recording) {
-        // Hide change device menus
-        audioDevices.style.display = 'none';
-        videoDevices.style.display = 'none';
-
-        const playbackTracks = this.$refs.playbackTracks as HTMLDivElement;
-        const audioTracks = [] as HTMLAudioElement[];
-        // @ts-ignore
-        for (const node of playbackTracks.childNodes) {
-          // Get inputs that have been checked
-          if ((node as HTMLElement).tagName === 'INPUT' && (node as HTMLInputElement).checked) {
-            if ((node as HTMLInputElement).value.includes('.wav')) {
-              this.$data.metronomeSource = await this.handleMetronome((node as HTMLInputElement).value);
-            } else {
-              const dir = await ipcRenderer.invoke('get-recordings-directory');
-
-              // Create an audio element and preload it
-              const audio = new Audio(path.join(dir, (node as HTMLInputElement).value));
-              audio.preload = 'auto';
-
-              audioTracks.push(audio);
-              playbackTracks.append(audio);
-            }
-          }
-        }
-        // Play all the new audio elements
-        for (const audio of audioTracks) {
-          audio.play();
-        }
-        this.$data.metronomeSource.start(0);
-
-        this.videoRecorder.start();
-        this.audioRecorder.start();
-      } else {
-        this.audioRecorder.stop();
-        this.videoRecorder.stop();
-
-        this.$data.metronomeSource.stop();
-      }
-    },
-    handleDataAvailable(event: BlobEvent, type: string) {
-      if (event.data.size > 0) {
-        if (type === 'video') {
-          this.videoChunks.push(event.data);
-        } else if (type === 'audio') {
-          this.audioChunks.push(event.data);
-        }
-      }
-    },
-    onRecordEnd() {
-      this.$emit('recording-end');
-    },
     download() {
       // If user hits the Exit button during recording
       if (this.recording) {
@@ -322,6 +175,154 @@ export default defineComponent({
         });
       });
       this.$data.audioChunks = [];
+    },
+    handleDataAvailable(event: BlobEvent, type: string) {
+      if (event.data.size > 0) {
+        if (type === 'video') {
+          this.videoChunks.push(event.data);
+        } else if (type === 'audio') {
+          this.audioChunks.push(event.data);
+        }
+      }
+    },
+    // Gets metronome audio source for play back
+    async handleMetronome(fileName: string): Promise<AudioBufferSourceNode>{
+      const dir = await ipcRenderer.invoke('get-temp-directory');
+      const audioFile = path.join(dir, fileName);
+
+      const audioCtx = new AudioContext();
+      const source = audioCtx.createBufferSource();
+
+      fs.readFile(audioFile, async (err, data) => {
+        if (err) {
+          throw err;
+        } else {
+          const buf = await audioCtx.decodeAudioData(data.buffer);
+          source.buffer = buf;
+          source.loop = true;
+          source.connect(audioCtx.destination);
+        }
+      });
+      return source;
+    },
+    // On audio device selection change
+    onAudioChange(event: Event) {
+      this.audioDevice = (event.target as HTMLSelectElement).value;
+      this.startStreams();
+    },
+    onRecordEnd() {
+      this.$emit('recording-end');
+    },
+    // On video device selection change
+    onVideoChange(event: Event) {
+      this.videoDevice = (event.target as HTMLSelectElement).value;
+      this.startStreams();
+    },
+    async recordOnClick() {
+      const audioDevices = this.$refs.audioDevices as HTMLSelectElement;
+      const videoDevices = this.$refs.videoDevices as HTMLSelectElement;
+
+      this.recording = !this.recording;
+      // On start recording
+      if (this.recording) {
+        // Hide change device menus
+        audioDevices.style.display = 'none';
+        videoDevices.style.display = 'none';
+
+        const playbackTracks = this.$refs.playbackTracks as HTMLDivElement;
+        const audioTracks = [] as HTMLAudioElement[];
+        // eslint-disable-next-line  @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        for (const node of playbackTracks.childNodes) {
+          // Get inputs that have been checked
+          if ((node as HTMLElement).tagName === 'INPUT' && (node as HTMLInputElement).checked) {
+            if ((node as HTMLInputElement).value.includes('.wav')) {
+              this.$data.metronomeSource = await this.handleMetronome((node as HTMLInputElement).value);
+            } else {
+              const dir = await ipcRenderer.invoke('get-recordings-directory');
+
+              // Create an audio element and preload it
+              const audio = new Audio(path.join(dir, (node as HTMLInputElement).value));
+              audio.preload = 'auto';
+
+              audioTracks.push(audio);
+              playbackTracks.append(audio);
+            }
+          }
+        }
+        // Play all the new audio elements
+        for (const audio of audioTracks) {
+          audio.play();
+        }
+        this.$data.metronomeSource.start(0);
+
+        this.videoRecorder.start();
+        this.audioRecorder.start();
+      } else {
+        this.audioRecorder.stop();
+        this.videoRecorder.stop();
+
+        this.$data.metronomeSource.stop();
+      }
+    },
+    startStreams() {
+      const video = this.$refs.videoPreview as HTMLVideoElement;
+      const videoConstraints = {
+        audio: false,
+        video: { deviceId: this.videoDevice, height: 720, width: 1280 }
+      };
+      // Get video stream
+      navigator.mediaDevices.getUserMedia(videoConstraints)
+        .then(stream => {
+          video.srcObject = stream;
+
+          // mp4/mpeg not supported by electron, though YouTube does support .webm
+          // Alternatively we can use ffmpeg to convert between file formats
+          const options = { mimeType: 'video/webm' };
+          this.videoRecorder = new MediaRecorder(stream, options);
+
+          // Set mediaRecorder funcionality
+          this.videoRecorder.ondataavailable = event => {
+            this.handleDataAvailable(event, 'video');
+          };
+
+          this.videoRecorder.onstop = this.download;
+        });
+
+      const audioConstraints = {
+        audio: { deviceId: this.audioDevice },
+        video: false
+      };
+      // Get audio stream
+      navigator.mediaDevices.getUserMedia(audioConstraints)
+        .then(stream => {
+          const options = { mimeType: 'audio/webm' };
+          this.audioRecorder = new MediaRecorder(stream, options);
+
+          // Set audioRecorder funcionality
+          this.audioRecorder.ondataavailable = event => {
+            this.handleDataAvailable(event, 'audio');
+          };
+
+          // Hooking more things up
+          const ac = new AudioContext();
+          const m = ac.createMediaStreamSource(stream);
+          const analyser = ac.createAnalyser();
+          m.connect(analyser);
+          analyser.fftSize = 32;
+
+          const vuAnimation = () => {
+            const d = new Uint8Array(analyser.frequencyBinCount);
+            analyser.getByteFrequencyData(d);
+
+            const volume = ((d.sort((a, b) => b - a)[3] / 255) ** 2.5) * 100;
+
+            this.vuClip = `polygon(0 0, ${volume}% 0, ${volume}% 100%, 0 100%)`;
+            requestAnimationFrame(vuAnimation);
+
+          };
+          requestAnimationFrame(vuAnimation);
+        });
     }
   }
 });
