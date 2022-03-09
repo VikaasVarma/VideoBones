@@ -24,9 +24,9 @@
           style="display: flex; overflow: hidden;"
           @mousedown="startTimelineDrag()"
         >
-          <div v-for="i in timeline_images.length" :key="i">
+          <div v-for="image of timeline_images" :key="image">
             <div :style="`aspect-ratio: 16/9; height:${timeline_seg_height};`">
-              <img alt="loading timeline..." :src="timeline_images[i - 1]" style="max-height: 100%; max-width: 100%;">
+              <img alt="loading timeline..." :src="image" style="max-height: 100%; max-width: 100%;">
             </div>
             <div :style="`height:${timeline_seg_height}; width:5px`" />
           </div>
@@ -118,11 +118,11 @@ export default defineComponent({
   setup() {
     const stream_url = ref('');
     const engineOpts = ref({
-        audioInputs: [],
-        outputType: 'preview',
-        thumbnailEvery: '1/5',
-        videoInputs: []
-      });
+      audioInputs: [],
+      outputType: 'preview',
+      thumbnailEvery: '1/5',
+      videoInputs: []
+    });
 
     ipcRenderer.addListener('asynchronous-reply', (event, args) => {
       const port = args.port;
