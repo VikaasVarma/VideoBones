@@ -12,6 +12,7 @@
     cursor: pointer;
 
     &.destructive {
+      // stylelint-disable-next-line function-no-unknown
       color: color.adjust($color: #AFAFAF, $red: 120);
     }
   }
