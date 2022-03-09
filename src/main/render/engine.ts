@@ -166,8 +166,7 @@ function buildArgs({
     let overlay = videoData.map((screen) => screen.map((input) => {
         let [i, j, x, y, start, end] = [input.id[0], input.id[1], input.position.left, input.position.top, input.interval[0], input.interval[1]]
         index++
-        return `[tmp${index - 1}][i${i}${j}]overlay=shortest=1:x=${x}:y=${y}[tmp${index}]`
-        // return `[tmp${index - 1}][i${i}${j}]overlay=shortest=1:x=${x}:y=${y}:enable='between(t,${start},${end})'[tmp${index}]`
+        return `[tmp${index - 1}][i${i}${j}]overlay=shortest=1:x=${x}:y=${y}:enable='between(t,${start},${end})'[tmp${index}]`
     })).flat(1)
     overlay[overlay.length - 1] = overlay[overlay.length - 1].replace(`tmp${index}`, `out`)
     return overlay
