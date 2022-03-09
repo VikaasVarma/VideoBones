@@ -1,8 +1,22 @@
 <template>
+  <div class="horizontal-spacer">
+    <button class="button-primary" @click="$emit('exit-recording')">
+      EXIT
+    </button>
+    <h1 class="section-title">
+      RECORDING
+    </h1>
+  </div>
 
-    <div class="horizontal-spacer">
-      <button @click="$emit('exit-recording')" class="button-primary">EXIT</button>
-      <h1 class="section-title">RECORDING</h1>
+  <div class="recording-grid">
+    <video ref="videoPreview" />
+
+    <div ref="vu" class="row vu" :style="{ clipPath : vuClip }" />
+
+    <select ref="audioDevices" class="dropdown" @change="onAudioChange($event)" />
+
+    <div :class="recording ? 'recording-button' : 'not-recording-button'" @click="recordOnClick()">
+      <div />
     </div>
 
     <div class="recording-grid">
