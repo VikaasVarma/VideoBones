@@ -286,7 +286,7 @@ export default defineComponent({
 
         fs.readdir(dir, (err, files) => {
           files.forEach(file => {
-            audiofiles.push(file);
+            if (file.lastIndexOf('.wav') === file.length - 4) audiofiles.push(file);
           });
 
           audiofiles.forEach(function(file:string) {
@@ -308,6 +308,15 @@ export default defineComponent({
     video.autoplay = true;
     this.startStreams();
   },
+  // On page change, turn off video streams
+  beforeUnmount() {
+    const video = <HTMLVideoElement> this.$refs.videoPreview;
+    const stream = <MediaStream> video.srcObject;
+    
+    stream.getTracks().forEach(track => {
+      track.stop();
+    });
+  }
 })
 </script>
 
