@@ -26,7 +26,6 @@ import CreateNewProjectPage from './CreateNewProjectPage.vue';
 import SingleVideoEditorPage from './SingleVideoEditorPage.vue';
 import VideoEditorPage from './VideoEditorPage.vue';
 import RecordingPage from './RecordingPage.vue';
-import FfmpegTest from './FfmpegTest.vue';
 
 export default defineComponent({
     name: "app",
@@ -35,8 +34,7 @@ export default defineComponent({
       CreateNewProjectPage,
       SingleVideoEditorPage,
       VideoEditorPage, 
-      RecordingPage,
-      FfmpegTest
+      RecordingPage
     },
     setup(props, context) {
       let pageDisplayed = ref("on-open-page")

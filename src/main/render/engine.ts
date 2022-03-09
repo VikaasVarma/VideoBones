@@ -1,4 +1,4 @@
-import { AudioInput, EngineOptions, Resolution, VideoInput } from './types';
+import { AudioInput, EngineOptions, VideoInput, VideoData, Resolution } from './types';
 import { ChildProcessByStdio, spawn } from 'child_process';
 import { getPath } from './ffmpeg';
 import { getTempDirectory } from '../storage/config';
@@ -16,91 +16,90 @@ function buildArgs({
   outputType,
   outputVolume = 256,
   previewManifest = 'stream.mpd',
-  startTime = 0,
   thumbnailEvery = '1/5',
   videoBitRate = '6M',
   videoInputs = [] as VideoInput[]
 }: EngineOptions): string[] {
   // The holy ffmpeg argument builder
   console.log(videoInputs);
-  const cumsum = ((sum: number) => (value: VideoInput) => {sum += value.files.length; return sum - value.files.length})(0);
-  let offset = videoInputs.map(cumsum);
+  function calculateLayoutPositions(input: VideoInput) : {x: number, y: number, resolution: Resolution}[] {
+      return [];
+  }
   
-  // Thought about doing it programmatically, landed on this instead
-  function calculateLayoutPositions(resolutions:Resolution[], screenStyle:string) {
-      if (resolutions.length !== screenStyle.length) { throw Error('Incorrect number of videos supplied')}
-
-    let screenWidth = outputResolution.width, screenHeight = outputResolution.height
-    let resizeData = []
-    let templateSizes = []
-
-    switch(screenStyle) {
-        case "....":
-            templateSizes = Array(4).fill({x:screenWidth/2, y:screenHeight/2})
-            
-            resizeData.push({x:0, y:0, resizeRatio:1}, 
-                            {x:screenWidth/2, y:0, resizeRatio:1}, 
-                            {x:0, y:screenHeight/2, resizeRatio:1}, 
-                            {x:screenWidth/2, y:screenHeight/2, resizeRatio:1})
-            break
-
-        case "|..":
-            
-            templateSizes = [{x:screenWidth/2, y:screenHeight},
-                             {x:screenWidth/2, y:screenHeight/2},
-                             {x:screenWidth/2, y:screenHeight/2}]
-
-            resizeData.push({x:0, y:0, resizeRatio:1}, 
-                             {x:resolutions[0].width, y:0, resizeRatio:1}, 
-                             {x:resolutions[0].width, y:resolutions[1].height, resizeRatio:1})
-            break
-            
-        case "_..":
-
-            templateSizes = [{x:screenWidth, y:screenHeight/2},
-                             {x:screenWidth/2, y:screenHeight/2},
-                             {x:screenWidth/2, y:screenHeight/2}]
-
-            resizeData.push({x:0, y:0, resizeData:1}, {x:0, y:resolutions[0].height, resizeData:1}, 
-                                           {x:resolutions[1].width, y:resolutions[0].height, resizeData:1})
-            break
-                
-        default:
-            throw Error("Fuck you: invalid screenstyle")
+  function genVideoData(videoInputs: VideoInput[], videoDict: Map<string, number>): VideoData[][] {
+    let videoData: VideoData[][] = []
+    let appearances: { [file: string]: number } = {};
+    for (let input of videoInputs) {
+        let data: VideoData[] = []
+        input.files.map((file, i) => {
+            let layout = calculateLayoutPositions(input)
+            appearances[file] = (appearances[file] ?? 0) + 1
+            data.push({
+                id: [videoDict.get(file)!, appearances[file] - 1],
+                file: file,
+                interval: input.interval,
+                position: { top: layout[i].x, left: layout[i].y },
+                resolution: layout[i].resolution
+            })
+        })
+        videoData.push(data)
     }
-    
-    for (let i = 0; i < resolutions.length; i++) {
-        let res = resolutions[i]
-        let xRatio = res.width / templateSizes[i].x, yRatio = res.height / templateSizes[i].y
-        resizeData[i].resizeRatio = (xRatio > yRatio) ? 1 / xRatio : 1 / yRatio
-    }
-    return resizeData
+    return videoData
   }
 
-
-  function screenStyle_to_layout(screenStyle: string) {
-    switch(screenStyle) {
-        case "....":
-            return "0_0|w0_0|0_h0|w0_h0";
-        case "|..":
-            return "0_0|w0_0|w0_h1";
-        case "_..":
-            return "0_0|0_h0|w1_h0";
-        default:
-            throw Error("Fuck you: invalid screenstyle")
-    }
+  function genVideoDict(videoInputs: VideoInput[]): Map<string, number> {
+    let videoDict = new Map<string, number>()
+    let i = 0;
+    videoInputs.map((input) => input.files.map((file) => { if (!(file in videoDict)) { videoDict.set(file, i++) } }))
+    return videoDict
   }
+
+  function splitInstr(videoData: VideoData[][], videoDict: Map<string, number>): string[] {
+    let splits: { [file: string]: number } = {};
+    videoData.map(screen => screen.map(video => splits[video.file] = (splits[video.file] ?? 0) + 1))
+
+    return videoData.map(screen => screen.map(video => {
+        let id = videoDict.get(video.file)!
+        let numSplits = splits[video.file]
+        if (numSplits > 1) {
+            return `[${id}:v]split=${numSplits}${[...Array(numSplits).keys()].map((j) => `[v${id}${j}]`).join('')}`
+        }
+        return `[${id}:v]null[v${id}0]`
+    })).flat(1)
+  }
+
+  function videoSetup(videoData: VideoData[][]): string[] {
+      return videoData.map((screen) => screen.map((input) => {
+          let [i, j, width, height] = [input.id[0], input.id[1], input.resolution.width, input.resolution.height]
+          return `[v${i}${j}]setpts=PTS-STARTPTS,scale=${width}x${height}[i${i}${j}]`
+      })).flat(1)
+  }
+
+  function videoOverlay(videoData: VideoData[][]): string[] {
+    let index = 0;
+    let overlay = videoData.map((screen) => screen.map((input) => {
+        let [i, j, x, y, start, end] = [input.id[0], input.id[1], input.position.left, input.position.top, input.interval[0], input.interval[1]]
+        index++
+        return `[tmp${index - 1}][i${i}${j}]overlay=shortest=1:x=${x}:y=${y}:enable='between(t,${start},${end})'[tmp${index}]`
+    })).flat(1)
+    overlay[overlay.length - 1].replace(`tmp${index}`, `[out]`)
+    return overlay
+  }
+
+  let videoDict: Map<string, number> = genVideoDict(videoInputs)
+  let videoData: VideoData[][] = genVideoData(videoInputs, videoDict)
 
   // eslint-disable-next-line function-paren-newline
-  let args: string[] = (<string[]>[]).concat(
+  return (<string[]>[]).concat(
     [outputType === 'preview' ? '-re' : ''],
-    videoInputs.map(input => input.files.map((file) => ['-i', file])).flat(2),
+    [...videoDict.keys()].map(file => ['-i', file]).flat(1),
     audioInputs.map(input => input.files.map((file) => ['-i', file])).flat(2),
-    ['-filter_complex', videoInputs.map((input, i) => ([
-        input.resolution.map((res, j) => `[${offset[i] + j}:v]setpts=PTS-STARTPTS,scale=${res.width}x${res.height},trim=${input.interval[0]}:${input.interval[1]}[input${offset[i] + j}];`).join(''),
-        `${input.files.map((_,j) => `[input${offset[i] + j}]`).join('')}xstack=inputs=${input.files.length}:layout=${screenStyle_to_layout(input.screenStyle)}[matrix${i}];`,
-        `[matrix${i}]scale=${outputResolution.width}:${outputResolution.height},setsar=1:1[v${i}];`
-    ].join(''))).join('') + `${videoInputs.map((_,i) => `[v${i}]`).join('')}concat[out]`],
+    ['filter_complex',  (<string[]>[]).concat(
+        [`nullsrc=size=${outputResolution.width}:${outputResolution.height}[tmp0]`],
+        splitInstr(videoData, videoDict),
+        videoSetup(videoData),
+        videoOverlay(videoData),
+    ).join(';')],
     [
         '-map', '[out]',
         //'-map', '[aout]',
@@ -125,8 +124,6 @@ function buildArgs({
         outputType === 'render' ? outputFile : (outputType === 'thumbnail' ? 'thumb%04d.png' : previewManifest)
     ]
   )
-    console.log(args);
-    return args;
 }
 
 let ffmpeg: ChildProcessByStdio<null, Readable, null> | null;

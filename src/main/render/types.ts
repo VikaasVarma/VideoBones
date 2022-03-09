@@ -32,6 +32,14 @@ interface VideoInput {
   zoom_levels: number[]
 }
 
+interface VideoData {
+    id: [number, number],
+    file: string,
+    interval: [number, number],
+    position: Position,
+    resolution: Resolution
+}
+
 interface Resolution {
   width: number;
   height: number;
@@ -47,5 +55,6 @@ export {
   EngineOptions,
   Position,
   Resolution,
-  VideoInput
+  VideoInput,
+  VideoData
 };

@@ -150,7 +150,7 @@ export default defineComponent({
         {
         type: 'startEngine', 
         data: {
-        outputType: "preview",
+        outputType: "render",
         videoInputs: [
           {
             files: ["video1.webm", "video2.webm", "video3.webm"].map(
@@ -158,18 +158,18 @@ export default defineComponent({
             ),
             screenStyle: "|..",
             resolution: [
-                {width: 1280, height: 1440},
+                {width: 1280, height: 720},
                 {width: 1280, height: 720},
                 {width: 1280, height: 720},
             ],
-            interval: [0, 1.5]
+            interval: [0, 7]
           },
           {
             files: ["video1.webm", "video2.webm", "video3.webm", "video4.webm"].map(
                 (file) => join("../recordings", (file))
             ),
             screenStyle: "....",
-            interval: [1.5, 3],
+            interval: [7, 10],
             resolution: [
                 {width: 1280, height: 720},
                 {width: 1280, height: 720},
