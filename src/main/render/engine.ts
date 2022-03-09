@@ -31,8 +31,8 @@ function buildArgs({
     switch (screenStyle) {
       case "....":
         templateSizes = Array(4).fill({
-          x: screenWidth / 2,
-          y: screenHeight / 2,
+          width: screenWidth / 2,
+          height: screenHeight / 2,
         });
   
         anchors = [
@@ -45,9 +45,9 @@ function buildArgs({
   
       case "|..":
         templateSizes = [
-          { x: screenWidth / 2, y: screenHeight },
-          { x: screenWidth / 2, y: screenHeight / 2 },
-          { x: screenWidth / 2, y: screenHeight / 2 },
+          { width: screenWidth / 2, height: screenHeight },
+          { width: screenWidth / 2, height: screenHeight / 2 },
+          { width: screenWidth / 2, height: screenHeight / 2 },
         ];
   
         anchors = [
@@ -59,9 +59,9 @@ function buildArgs({
   
       case "_..":
         templateSizes = [
-          { x: screenWidth, y: screenHeight / 2 },
-          { x: screenWidth / 2, y: screenHeight / 2 },
-          { x: screenWidth / 2, y: screenHeight / 2 },
+          { width: screenWidth, height: screenHeight / 2 },
+          { width: screenWidth / 2, height: screenHeight / 2 },
+          { width: screenWidth / 2, height: screenHeight / 2 },
         ];
   
         anchors = [
@@ -91,8 +91,8 @@ function buildArgs({
     for (let i = 0; i < videoInput.files.length; i++) {
       let res = video_resolutions[i];
       let res_ratio = Math.min(
-        res.width / template_data.templateSizes[i].x,
-        res.height / template_data.templateSizes[i].y
+        res.width / template_data.templateSizes[i].width,
+        res.height / template_data.templateSizes[i].height
       );
       real_resolutions.push({
         width: res.width / res_ratio,
@@ -112,8 +112,8 @@ function buildArgs({
       let data: VideoData[] = []
       input.files.map((file, i) => {
             let layout = calculateLayout(input)
-
-            // console.log("\n\n\n",layout, "\n\n\n")
+            
+            console.log("\n\n\n",layout, "\n\n\n")
 
             appearances[file] = (appearances[file] ?? 0) + 1
             data.push({
@@ -122,7 +122,7 @@ function buildArgs({
                 interval: input.interval,
                 position: { top: layout.video_anchors[i].y, left: layout.video_anchors[i].x },
                 resolution: { width: layout.real_resolutions[i].width, height:  layout.real_resolutions[i].height },
-                crop_size: {  width: layout.real_resolutions[i].width, height:  layout.real_resolutions[i].height},
+                crop_size: {  width: layout.layout_resolutions[i].width, height:  layout.layout_resolutions[i].height},
                 crop_offset: { top: 0, left: 0 }
             })
         })
