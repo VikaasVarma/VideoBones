@@ -36,10 +36,12 @@
             <div /> <div />
           </div>
 
-          <div v-for="input of engineOpts.videoInputs" :key="input.interval.toString()" class="sectionMarker">
+          <div v-for="input, id of engineOpts.videoInputs" :key="input.interval.toString()" class="sectionMarker">
             <div
-              class="marker"
+              :class="['marker', activeSegment === id ? 'selected' : '']"
               :style="{left: `${input.interval[0] / projLength * timelineWidth - 8}px`}"
+              @click.left="selectSegment(id)"
+              @click.right="deleteSegment($event, id)"
             >
               <img src="../../../assets/images/arrow.svg">
             </div>
@@ -228,7 +230,11 @@ export default defineComponent({
         resolution: [],
         screenStyle: ('....' as '....' | '|..' | '_..')
       });
-      console.log(this.engineOpts);
+    },
+    deleteSegment(event: MouseEvent, id: number) {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore -- Trust me on this one
+      (event.target as HTMLElement).parentNode?.parentNode?.remove();
     },
     deleteTrack(trackName: string) {
       this.tracks = this.tracks.filter(track => track.trackName !== trackName);
@@ -357,6 +363,9 @@ export default defineComponent({
       const newPlaybackTime = (this.playhead / timeline.width) * vidPlayer.getEndTime();
 
       vidPlayer.seekToTime(newPlaybackTime);
+    },
+    selectSegment(id: number) {
+      this.activeSegment = id;
     },
     setScreenStyle(style: number) {
       for (const el of document.querySelectorAll('div.screen-style.selected > div > p')) {

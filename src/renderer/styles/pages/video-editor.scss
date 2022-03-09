@@ -142,11 +142,16 @@
 
   .marker {
     height: 16px;
+    opacity: .5;
     position: absolute;
     top: -12px;
     transform: rotate(180deg);
     width: 16px;
     z-index: 20;
+
+    &.selected {
+      opacity: 1;
+    }
 
     // stylelint-disable-next-line no-descending-specificity
     img {
