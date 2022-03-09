@@ -7,13 +7,17 @@
             </div>
 
             <div id="video-controls" class="horizontal-spacer">
-                <button class="image-container">
+                <button v-show="previewPaused" @click="previewPlay()" class="image-container">
                     <img src="../../../assets/images/playButton.svg">
                 </button>
 
-                <button class="image-container">
+                <button v-show="!previewPaused" @click="previewPause()" class="image-container">
                     <img src="../../../assets/images/stopButton.svg">
                 </button>
+
+                <div style="display: flex; justify-content: center; align-items: center;">
+                    {{ previewCurrentTime.toFixed(2) }} <br> / <br> {{ previewEndTime.toFixed(2) }}
+                </div>  
 
                 <div @mousedown="startTimelineDrag()" class="timeline" ref="timeline" style="display:flex; overflow:hidden;">
                     <div v-for="i in timeline_images.length">
@@ -90,7 +94,11 @@ export default defineComponent({
             timeline_seg_height:0,
             timeline_segments_count:0,
             timeline_max_time: 0,
-            timeline_is_dragging: false,
+
+            previewCurrentTime: 0,
+            previewEndTime: 0,
+            previewPaused: false,
+            previewPausedBeforeSeek: false
         }
     },
     methods: {
@@ -99,28 +107,50 @@ export default defineComponent({
                 var timeline = document.getElementsByClassName("timeline")[0].getBoundingClientRect();
                 var x = event.clientX;
                 this.playhead = Math.min(timeline.width, Math.max(0, (x - timeline.x)));
+
+                // I've done this for now so that the preview seeks while you drag the playhead
+                // this may not be performant as we seek on every mousemove event, and this line can be removed to revert to just seeking after the drag has ended
+                // however, i think this is more useful as user sees in the big picture what they are seeking over
+                this.seekToPlayhead();
+
+                this.previewCurrentTime = (this.playhead / timeline.width) * (this.$refs.fuckingVideoPlayer as any).getEndTime();
             }
         },
         startTimelineDrag: function() {
             this.mouse_down = true;
-            (this.$refs.fuckingVideoPlayer as any).pausePlayback();
+            this.previewPausedBeforeSeek = this.previewPaused;
+            this.previewPause();
         },
         endTimelineDrag: function() {
             if (this.mouse_down) {
-                const vidPlayer = (this.$refs.fuckingVideoPlayer as any);
-                var timeline = document.getElementsByClassName("timeline")[0].getBoundingClientRect();
-                const newPlaybackTime = (this.playhead / timeline.width) * vidPlayer.getEndTime();
+                this.seekToPlayhead();
 
-                vidPlayer.seekToTime(newPlaybackTime);
-
-                vidPlayer.resumePlayback();
+                if (!this.previewPausedBeforeSeek) this.previewPlay();
                 this.mouse_down = false;
+            }
+        },
+        seekToPlayhead() {
+            const vidPlayer = (this.$refs.fuckingVideoPlayer as any);
+            var timeline = document.getElementsByClassName("timeline")[0].getBoundingClientRect();
+            const newPlaybackTime = (this.playhead / timeline.width) * vidPlayer.getEndTime();
+
+            vidPlayer.seekToTime(newPlaybackTime);
+        },
+        previewPlay() {
+            if (this.$refs.fuckingVideoPlayer !== undefined) {
+                (this.$refs.fuckingVideoPlayer as any).resumePlayback();
+                this.previewPaused = false;
+            }
+        },
+        previewPause() {
+            if (this.$refs.fuckingVideoPlayer !== undefined) {
+                (this.$refs.fuckingVideoPlayer as any).pausePlayback();
+                this.previewPaused = true;
             }
         }
 
     },
     setup(props, context) {
-        
         var tracks = ref(<object[]> [])
         let metronome = ref({ initialBpm : 80})
         let screenStyle = ref(0)
@@ -231,14 +261,24 @@ export default defineComponent({
         //this.$forceUpdate();
 
         const playheadUpdate = () => {
-            if (this.$refs['fuckingVideoPlayer'] !== undefined && !this.mouse_down) {
+            if (this.$refs['fuckingVideoPlayer'] !== undefined && !this.mouse_down && !this.previewPaused) {
                 var timeline = document.getElementsByClassName("timeline")[0].getBoundingClientRect()
                 const vidPlayer = (this.$refs.fuckingVideoPlayer as any);
-                const playheadx = (vidPlayer.getCurrentTime() / vidPlayer.getEndTime()) * timeline.width;
+
+                this.previewCurrentTime = vidPlayer.getCurrentTime();
+                this.previewEndTime = vidPlayer.getEndTime();
+
+                const playheadx = (this.previewCurrentTime / vidPlayer.getEndTime()) * timeline.width;
 
                 this.playhead = (playheadx);
+
+                if (this.previewCurrentTime === this.previewEndTime) {
+                    this.previewPause();
+                }
             }
         }
+
+        // feels like the leas frequent we can get away with while making the playhead still seem smooth
         window.setInterval(playheadUpdate, 0.1);
     }
 });
