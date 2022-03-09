@@ -1,10 +1,9 @@
+import { ipcMain } from 'electron';
 import * as config from '../storage/config';
 import * as projects from '../storage/projects';
 
-import { ipcMain } from 'electron';
 
 // Defines a bunch of ipc handlers for all the storage stuff
-
 export function startStorageHandlers() {
   ipcMain.addListener('create-project', (event, parentDirectory: string, projectName: string) => {
     return  projects.createProject(parentDirectory, projectName);
