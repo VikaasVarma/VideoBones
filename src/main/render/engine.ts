@@ -16,7 +16,7 @@ function buildArgs({
   bufferSize = '32M',
   framesPerSecond = 60,
   outputFile = 'output.mp4',
-  outputResolution = { width: 1920, height: 1080 },
+  outputResolution = { height: 1080, width: 1920  },
   outputType,
   outputVolume = 256,
   previewManifest = 'stream.mpd',

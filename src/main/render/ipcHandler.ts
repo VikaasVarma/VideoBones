@@ -20,7 +20,7 @@ export function startHandler(port: number) {
     switch (arg.type) {
       case 'startEngine':
         start(arg.data, (elapsedTime, donePercentage) => {
-          event.sender.send('asynchronous-reply', { event: 'progress', elapsedTime, donePercentage, port });
+          event.sender.send('asynchronous-reply', { donePercentage, elapsedTime, event: 'progress', port });
         }, () => {
           event.sender.send('asynchronous-reply', { event: 'done', port });
         });
