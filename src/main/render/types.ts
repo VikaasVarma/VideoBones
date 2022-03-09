@@ -20,7 +20,11 @@ interface EngineOptions {
 }
 
 /**
- * Specifies an audio track for the player.
+ * Specifies audio tracks for a segment of the final render.
+ *
+ * Can be many audio files, along with a volume.
+ * All the audio tracks in a single AudioInput are first volume scaled with their respective volume,
+ * then overlayed and finally trimmed to the interval.
  */
 interface AudioInput {
   files: string[];
@@ -28,6 +32,15 @@ interface AudioInput {
   interval: [number, number];
 }
 
+/**
+ * Specifies video tracks for a segment of the final render.
+ *
+ * Can be many video files, each with an associated Resolution.
+ * We also have a screen style, which describes (in an abstract way) how the videos will be layed out in the render.
+ * 
+ * All the videos in a single VideoInput are trimmed to the interval,
+ * then transformed to conform to the layout specified in screenStyle.
+ */
 interface VideoInput {
   files: string[];
   screenStyle: '....' | '|..' | '_..';
