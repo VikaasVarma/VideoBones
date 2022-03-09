@@ -91,6 +91,12 @@
             <div style="grid-column: 2 / 3; grid-row: 1 / 2;" />
             <div style="grid-column: 2 / 3; grid-row: 2 / 3;" />
           </div>
+          <div
+            :class="['screen-style', screenStyle === 3 ? 'selected' : '']"
+            @click="setScreenStyle(3)"
+          >
+            <div style="grid-column: 1 / 3; grid-row: 1 / 3;" />
+          </div>
         </div>
       </menu>
     </menu>
@@ -98,7 +104,6 @@
 </template>
 
 <script lang="ts">
-import { join } from 'node:path';
 import { defineComponent, ref } from 'vue';
 import { ipcRenderer } from 'electron';
 import TrackSelector from '../components/TrackSelector.vue';
@@ -106,37 +111,27 @@ import MetronomeComponent from '../components/MetronomeComponent.vue';
 import VideoPlayer from '../components/VideoPlayer.vue';
 
 
-const thumbnailFrequency = '1';
-
 export default defineComponent({
   name: 'VideoEditorPage',
   components: { MetronomeComponent, TrackSelector, VideoPlayer },
   emits: [ 'open-recording-page', 'open-single-editor' ],
   setup() {
-        interface Track {
-            trackName: string;
-        }
+    const stream_url = ref('');
+    const engineOpts = ref({
+        audioInputs: [],
+        outputType: 'preview',
+        thumbnailEvery: '1/5',
+        videoInputs: []
+      });
 
-        const tracks = ref([] as Track[]);
-        const stream_url = ref('');
-        const track_data = {
-          all_track_ids: [ 'Track_0', 'Track_1', 'Track_3', 'Track_3' ],
-          timeline_splits: [
-            { active_tracks: [ 0, 1, 2, 3 ], endpoint: 0.3, screenStyle: '....'  },
-            { active_tracks: [ 0, 2, 3 ], endpoint: 0.7, screenStyle: '_..' },
-            { active_tracks: [ 0, 1, 3 ], endpoint: 1, screenStyle: '|..'  }
-          ]
-        };
+    ipcRenderer.addListener('asynchronous-reply', (event, args) => {
+      const port = args.port;
+      if (stream_url.value === '') {
+        stream_url.value = `http://localhost:${  port.toString()  }/stream.mpd`;
+      }
+    });
 
-        ipcRenderer.addListener('asynchronous-reply', (event, args) => {
-          const port = args.port;
-          if (stream_url.value === '') {
-            stream_url.value = `http://localhost:${  port.toString()  }/stream.mpd`;
-          }
-        });
-
-        return { stream_url, track_data, tracks };
-
+    return { engineOpts, stream_url };
   },
   data() {
     return {
@@ -156,7 +151,9 @@ export default defineComponent({
       timeline_images: ([] as string[]),
       timeline_max_time: 0,
       timeline_seg_height: 0,
-      timeline_segments_count: 0
+      timeline_segments_count: 0,
+
+      tracks: ([] as {trackName: string}[])
     };
   },
   created() {
@@ -170,54 +167,14 @@ export default defineComponent({
     });
 
     ipcRenderer.invoke('get-recordings-directory').then(dir => {
-      const engineOpts = {
-        audioInputs: [
-        /*{
-                        file: join("../recordings", "audio1.webm"),
-                        startTime: 0.02,
-                        volume: 255,
-                    },*/
-        ],
-        outputType: 'preview',
-        thumbnailEvery: thumbnailFrequency,
-        videoInputs: [
-          {
-            files: [
-              join(dir, 'video1.webm'), join(dir, 'video2.webm'),
-              join(dir, 'video3.webm'), join(dir, 'video4.webm')
-            ],
-            interval: [ 0, 5 ],
-            resolution: [
-              { height: 720, width: 1280 }, { height: 720, width: 1280 },
-              { height: 720, width: 1280 }, { height: 720, width: 1280 }
-            ],
-            screenStyle: '....'
-          },
-          {
-            files: [ join(dir, 'video1.webm'), join(dir, 'video2.webm'), join(dir, 'video3.webm') ],
-            interval: [ 5, 10 ],
-            resolution: [{ height: 1440, width: 1280 }, {  height: 720, width: 1280 }, { height: 720, width: 1280 }],
-            screenStyle: '|..'
-          }
-        ]
-      };
       // the max time for the timeline is the end of the last video interval, which is the length of the whole video
-      this.timeline_max_time = engineOpts.videoInputs[engineOpts.videoInputs.length - 1].interval[1];
-      ipcRenderer.send(
-        'asynchronous-message',
-        {
-          data: engineOpts,
-          type: 'startEngine'
-        }
-      );
-
-      ipcRenderer.send(
-        'asynchronous-message',
-        {
-          data: { ...engineOpts, outputType: 'thumbnail' },
-          type: 'getThumbnails'
-        }
-      );
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      this.timeline_max_time = this.engineOpts.videoInputs.map(i => i.intervals[1])
+      // eslint-disable-next-line unicorn/no-array-reduce
+        .reduce((max, video) => Math.max(max, video), 0);
+      this.getThumbnails();
+      this.getPreview();
     });
   },
   async mounted() {
@@ -303,10 +260,10 @@ export default defineComponent({
         for (const child of box.childNodes) {
           child.remove();
         }
-        box.append(this.draggingTrack);
-        this.draggingTrack.style.position = 'static';
-        this.draggingTrack.style.cursor = 'pointer';
-        this.draggingTrack = null;
+        const indicator = document.createElement('p');
+        indicator.textContent = this.draggingTrack.textContent;
+        indicator.classList.add('track-inserted');
+        box.append(indicator);
       }
       if (this.mouse_down) {
         this.seekToPlayhead();
@@ -314,6 +271,24 @@ export default defineComponent({
         if (!this.previewPausedBeforeSeek) this.previewPlay(false);
         this.mouse_down = false;
       }
+    },
+    getPreview() {
+      ipcRenderer.send(
+        'asynchronous-message',
+        {
+          data: JSON.parse(JSON.stringify(this.engineOpts)),
+          type: 'startEngine'
+        }
+      );
+    },
+    getThumbnails() {
+      ipcRenderer.send(
+        'asynchronous-message',
+        {
+          data: { ...JSON.parse(JSON.stringify(this.engineOpts)), outputType: 'thumbnail' },
+          type: 'getThumbnails'
+        }
+      );
     },
     playheadUpdate() {
       if (this.$refs.previewPlayer && !this.mouse_down && !this.previewPaused) {
@@ -351,6 +326,9 @@ export default defineComponent({
       vidPlayer.seekToTime(newPlaybackTime);
     },
     setScreenStyle(style: number) {
+      for (const el of document.querySelectorAll('div.screen-style.selected > div > p')) {
+        el.remove();
+      }
       this.screenStyle = style;
     },
     startTimelineDrag: function() {
@@ -366,3 +344,11 @@ export default defineComponent({
   @import '../styles/main';
   @import '../styles/pages/video-editor';
 </style>
+
+<style lang="scss">
+p.track-inserted {
+    color: white;
+    font-size: 11px;
+    user-select: none;
+  }
+  </style>
