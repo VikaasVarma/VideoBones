@@ -1,12 +1,9 @@
-import { join } from 'node:path';
-import { open, readFile } from 'node:fs/promises';
-import { createServer } from 'node:http';
-import { promisify } from 'node:util';
+import { open, readFile } from 'fs/promises';
+import { createServer } from 'http';
 import { getTempDirectory } from '../storage/config';
+import { join } from 'path';
+import { promisify } from 'util';
 
-/**
- * Holds a static http server open for the lifetime of the program.
- */
 const server = createServer(async (request, response) => {
   console.log('Integrated server request', request.url);
   try {
@@ -30,11 +27,6 @@ const server = createServer(async (request, response) => {
   }
 });
 
-/**
- * Spins up/restarts the integrated server.
- *
- * @returns A promise resolving to the port the server is using
- */
 export async function startIntegratedServer(): Promise<number> {
   if (server.listening) {
     server.close();
@@ -50,9 +42,6 @@ export async function startIntegratedServer(): Promise<number> {
   return -1;
 }
 
-/**
- * Heartlessly murders the server :)
- */
 export function stopIntegratedServer(): void {
   if (server.listening) {
     server.close();

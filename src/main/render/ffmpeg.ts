@@ -1,10 +1,6 @@
-import { arch, platform } from 'node:os';
-import { join } from 'node:path';
+import { arch, platform } from 'os';
+import { join } from 'path';
 
-
-/**
- * @returns The full system path to ffmpeg.exe
- */
 export function getPath() {
   if (process.env.FFMPEG_BIN) {
     module.exports = process.env.FFMPEG_BIN;
@@ -26,7 +22,7 @@ export function getPath() {
       pl === 'win32' ? 'ffmpeg.exe' : 'ffmpeg'
     );
 
-    if (!binaries[pl] || !binaries[pl].includes(ar)) {
+    if (!binaries[pl] || binaries[pl].indexOf(ar) === -1) {
       return null;
     }
 
