@@ -1,5 +1,5 @@
-import { app, BrowserWindow, dialog, ipcMain } from 'electron';
 import { join } from 'node:path';
+import { app, BrowserWindow, dialog, ipcMain } from 'electron';
 import * as config from '../main/storage/config';
 import * as projects from '../main/storage/projects';
 

@@ -1,8 +1,8 @@
 import { existsSync, readFileSync } from 'node:fs';
 import * as fs from 'node:fs/promises';
 
-import { app } from 'electron';
 import path from 'node:path';
+import { app } from 'electron';
 import { readDirectoryConfig, recordingsDirectoryName, tempDirectoryName } from './storage';
 import { internal_initialiseProjectConfig as initialiseProjectConfig } from './config';
 
