@@ -34,7 +34,6 @@ import path from 'node:path';
 import { defineComponent } from 'vue';
 import { ipcRenderer } from 'electron';
 
-
 export default defineComponent({
   name: 'RecordingPage',
   emits: [ 'recording-end', 'exit-recording' ],

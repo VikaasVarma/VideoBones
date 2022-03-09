@@ -1,33 +1,26 @@
-import { getThumbnails, kill, start } from './engine';
 import { ipcMain } from 'electron';
+import { getThumbnails, kill, start } from './engine';
+
 
 export function startHandler(port: number) {
+  // start the preview render engine
+  ipcMain.addListener('start-engine', (event, arg) => {
+    start(arg.data, renderedTime => {
+      event.sender.send('engine-progress', { port, renderedTime });
+    }, () => {
+      event.sender.send('engine-done', { port });
+    });
+  });
 
-  ipcMain.addListener('asynchronous-message', (event, arg) => {
-    if (!arg.type) {
-      console.warn('Incorrect type from IPC', arg);
-      return;
-    }
+  ipcMain.addListener('stop-engine', () => {
+    kill();
+  });
 
-    switch (arg.type) {
-        case 'startEngine':
-          start(arg.data, (elapsedTime, donePercentage) => {
-            event.sender.send('asynchronous-reply', { event: 'progress', elapsedTime, donePercentage, port });
-          }, () => {
-            event.sender.send('asynchronous-reply', { event: 'done', port });
-          });
-          break;
-        case 'getThumbnails':
-          getThumbnails(arg.data, (thumbnailFiles: string[]) => {
-            event.sender.send('thumbnail-reply', { event: 'thumbnails', thumbnailFiles });
-          });
-          break;
-        case 'stopEngine':
-          kill();
-          break;
-        default:
-          console.warn('Unknown type from IPC', arg);
-    }
+  // start the thumbnail engine
+  ipcMain.addListener('get-thumbnails', (event, arg) => {
+    getThumbnails(arg.data, (thumbnailFiles: string[]) => {
+      event.sender.send('thumbnail-reply', { thumbnailFiles });
+    });
   });
 }
 

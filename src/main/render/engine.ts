@@ -8,6 +8,8 @@ import { getPath } from './ffmpeg';
 import { AudioInput, EngineOptions, VideoInput } from './types';
 
 
+const thumbnailResolutionDivisor = 4;
+
 function buildArgs({
   aspectRatio = '16:9',
   audioBitRate = '320k',
@@ -51,9 +53,9 @@ function buildArgs({
       audioInputs.map(input => input.files.map(file => [ '-i', file ])).flat(2),
       [
         '-filter_complex', `${videoInputs.map((input, i) => ([
-          input.resolution.map((res, j) => `[${offset[i] + j}:v]setpts=PTS-STARTPTS,scale=${res.width}x${res.height},trim=${input.interval[0]}:${input.interval[1]}[input${offset[i] + j}];`).join(''),
+          input.resolution.map((res, j) => `[${offset[i] + j}:v]setpts=PTS-STARTPTS,scale=${res.width / (outputType === 'thumbnail' ? thumbnailResolutionDivisor : 1)}x${res.height / (outputType === 'thumbnail' ? thumbnailResolutionDivisor : 1)},trim=${input.interval[0]}:${input.interval[1]}[input${offset[i] + j}];`).join(''),
           `${input.files.map((_, j) => `[input${offset[i] + j}]`).join('')}xstack=inputs=${input.files.length}:layout=${screenStyle_to_layout(input.screenStyle)}[matrix${i}];`,
-          `[matrix${i}]scale=${outputResolution.width}:${outputResolution.height},setsar=1:1[v${i}];`
+          `[matrix${i}]scale=${outputResolution.width / (outputType === 'thumbnail' ? thumbnailResolutionDivisor : 1)}:${outputResolution.height / (outputType === 'thumbnail' ? thumbnailResolutionDivisor : 1)},setsar=1:1[v${i}];`
         ].join(''))).join('')  }${videoInputs.map((_, i) => `[v${i}]`).join('')}concat=n=${videoInputs.length},fps=${outputType === 'thumbnail' ? thumbnailEvery : framesPerSecond}[out]`
       ],
       [
@@ -66,6 +68,7 @@ function buildArgs({
     ...filter,
     '-preset', 'ultrafast',
     '-aspect', aspectRatio,
+    '-progress', '-', '-nostats', // get it to print stats
     '-r', '1'
     ,  'thumbs/%04d.png'
   ] : [
@@ -88,6 +91,8 @@ function buildArgs({
     '-aspect', aspectRatio,
     '-vol', outputVolume.toString(),
     '-metadata', 'description="Made with VideoBones"',
+    '-probesize', '32', '-analyzeduration', '0', // optimisations, can remove if breaking
+    '-progress', '-', '-nostats', // get it to print stats
     '-stats'
     ,  outputType === 'render' ? outputFile : previewManifest
   ].filter(str => {
@@ -103,7 +108,7 @@ let ffmpeg_thumbs: ChildProcessByStdio<null, Readable, null> | null;
 
 export function start(
   options: EngineOptions,
-  statusCallback: (elapsedTime: string, donePercentage: number) => void,
+  statusCallback: (renderedTime: number) => void,
   doneCallback: () => void
 ) {
   if (options.outputType === 'thumbnail') {
@@ -123,8 +128,10 @@ export function start(
     console.log(getTempDirectory());
     ffmpeg = spawn(bin, args, { cwd: getTempDirectory(), stdio: [ 'ignore', 'pipe', process.stderr ] });
     ffmpeg.stdout.on('data', data => {
-      console.log(data);
-      statusCallback(data.toString(), 0);
+      const values = data.toString().split(/\n|=/);
+      const i = values.indexOf('out_time_ms') + 1;
+      const doneTime = values[i] / 2000;
+      statusCallback(doneTime);
     });
     ffmpeg.on('exit', doneCallback);
   }
@@ -157,7 +164,7 @@ export function getThumbnails(
   if (bin) {
     console.log(getTempDirectory());
     ffmpeg_thumbs = spawn(bin, args, { cwd: getTempDirectory(), stdio: [ 'ignore', 'pipe', process.stderr ] });
-    ffmpeg_thumbs.on('exit', () => {
+    ffmpeg_thumbs.on('exit', function() {
       const files = readdirSync(thumbs);
       doneCallback(files.map(f => join(thumbs, f)));
     });
