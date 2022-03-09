@@ -115,10 +115,11 @@
 
   .playhead {
     height: 110%;
-    position: relative;
+    position: absolute;
     top: -10%;
     user-select: none;
     width: 10px;
+    z-index: 10;
 
     :nth-child(1) {
       aspect-ratio: 1/1;
@@ -136,6 +137,21 @@
       margin: auto;
       position: absolute;
       width: 30%;
+    }
+  }
+
+  .marker {
+    height: 16px;
+    position: absolute;
+    top: -12px;
+    transform: rotate(180deg);
+    width: 16px;
+    z-index: 20;
+
+    // stylelint-disable-next-line no-descending-specificity
+    img {
+      height: 100%;
+      width: 100%;
     }
   }
 }

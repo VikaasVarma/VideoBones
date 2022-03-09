@@ -21,18 +21,28 @@
         <div
           ref="timeline"
           class="timeline"
-          style="display: flex; overflow: hidden;"
-          @mousedown="startTimelineDrag()"
+          @dblclick="addSegment($event)"
         >
-          <div v-for="image of timeline_images" :key="image">
-            <div :style="`aspect-ratio: 16/9; height:${timeline_seg_height};`">
-              <img alt="loading timeline..." :src="image" style="max-height: 100%; max-width: 100%;">
+          <div style="display: flex; overflow: hidden;">
+            <div v-for="image of timeline_images" :key="image">
+              <div :style="`aspect-ratio: 16/9; height:${timeline_seg_height};`">
+                <img alt="loading timeline..." :src="image" style="max-height: 100%; max-width: 100%;">
+              </div>
+              <div :style="`height:${timeline_seg_height}; width:5px`" />
             </div>
-            <div :style="`height:${timeline_seg_height}; width:5px`" />
           </div>
 
-          <div class="playhead" :style="`position:absolute; z-index:10; left: calc(-5px + ${playhead}px)`">
+          <div class="playhead" :style="`left: calc(-5px + ${playhead}px)`">
             <div /> <div />
+          </div>
+
+          <div v-for="input of engineOpts.videoInputs" :key="input.interval.toString()" class="sectionMarker">
+            <div
+              class="marker"
+              :style="{left: `${input.interval[0] / projLength * timelineWidth - 8}px`}"
+            >
+              <img src="../../../assets/images/arrow.svg">
+            </div>
           </div>
         </div>
       </div>
@@ -148,13 +158,14 @@ export default defineComponent({
       previewEndTime: 0,
       previewPaused: false,
       previewPausedBeforeSeek: false,
-
+      projLength: 15,
       screenStyle: 0,
 
       timeline_images: ([] as string[]),
       timeline_max_time: 0,
       timeline_seg_height: 0,
       timeline_segments_count: 0,
+      timelineWidth: 1,
 
       tracks: ([] as {trackName: string}[])
     };
@@ -191,6 +202,7 @@ export default defineComponent({
 
     const timeline_h = (this.$refs.timeline as HTMLElement).clientHeight;
     const timeline_w = (this.$refs.timeline as HTMLElement).clientWidth;
+    this.timelineWidth = timeline_w;
 
     this.timeline_seg_height = timeline_h;
 
@@ -205,6 +217,19 @@ export default defineComponent({
     window.setInterval(this.playheadUpdate, 0.1);
   },
   methods: {
+    addSegment(event: MouseEvent) {
+      const timeline = document.querySelectorAll('.timeline')[0].getBoundingClientRect();
+      this.engineOpts.videoInputs.push({
+        files: [],
+        interval: [
+          (event.clientX - timeline.left)
+         / timeline.width * this.projLength, this.projLength
+        ] as [number, number],
+        resolution: [],
+        screenStyle: ('....' as '....' | '|..' | '_..')
+      });
+      console.log(this.engineOpts);
+    },
     deleteTrack(trackName: string) {
       this.tracks = this.tracks.filter(track => track.trackName !== trackName);
       ipcRenderer.send('remove-recording', trackName);
