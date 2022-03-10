@@ -1,11 +1,12 @@
 import { join } from 'node:path';
-import { app, BrowserWindow, dialog, ipcMain } from 'electron';
+import { app, BrowserWindow, dialog, ipcMain, Menu, MenuItem } from 'electron';
 import * as config from '../main/storage/config';
 import * as projects from '../main/storage/projects';
 
 import { startHandler, stopHandler } from './render/ipcHandler';
 import { startIntegratedServer, stopIntegratedServer } from './render/integratedServer';
 import { startStorageHandlers } from './storage/ipcHandler';
+import Main from 'electron/main';
 
 
 let mainWindow: BrowserWindow | null = null;
@@ -40,6 +41,25 @@ async function createWindow() {
   startStorageHandlers();
 
   mainWindow.maximize();
+
+  let menu = new Menu();
+  const isMac = process.platform === "darwin";
+  let exportItem = new MenuItem({
+    label: "File",
+    submenu: [
+        { role: "quit" },
+        { 
+            label: "Export",
+            click: () => {
+                
+            }
+        }
+    ]
+
+  });
+  menu.append(exportItem);
+  
+  Menu.setApplicationMenu(menu);
 }
 
 /**
