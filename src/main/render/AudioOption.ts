@@ -33,7 +33,7 @@ export class AudioInputOption implements AudioInput{
     echo_delay_indentifier = 0,
     echo_decay_indentifier = 0
   ){
-    this.file = file;
+    this.file = file.replace('video','audio');
     this.startTime = startTime;
     this.volume = volume;
     this.reverb_active = reverb_active;

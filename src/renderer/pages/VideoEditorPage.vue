@@ -127,6 +127,7 @@ import TrackSelector from '../components/TrackSelector.vue';
 import MetronomeComponent from '../components/MetronomeComponent.vue';
 import VideoPlayer from '../components/VideoPlayer.vue';
 import { EngineOptions } from '../../main/render/types';
+import { json } from 'stream/consumers';
 
 
 export default defineComponent({
@@ -181,7 +182,10 @@ export default defineComponent({
     });
 
     function render() {
-        console.log("render");
+      console.log(JSON.parse(JSON.stringify(engineOpts.value)));
+      ipcRenderer.send('export-render', {
+        data: JSON.parse(JSON.stringify(engineOpts.value))
+      });
     }
 
     return { engineOpts, stream_url, render };
@@ -222,6 +226,8 @@ export default defineComponent({
     });
 
     ipcRenderer.invoke('get-recordings-directory').then(dir => {
+      //the follow 100 lines or so are for test case for video/audio effect, do not need them in the app
+      //the setting should be set in single-video-editor
       ipcRenderer.send(
         'asynchronous-message',
         {
