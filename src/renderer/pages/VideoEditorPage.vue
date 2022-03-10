@@ -113,7 +113,7 @@
         </div>
       </menu>
       <button class="button-primary" @click="render()">
-        RENDER
+        {{ !isRendering ? 'RENDER' : `${renderPct.toFixed(2)}%` }}
       </button>
     </menu>
   </div>
@@ -181,14 +181,7 @@ export default defineComponent({
       }
     });
 
-    function render() {
-      console.log(JSON.parse(JSON.stringify(engineOpts.value)));
-      ipcRenderer.send('export-render', {
-        data: JSON.parse(JSON.stringify(engineOpts.value))
-      });
-    }
-
-    return { engineOpts, stream_url, render };
+    return { engineOpts, stream_url };
   },
   data() {
     return {
@@ -212,7 +205,10 @@ export default defineComponent({
       timeline_segments_count: 0,
       timelineWidth: 1,
 
-      tracks: ([] as {trackName: string}[])
+      tracks: ([] as {trackName: string}[]),
+
+      isRendering: false,
+      renderPct: 0
     };
   },
   created() {
@@ -380,6 +376,21 @@ export default defineComponent({
       }
     });
 
+    ipcRenderer.addListener('render-progress', (event, args) => {
+      if (this.isRendering) {
+        const t = args.renderedTime;
+        const pct = t / this.engineOpts.videoInputs[this.engineOpts.videoInputs.length - 1].interval[2];
+        this.renderPct = pct;
+      }
+    });
+
+    ipcRenderer.addListener('render-done', (event, args) => {
+      if (this.isRendering) {
+        this.isRendering = false;
+        alert(`Rendering finished, output in file: ${args.outputFile}.`);
+      }
+    });
+
     const timeline_h = (this.$refs.timeline as HTMLElement).clientHeight;
     const timeline_w = (this.$refs.timeline as HTMLElement).clientWidth;
     this.timelineWidth = timeline_w;
@@ -399,6 +410,15 @@ export default defineComponent({
     this.previewPlay(false);
   },
   methods: {
+    render() {
+      console.log("Starting render!");
+      console.log(JSON.parse(JSON.stringify(this.engineOpts)))
+      this.isRendering = true;
+      this.renderPct = 0;
+      ipcRenderer.send('export-render', {
+        data: JSON.parse(JSON.stringify(this.engineOpts))
+      });
+    },
     addSegment(event: MouseEvent) {
       const timeline = document.querySelectorAll('.timeline')[0].getBoundingClientRect();
       /*this.engineOpts.videoInputs.push({
