@@ -389,6 +389,8 @@ export default defineComponent({
 
     // feels like the leas frequent we can get away with while making the playhead still seem smooth
     window.setInterval(this.playheadUpdate, 0.1);
+
+    this.previewPlay(false);
   },
   methods: {
     addSegment(event: MouseEvent) {
