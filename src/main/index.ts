@@ -1,8 +1,8 @@
 import { join } from 'node:path';
-import { app, BrowserWindow, dialog, ipcMain, Menu, MenuItem } from 'electron';
 import * as config from '../main/storage/config';
 import * as projects from '../main/storage/projects';
 
+import { app, BrowserWindow, dialog, ipcMain, Menu, MenuItem } from 'electron';
 import { startHandler, stopHandler } from './render/ipcHandler';
 import { startIntegratedServer, stopIntegratedServer } from './render/integratedServer';
 import { startStorageHandlers } from './storage/ipcHandler';
