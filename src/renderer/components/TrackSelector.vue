@@ -6,7 +6,7 @@
     <button @click="$emit('edit-clicked')">
       Edit
     </button>
-    <button class="destructive" @click="$emit('delete-clicked')">
+    <button class="destructive" @click="$emit('delete-clicked', trackNumber)">
       Delete
     </button>
   </div>
@@ -21,6 +21,10 @@ export default defineComponent({
   props: {
     trackName: {
       type: String,
+      required: true
+    },
+    trackNumber: {
+      type: Number,
       required: true
     }
   },

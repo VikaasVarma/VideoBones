@@ -114,7 +114,7 @@ export function writeDirectoryConfig(directory: string, cfg: Config): Promise<vo
  * @returns A promise which resolves when the write is complete
  */
 export function writeProjectConfig(projectHandle: ProjectHandle, cfg: Config): Promise<void> {
-  return writeDirectoryConfig(projectHandle.projectPath, cfg).catch((error: Error) => {
+  return writeDirectoryConfig(projectHandle.projectPath, cfg).catch(error => {
     throw new Error(`Error writing config in project ${projectHandle.projectName}, reason: ${error}`);
   });
 }

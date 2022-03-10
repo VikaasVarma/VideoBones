@@ -61,9 +61,10 @@
             Tracks
           </h2>
           <track-selector
-            v-for="track in tracks"
+            v-for="track, id in tracks"
             :key="track.trackName"
             :track-name="track.trackName"
+            :track-number="id"
             @delete-clicked="deleteTrack(track.trackName)"
             @dragged="dragTrack($event, track.trackName)"
             @edit-clicked="$emit('open-single-editor', track.trackName)"
@@ -389,8 +390,8 @@ export default defineComponent({
 
 <style lang="scss">
 p.track-inserted {
-    color: white;
-    font-size: 11px;
-    user-select: none;
-  }
-  </style>
+  color: white;
+  font-size: 11px;
+  user-select: none;
+}
+</style>

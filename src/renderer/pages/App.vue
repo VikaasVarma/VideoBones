@@ -38,14 +38,12 @@ import CreateNewProjectPage from './CreateNewProjectPage.vue';
 import SingleVideoEditorPage from './SingleVideoEditorPage.vue';
 import VideoEditorPage from './VideoEditorPage.vue';
 import RecordingPage from './RecordingPage.vue';
-import FfmpegTest from './FfmpegTest.vue';
 
 
 export default defineComponent({
   name: 'App',
   components: {
     CreateNewProjectPage,
-    FfmpegTest,
     OnOpenPage,
     RecordingPage,
     SingleVideoEditorPage,
