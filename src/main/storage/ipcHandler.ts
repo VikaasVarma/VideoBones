@@ -63,7 +63,7 @@ export function startStorageHandlers() {
   });
 
   ipcMain.handle('get-option', (event, optionName: string) => {
-    return config.getOption(optionName);
+    return JSON.stringify(config.getOption(optionName));
   });
 
   ipcMain.addListener('remove-option', (event, optionName) => {
