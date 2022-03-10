@@ -222,7 +222,7 @@ function buildArgs({
           videoSetup(videoData),
           videoOverlay(videoData),
           audioInputOptions.map((input: AudioInputOption, i: number) =>
-            `[${i + videoSum}:a]${input.getAllOptions()}aformat=fltp:44100:stereo,volume=${input.volume / 256} [ainput${i}];`)
+            `[${i + videoDict.size}:a]${input.getAllOptions()}aformat=fltp:48000:stereo,volume=${input.volume / 256}[ainput${i}]`)
             .join(''),
           audioInputOptions.length === 0 ? '' : `${audioInputOptions.map((_, i: number) => `[ainput${i}]`).join('')  }amerge=inputs=${audioInputOptions.length  }[aout]`
         ).filter(el => el.length > 0).join(';')

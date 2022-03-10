@@ -358,8 +358,8 @@ export default defineComponent({
   },
   async mounted() {
     ipcRenderer.invoke('get-option', 'videoTracks').then(videoTracks => {
-      const data = JSON.parse(videoTracks);
-      for (const track of data) {
+      //const data = JSON.parse(videoTracks);
+      for (const track of videoTracks) {
         this.tracks.push({ trackName: track.slice(0, Math.max(0, track.indexOf('.webm'))) });
       }
     });

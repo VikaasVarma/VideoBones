@@ -16,7 +16,7 @@ const tempDeathTimeMs = 60000;
  *
  * Any file in the temp folder with a name matching this regex will never be cleaned up.
  */
-const tempDeathExclusionRegex = /$.*^/;  // currently matches nothing
+const tempDeathExclusionRegex = /^.*$/;  // currently matches nothing
 
 /**
  * Constant specifying the project subdirectory to create for recordings.
