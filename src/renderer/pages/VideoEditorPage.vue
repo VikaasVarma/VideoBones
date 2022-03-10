@@ -112,6 +112,9 @@
           </div>
         </div>
       </menu>
+      <button class="button-primary" @click="render()">
+        RENDER
+      </button>
     </menu>
   </div>
 </template>
@@ -177,7 +180,11 @@ export default defineComponent({
       }
     });
 
-    return { engineOpts, stream_url };
+    function render() {
+        console.log("render");
+    }
+
+    return { engineOpts, stream_url, render };
   },
   data() {
     return {
