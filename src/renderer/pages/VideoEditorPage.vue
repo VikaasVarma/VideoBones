@@ -406,6 +406,11 @@ export default defineComponent({
 
     //this.$forceUpdate();
 
+    ipcRenderer.addListener('engine-done',  (event, args) => {
+      // if the preview has rendered more than 2 secs, start the preview viewer
+      this.previewEndTime = (this.$refs.previewPlayer as any).getEndTime();
+    });
+
     // feels like the leas frequent we can get away with while making the playhead still seem smooth
     window.setInterval(this.playheadUpdate, 0.1);
 
@@ -536,10 +541,6 @@ export default defineComponent({
         const vidPlayer = (this.$refs.previewPlayer as any);
 
         this.previewCurrentTime = vidPlayer.getCurrentTime();
-        ipcRenderer.addListener('engine-done',  (event, args) => {
-          // if the preview has rendered more than 2 secs, start the preview viewer
-          this.previewEndTime = vidPlayer.getEndTime();
-        });
 
         const playheadx = (this.previewCurrentTime / vidPlayer.getEndTime()) * timeline.width;
 
