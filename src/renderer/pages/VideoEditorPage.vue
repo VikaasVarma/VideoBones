@@ -222,6 +222,8 @@ export default defineComponent({
     });
 
     ipcRenderer.invoke('get-recordings-directory').then(dir => {
+      //the follow 100 lines or so are for test case for video/audio effect, do not need them in the app
+      //the setting should be set in single-video-editor
       ipcRenderer.send(
         'asynchronous-message',
         {
