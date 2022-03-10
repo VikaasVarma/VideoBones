@@ -416,6 +416,12 @@ export default defineComponent({
 
     this.previewPlay(false);
   },
+  unmounted() {
+    ipcRenderer.removeAllListeners('engine-progress');
+    ipcRenderer.removeAllListeners('engine-done');
+    ipcRenderer.removeAllListeners('render-done');
+    ipcRenderer.removeAllListeners('render-progress');
+  },
   methods: {
     render() {
       if (this.isRendering) return;
