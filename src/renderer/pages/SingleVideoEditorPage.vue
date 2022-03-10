@@ -118,7 +118,7 @@
         </div>
       </menu>
 
-      <button class="button-primary" @click="$emit('exit-single-editor')">
+      <button class="button-primary" @click="done(); $emit('exit-single-editor')">
         DONE
       </button>
     </menu>
@@ -164,6 +164,34 @@ export default defineComponent({
   },
   methods: {
     updateVideoSetting(){
+
+    },
+    updateVolume(){
+
+    },
+    updateEcho() {
+     
+    },
+    updateReverb() {
+
+  },
+  done(){
+    ipcRenderer.send(
+        'asynchronous-message',
+        {
+          type: 'audioOptions',
+          data: {
+            file: this.video_name,
+            startTime: 0,
+            volume: this.volume,
+            reverb_active: this.reverb_enabled,
+            reverb_delay_identifier: this.reverb_settings.delay,
+            reverb_decay_indentifier: this.reverb_settings.decay,
+            declick_active: this.denoise_enabled,
+            declip_active: this.denoise_enabled
+          }
+        }
+      );
       ipcRenderer.send(
         'asynchronous-message',
         {
@@ -183,61 +211,6 @@ export default defineComponent({
           }
         }
       );
-    },
-    updateVolume(){
-      ipcRenderer.send(
-        'asynchronous-message',
-        {
-          type: 'audioOptions',
-          data: {
-            file: this.video_name,
-            startTime: 0,
-            volume: this.volume,
-            reverb_active: this.reverb_enabled,
-            reverb_delay_identifier: this.reverb_settings.delay,
-            reverb_decay_indentifier: this.reverb_settings.decay,
-            declick_active: this.denoise_enabled,
-            declip_active: this.denoise_enabled
-          }
-        }
-      );
-    },
-    updateEcho() {
-      ipcRenderer.send(
-        'asynchronous-message',
-        {
-          type: 'audioOptions',
-          data: {
-            file: this.video_name,
-            startTime: 0,
-            volume: this.volume,
-            reverb_active: this.reverb_enabled,
-            reverb_delay_identifier: this.reverb_settings.delay,
-            reverb_decay_indentifier: this.reverb_settings.decay,
-            declick_active: this.denoise_enabled,
-            declip_active: this.denoise_enabled
-          }
-        }
-      );
-    },
-    updateReverb() {
-      ipcRenderer.send(
-        'asynchronous-message',
-        {
-          type: 'audioOptions',
-          data: {
-            file: this.video_name,
-            startTime: 0,
-            volume: this.volume,
-            reverb_active: this.reverb_enabled,
-            reverb_delay_identifier: this.reverb_settings.delay,
-            reverb_decay_indentifier: this.reverb_settings.decay,
-            declick_active: this.denoise_enabled,
-            declip_active: this.denoise_enabled
-          }
-        }
-      );
-    }
   }
 });
 </script>

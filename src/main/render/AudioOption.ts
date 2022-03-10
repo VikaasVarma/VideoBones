@@ -1,4 +1,6 @@
 import { AudioInput } from './types';
+import { getRecordingsDirectory } from '../storage/config';
+import { join } from 'path';
 
 /**
  * The class receives message from IPC-handler and record the audio settings that are given
@@ -38,7 +40,7 @@ export class AudioInputOption implements AudioInput{
     this.volume = volume;
     this.reverb_active = reverb_active;
     this.reverb_delay_identifier = reverb_delay;
-    this.reverb_decay_identifier = reverb_dacay;
+    this.reverb_decay_identifier = 0.5;
     this.declick_active = declick_active;
     this.declip_active = declip_active;
     this.echo_active = echo_active;
@@ -83,7 +85,7 @@ export class AudioInputOption implements AudioInput{
       let s_delays = '';
       let i = 0;
       while (i < 10){
-        s_delays += `${(i + 1) * this.reverb_delay_identifier}`;
+        s_delays += `${Math.min((i + 1) * this.reverb_delay_identifier, 90000)}`;
         if (i < 9) s_delays += '|';
         i++;
       }
@@ -104,11 +106,12 @@ export class AudioInputOption implements AudioInput{
   }
 }
 
-const audioOptions: AudioInputOption[] = [];
+let audioOptions: AudioInputOption[] = [];
 
 export function addAudioOption(option: AudioInput): void{
+  audioOptions = audioOptions.filter((object) => object.file !== join(getRecordingsDirectory(), option.file) + '.webm');
   audioOptions.push(new AudioInputOption(
-    option.file,
+    join(getRecordingsDirectory(), option.file) + '.webm',
     option.startTime,
     option.volume,
     option.reverb_active,

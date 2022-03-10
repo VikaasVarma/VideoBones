@@ -207,6 +207,10 @@ function buildArgs({
   const videoData: VideoData[][] = genVideoData(videoInputs, videoDict);
   //the audioInput part of the EngineOption is never used, instead, it uses the records from AudioOption
   const audioInputOptions: AudioInputOption[] = getAudioOptions();
+
+  //test
+  console.log('--------------------------------');
+  console.log(audioInputOptions);
   //video effect part
   const videoInputOptionsMap: Map<string, VideoInputOption> = getVideoOptionMap();
 
