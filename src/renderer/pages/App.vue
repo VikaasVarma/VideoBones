@@ -14,10 +14,11 @@
   <video-editor-page
     v-else-if="pageDisplayed === 'video-editor-page'"
     @open-recording-page="pageDisplayed = 'recording-page'"
-    @open-single-editor="pageDisplayed = 'single-video-editor-page'"
+    @open-single-editor="openSingleEditor"
   />
 
   <single-video-editor-page
+    :video_name="single_video"
     v-else-if="pageDisplayed === 'single-video-editor-page'"
     @exit-single-editor="pageDisplayed = 'video-editor-page'"
   />
@@ -27,7 +28,6 @@
     @exit-recording="pageDisplayed = 'video-editor-page'"
     @recording-end="pageDisplayed = 'video-editor-page'"
   />
-  <ffmpeg-test v-else-if="pageDisplayed === 'ffmpeg-test'" />
 </template>
 
 <script lang="ts">
@@ -37,14 +37,12 @@ import CreateNewProjectPage from './CreateNewProjectPage.vue';
 import SingleVideoEditorPage from './SingleVideoEditorPage.vue';
 import VideoEditorPage from './VideoEditorPage.vue';
 import RecordingPage from './RecordingPage.vue';
-import FfmpegTest from './FfmpegTest.vue';
 
 
 export default defineComponent({
   name: 'App',
   components: {
     CreateNewProjectPage,
-    FfmpegTest,
     OnOpenPage,
     RecordingPage,
     SingleVideoEditorPage,
@@ -52,8 +50,16 @@ export default defineComponent({
   },
   data() {
     return {
-      pageDisplayed: 'on-open-page'
+      pageDisplayed: 'on-open-page',
+      single_video: '',
+      // pageDisplayed: 'single-video-editor-page',
     };
+  },
+  methods: {
+    openSingleEditor(track: string) {
+      this.single_video = track
+      this.pageDisplayed = 'single-video-editor-page';
+    }
   }
 });
 </script>

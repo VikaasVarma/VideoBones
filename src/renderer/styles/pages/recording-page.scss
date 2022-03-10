@@ -68,33 +68,34 @@
 	margin: auto;
 	width: $scaling-factor * 60px;
 
-	& > div {
-		background-color: red;
-		border-radius: $scaling-factor * 5px;
-		height: $scaling-factor * 27px;
-		margin: auto;
-		transition: border-radius 100ms ease-out, width 100ms ease-out,
-			height 100ms ease-out;
-		width: $scaling-factor * 27px;
-	}
+  & > div {
+    background-color: red;
+    border-radius: $scaling-factor * 5px;
+    height: $scaling-factor * 27px;
+    margin: auto;
+    transition: border-radius 100ms ease-out,
+      width 100ms ease-out,
+      height 100ms ease-out;
+    width: $scaling-factor * 27px;
+  }
 }
 
 .not-recording-button {
 	@extend .recording-button;
 
-	& > div {
-		border-radius: $scaling-factor * 18px;
-		height: $scaling-factor * 36px;
-		width: $scaling-factor * 36px;
-	}
+  & > div {
+    border-radius: $scaling-factor * 18px;
+    height: $scaling-factor * 36px;
+    width: $scaling-factor * 36px;
+  }
 }
 
 .image-container {
-	height: fit-content;
-	padding: 0;
+  height: fit-content;
+  padding: 0;
 
-	& > img {
-		display: inline;
-		height: 50px;
-	}
+  & > img {
+    display: inline;
+    height: 50px;
+  }
 }

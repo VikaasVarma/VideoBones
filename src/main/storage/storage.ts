@@ -1,10 +1,22 @@
-import { existsSync } from 'fs';
-import * as fs from 'fs/promises';
+import path from 'node:path';
+import { existsSync } from 'node:fs';
+import * as fs from 'node:fs/promises';
 
-import path from 'path';
 
 import { ProjectHandle } from './projects';
 import { internal_Config as Config, internal_isConfig as isConfig } from './config';
+
+/**
+ * How long in milliseconds since last modification or access should temp files be cleaned.
+ */
+const tempDeathTimeMs = 60000;
+
+/**
+ * Regex to prevent certain files in temp from being removed.
+ *
+ * Any file in the temp folder with a name matching this regex will never be cleaned up.
+ */
+const tempDeathExclusionRegex = /^.*$/;  // currently matches nothing
 
 /**
  * Constant specifying the project subdirectory to create for recordings.
@@ -25,17 +37,6 @@ export function getProjectRecordingsDirectory(projectHandle: ProjectHandle) {
  */
 export const tempDirectoryName = 'tmp';
 
-/**
- * How long in milliseconds since last modification or access should temp files be cleaned.
- */
-const tempDeathTimeMs = 60000;
-
-/**
- * Regex to prevent certain files in temp from being removed.
- *
- * Any file in the temp folder with a name matching this regex will never be cleaned up.
- */
-const tempDeathExclusionRegex = /$^/;  // currently matches nothing
 
 export function getProjectTempDirectory(projectHandle: ProjectHandle) {
   return path.join(projectHandle.projectPath, tempDirectoryName);
@@ -76,15 +77,15 @@ export function cleanProjectTempDirectory(projectHandle: ProjectHandle): Promise
             return fs.rm(fullPath);
           }
         })
-        .catch(reason => {
-          console.log(`Failed to cleanup temp file '${file}', reason: ${reason}`);
+        .catch((error: Error) => {
+          console.log(`Failed to cleanup temp file '${file}', reason: ${error}`);
         });
     }
 
     return prom;
   })
-    .catch(reason => {
-      console.log(`Failed to cleanup temp files, reason: ${reason}`);
+    .catch((error: Error) => {
+      console.log(`Failed to cleanup temp files, reason: ${error}`);
     });
 }
 
@@ -100,8 +101,8 @@ export function writeDirectoryConfig(directory: string, cfg: Config): Promise<vo
   const cfgString = JSON.stringify(cfg);
 
   return fs.writeFile(file, cfgString)
-    .catch(reason => {
-      throw Error(`Failed to write directory config, reason: ${reason}`);
+    .catch((error: Error) => {
+      throw new Error(`Failed to write directory config, reason: ${error}`);
     });
 }
 
@@ -155,8 +156,8 @@ export function readDirectoryConfig(directory: string): Promise<Config> {
  * @returns A promise which resolves to an object representing the project config
  */
 export function readProjectConfig(projectHandle: ProjectHandle): Promise<Config> {
-  return readDirectoryConfig(projectHandle.projectPath).catch(reason => {
-    throw Error(`Error reading config in project ${projectHandle.projectName}, reason: ${reason}`);
+  return readDirectoryConfig(projectHandle.projectPath).catch((error: Error) => {
+    throw new Error(`Error reading config in project ${projectHandle.projectName}, reason: ${error}`);
   });
 }
 

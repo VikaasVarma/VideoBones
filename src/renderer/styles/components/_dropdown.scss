@@ -1,16 +1,15 @@
 select {
-	height: $scaling-factor * 60px;
-	width: 100%;
+  background-color: $color-middleground;
+  border-color: $color-middleground;
+  border-style: solid;
+  color: white;
+  font-style: normal;
+  height: $scaling-factor * 60px;
+  outline: none;
+  padding-left: 5px;
+  width: 100%;
 
-	border-style: solid;
-	background-color: $color-middleground;
-	border-color: $color-middleground;
-	color: white;
-	padding-left: 5px;
-	outline: none;
-	font-style: normal;
-
-	&:focus {
-		border-color: $color-purple;
-	}
+  &:focus {
+    border-color: $color-purple;
+  }
 }

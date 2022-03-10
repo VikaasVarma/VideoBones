@@ -1,15 +1,15 @@
 .horizontal-options-menu {
-	height: fit-content;
-	display: flex;
+  display: flex;
+  height: fit-content;
 
-	& > div {
-		width: 200px;
-		margin-top: 10px;
-	}
+  & > div {
+    margin-top: 10px;
+    width: 200px;
+  }
 }
 
 .image-container {
-	padding: 20px;
-	background-color: $color-middleground;
-	border-radius: 7px;
+  background-color: $color-middleground;
+  border-radius: 7px;
+  padding: 20px;
 }

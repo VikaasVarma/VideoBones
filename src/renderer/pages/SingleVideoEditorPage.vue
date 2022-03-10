@@ -4,7 +4,7 @@
     <menu class="grid-container" style="margin: auto;">
       <div id="video-container">
         <video controls>
-          <source>
+          <source :src="video_url" type="video/webm">
         </video>
       </div>
 
@@ -79,10 +79,13 @@ import TickboxComponent from '../components/TickboxComponent.vue';
 export default defineComponent({
   name: 'SingleVideoEditorPage',
   components: { SliderComponent, TickboxComponent },
+  props: {
+    video_name: { type: String, default: '' }
+  },
   emits: [ 'exit-single-editor' ],
-
   data() {
     return {
+      video_url: `../../DemoProject/recordings/${this.video_name  }.webm`,
       denoise_enabled: false,
       echo_enabled: false,
       echo_settings: { decay: 0, delay: 0 },
@@ -93,10 +96,40 @@ export default defineComponent({
   },
   methods: {
     updateEcho() {
-      ipcRenderer.send('echo-settings-changed', (<any>this.echo_settings).value);
+      ipcRenderer.send(
+        'asynchronous-message',
+        {
+          type: ' audioOptions',
+          data: {
+            file: this.video_name,
+            startTime: 0,
+            volume: 255,
+            reverb_active: this.reverb_enabled,
+            reverb_delay_identifier: this.reverb_settings.delay,
+            reverb_decay_indentifier: this.reverb_settings.decay,
+            declick_active: this.denoise_enabled,
+            declip_active: this.denoise_enabled
+          }
+        }
+      );
     },
     updateReverb() {
-      ipcRenderer.send('reverb-settings-changed', (<any>this.reverb_settings).value);
+      ipcRenderer.send(
+        'asynchronous-message',
+        {
+          type: ' audioOptions',
+          data: {
+            file: this.video_name,
+            startTime: 0,
+            volume: 255,
+            reverb_active: this.reverb_enabled,
+            reverb_delay_identifier: this.reverb_settings.delay,
+            reverb_decay_indentifier: this.reverb_settings.decay,
+            declick_active: this.denoise_enabled,
+            declip_active: this.denoise_enabled
+          }
+        }
+      );
     }
   }
 });

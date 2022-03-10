@@ -1,81 +1,72 @@
 .options-menu {
-	background-color: $color-outline;
-	width: 80%;
-	height: fit-content;
-	padding: 50px;
-	border-radius: 20px;
+  background-color: $color-outline;
+  border-radius: 20px;
+  display: grid;
+  grid-column-gap: 40px;
+  grid-row-gap: 15px;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  height: fit-content;
+  padding: 50px;
+  width: 80%;
 
-	display: grid;
-	grid-template-columns: 1fr 1fr;
-	grid-template-rows: 1fr 1fr;
-	grid-row-gap: 15px;
-	grid-column-gap: 40px;
-
-	& > h1,
-	h2,
-	h3 {
-		font-size: 16px;
-		color: white;
-	}
+  & > h1, h2, h3 {
+    color: white;
+    font-size: 16px;
+  }
 }
 
 .vertical-options-menu {
-	background-color: $color-outline;
-	width: fit-content;
-	height: fit-content;
-	display: grid;
+  background-color: $color-outline;
+  display: grid;
+  grid-column-gap: 40px;
+  grid-row-gap: 15px;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr 1fr;
+  height: fit-content;
+  padding: 16px;
+  width: fit-content;
 
-	grid-template-columns: 1fr;
-	grid-template-rows: 1fr 1fr;
-	grid-row-gap: 15px;
-	grid-column-gap: 40px;
+  &-title {
+    color: white;
+    margin-bottom: 15px;
+    margin-left: 0;
+    text-transform: uppercase;
+  }
 
-	padding: 16px;
-
-	&-title {
-		text-transform: uppercase;
-		color: white;
-		margin-bottom: 15px;
-		margin-left: 0;
-	}
-
-	& > * {
-		margin: 10px 10px 10px 10px;
-	}
+  & > * {
+    margin: 10px;
+  }
 }
 
 .horizontal-options-menu {
-	background-color: $color-outline;
-	width: fit-content;
-	height: 40%;
-	display: flex;
-	margin: auto;
+  background-color: $color-outline;
+  border-radius: 15px;
+  display: flex;
+  height: 40%;
+  margin: auto;
+  padding: 25px;
+  width: fit-content;
 
-	padding: 25px;
-	border-radius: 15px;
+  & > div {
+    height: fit-content;
+    margin-top: 8%;
 
-	& > div {
-		&:first-of-type {
-			margin-left: 25px;
-		}
+    &:first-of-type {
+      margin-left: 25px;
+    }
 
-		&:last-of-type {
-			margin-right: 25px;
-		}
+    &:last-of-type {
+      margin-right: 25px;
+    }
 
-		margin-top: 8%;
-		height: fit-content;
-
-		& > h1,
-		h2,
-		h3 {
-			text-align: center;
-			color: white;
-			font-size: medium;
-			font-weight: normal;
-
-			width: 80%;
-			margin: auto;
-		}
-	}
+    & > h1, h2, h3 {
+      color: white;
+      font-size: medium;
+      font-weight: normal;
+      margin: auto;
+      text-align: center;
+      width: 80%;
+    }
+  }
 }
