@@ -4,6 +4,9 @@ These modules handle setting up and interfacing with ffmpeg for video and audio 
 
 ## Modules
 
+### AudioOption.ts
+Handle the audio setting messages relayed from ipcHandler and generate audio part of ffmpeg arguements.
+
 ### engine.ts
 
 Spawns and kills ffmpeg processes on-demand, as well as builds cli argument lists for ffmpeg.

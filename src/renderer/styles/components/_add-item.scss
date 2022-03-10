@@ -1,29 +1,27 @@
 $color_tickbox: #404451;
 
 .add-item-container {
-	width: $scaling-factor * 200px;
-	display: flex;
-	cursor: pointer;
+  cursor: pointer;
+  display: flex;
+  width: $scaling-factor * 200px;
 
-	> * {
-		display: inline;
-	}
+  > * {
+    display: inline;
+  }
 
-	> h2,
-	h3,
-	h4 {
-		font-size: $scaling-factor * 28px;
-		color: white;
-		width: 80%;
-	}
+  > h2, h3, h4 {
+    color: white;
+    font-size: $scaling-factor * 28px;
+    width: 80%;
+  }
 
-	& > img {
-		height: 15px;
-		width: auto;
-		top: 0;
-		bottom: 0;
-		left: 0;
-		right: 0;
-		margin-right: 10px;
-	}
+  & > img {
+    bottom: 0;
+    height: 15px;
+    left: 0;
+    margin-right: 10px;
+    right: 0;
+    top: 0;
+    width: auto;
+  }
 }

@@ -1,15 +1,22 @@
 import { Readable } from 'node:stream';
-import { stringify } from 'node:querystring';
 import { join } from 'node:path';
 import { ChildProcessByStdio, spawn } from 'node:child_process';
 import { existsSync, mkdirSync, readdirSync, rmSync } from 'node:fs';
 import { getTempDirectory } from '../storage/config';
 import { getPath } from './ffmpeg';
-import { AudioInput, EngineOptions, VideoInput, VideoData, Resolution, Position } from './types';
+import { AudioInput, EngineOptions, VideoInput, VideoData, VideoOption } from './types';
+import { AudioInputOption, getAudioOptions } from './AudioOption';
+import { getVideoOptionMap, VideoInputOption } from './videoOption';
 
 
 const thumbnailResolutionDivisor = 4;
 
+/**
+ *
+ * @param param0 Needs a structure of EngineOptions, go to: @interface EngineOptions
+ *
+ * @returns all the arguements that ffmpeg needs to do the rendering job
+ */
 function buildArgs({
   aspectRatio = '16:9',
   audioBitRate = '320k',
@@ -27,8 +34,23 @@ function buildArgs({
   videoBitRate = '6M',
   videoInputs = [] as VideoInput[]
 }: EngineOptions): string[] {
+
+  //to figure out the indices for video inputs
+  console.log(videoInputs);
+  const cumsum = ((sum: number) => (value: VideoInput) => {
+    sum += value.files.length; return sum - value.files.length;
+  })(0);
+  const offset = videoInputs.map(cumsum);
+
+  //to figure out the indices for audio inputs
+  const videoCount: number[] = videoInputs.map(videoArray => videoArray.files.length);
+  let videoSum = 0;
+  for (const n of videoCount){
+    videoSum += n;
+  }
+
   // The holy ffmpeg argument builder
-  function getTemplateSizeAndAnchors(screenStyle: string): { anchors: any[], templateSizes: any[] } {
+  function getTemplateSizeAndAnchors(screenStyle: string): { anchors: any[]; templateSizes: any[] } {
     let templateSizes;
     let anchors;
     const screenWidth = outputResolution.width;
@@ -183,22 +205,31 @@ function buildArgs({
 
   const videoDict: Map<string, number> = genVideoDict(videoInputs);
   const videoData: VideoData[][] = genVideoData(videoInputs, videoDict);
+  //the audioInput part of the EngineOption is never used, instead, it uses the records from AudioOption
+  const audioInputOptions: AudioInputOption[] = getAudioOptions();
+  //video effect part
+  const videoInputOptionsMap: Map<string, VideoInputOption> = getVideoOptionMap();
 
-  // eslint-disable-next-line function-paren-newline
+  //the filter is the main part of the arguements, it specifies the rendering type,
+  //the video layout, timing and video/audio effects.
   const filter
     = (<string[]>[]).concat(
       [ ...videoDict.keys() ].flatMap(file => [ '-i', file ]),
-      audioInputs.map(input => input.files.map(file => [ '-i', file ])).flat(2),
+      audioInputOptions.flatMap(input => [ '-i', input.file ]),
       [
         '-filter_complex',  [ ...(<string[]>[]), `color=s=${outputResolution.width}x${outputResolution.height}:c=black[tmp0]` ].concat(
           splitInstr(videoData, videoDict),
           videoSetup(videoData),
-          videoOverlay(videoData)
-        ).join(';')
+          videoOverlay(videoData),
+          audioInputOptions.map((input: AudioInputOption, i: number) =>
+            `[${i + videoSum}:a]${input.getAllOptions()}aformat=fltp:44100:stereo,volume=${input.volume / 256} [ainput${i}];`)
+            .join(''),
+          audioInputOptions.length === 0 ? '' : `${audioInputOptions.map((_, i: number) => `[ainput${i}]`).join('')  }amerge=inputs=${audioInputOptions.length  }[aout]`
+        ).filter(el => el.length > 0).join(';')
       ],
       [
-        '-map', '[out]'
-        //'-map', '[aout]',
+        '-map', '[out]',
+        '-map', '[aout]',
       ]
     );
 
@@ -233,7 +264,6 @@ function buildArgs({
   ].filter(str => {
     return str !== 'REMOVED';
   });
-
   console.log(args);
   return args;
 }
@@ -241,6 +271,7 @@ function buildArgs({
 let ffmpeg: ChildProcessByStdio<null, Readable, null> | null;
 let ffmpeg_thumbs: ChildProcessByStdio<null, Readable, null> | null;
 
+//The function that will specify the engine options and start the rendering process
 export function start(
   options: EngineOptions,
   statusCallback: (elapsedTime: string, donePercentage: number) => void,
@@ -270,6 +301,7 @@ export function start(
   }
 }
 
+//the functiion that starts the engine in thumbnail mode, which takes less time
 export function getThumbnails(
   options: EngineOptions,
   doneCallback: (paths: string[]) => void

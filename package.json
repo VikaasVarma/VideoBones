@@ -34,7 +34,8 @@
     "@fontsource/inter": "^4.5.4",
     "ffmpeg-static": "^5.0.0",
     "shaka-player": "^3.3.1",
-    "vue": "^3.2.31"
+    "vue": "^3.2.31",
+    "zeromq": "^5.2.8"
   },
   "devDependencies": {
     "@types/ffmpeg-static": "^3.0.1",

@@ -1,5 +1,7 @@
 import { ipcMain } from 'electron';
 import { getThumbnails, kill, start } from './engine';
+import { addAudioOption } from './AudioOption';
+import { addVideoOption } from './videoOption';
 
 
 /**
@@ -29,6 +31,12 @@ export function startHandler(port: number) {
         getThumbnails(arg.data, (thumbnailFiles: string[]) => {
           event.sender.send('thumbnail-reply', { event: 'thumbnails', thumbnailFiles });
         });
+        break;
+      case 'audioOptions':
+        addAudioOption(arg.data);
+        break;
+      case 'videoOptions':
+        addVideoOption(arg.data);
         break;
       case 'stopEngine':
         kill();

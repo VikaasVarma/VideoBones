@@ -1,27 +1,26 @@
 .named-input-container {
-	width: 100%;
-	grid-column: 1 / 3;
-	grid-row: 1 / 2;
+  grid-column: 1 / 3;
+  grid-row: 1 / 2;
+  width: 100%;
 
-	& > input {
-		padding-left: 15px;
-		padding-right: 15px;
-		margin-top: 3px;
+  & > input {
+    background-color: $color-middleground;
+    border-color: $color-middleground;
+    border-style: solid;
+    color: white;
+    height: $scaling-factor * 55px;
+    margin-top: 3px;
+    outline: none;
+    padding-left: 15px;
+    padding-right: 15px;
+    width: 100%;
 
-		height: $scaling-factor * 55px;
-		width: 100%;
-		border-style: solid;
-		border-color: $color-middleground;
-		background-color: $color-middleground;
-		color: white;
-		outline: none;
+    &::placeholder {
+      color: rgb(255 255 255 / 20%);
+    }
 
-		&::placeholder {
-			color: rgba(255, 255, 255, 0.2);
-		}
-
-		&:focus {
-			border-color: $color-purple;
-		}
-	}
+    &:focus {
+      border-color: $color-purple;
+    }
+  }
 }

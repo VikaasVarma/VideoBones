@@ -69,7 +69,7 @@ export class OperationUndoStack {
    */
   undo() {
     if (this.isEmpty()) {
-      throw Error('Nothing to undo!');
+      throw new Error('Nothing to undo!');
     }
 
     (this.#top as Operation).undo();
@@ -93,11 +93,11 @@ export class OperationUndoStack {
         return;
       }
 
-      throw Error('Nothing to redo!');
+      throw new Error('Nothing to redo!');
     }
 
     if (this.isFull() || (this.#top as Operation).next === null) {
-      throw Error('Nothing to redo!');
+      throw new Error('Nothing to redo!');
     }
 
     this.#top = (this.#top as Operation).next;
