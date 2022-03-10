@@ -169,12 +169,12 @@ export default defineComponent({
 
     ipcRenderer.addListener('engine-progress', (event, args) => {
       // if the preview has rendered more than 2 secs, start the preview viewer
-      //if (args.renderedTime > 2) {
+      if (args.renderedTime > 2) {
       const port = args.port;
       if (stream_url.value === '') {
         stream_url.value = `http://localhost:${  port.toString()  }/stream.mpd`;
       }
-      // }
+      }
     });
 
     return { engineOpts, stream_url };
