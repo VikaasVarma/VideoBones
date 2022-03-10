@@ -132,11 +132,39 @@ export default defineComponent({
   emits: [ 'open-recording-page', 'open-single-editor' ],
   setup() {
     const stream_url = ref('');
-    const engineOpts: Ref<EngineOptions> = ref({
-      audioInputs: [],
-      outputType: 'preview' as ('render' | 'thumbnail' | 'preview'),
-      thumbnailEvery: '1/5',
-      videoInputs: []
+    const engineOpts = ref({
+      outputType: 'preview' as const,
+      videoInputs: [
+        {
+          files: [ 'video1.webm', 'video2.webm', 'video3.webm' ].map(file => join('../recordings', (file))),
+          screenStyle: '|..',
+          resolutions: [
+            { width: 1280, height: 720 },
+            { width: 1280, height: 720 },
+            { width: 1280, height: 720 }
+          ],
+          interval: [ 0, 7 ]
+        },
+        {
+          files: [ 'video1.webm', 'video2.webm', 'video3.webm', 'video4.webm' ].map(file => join('../recordings', (file))),
+          screenStyle: '....',
+          interval: [ 7, 10 ],
+          resolutions: [
+            { width: 1280, height: 720 },
+            { width: 1280, height: 720 },
+            { width: 1280, height: 720 },
+            { width: 1280, height: 720 }
+          ]
+        }
+      ],
+      audioInputs: [
+        /*{
+            file: join("../recordings", "audio1.webm"),
+            startTime: 0.02,
+            volume: 255,
+        },*/
+      ],
+      thumbnailEvery: '1/5'
     });
 
     ipcRenderer.addListener('asynchronous-reply', (event, args) => {
@@ -222,15 +250,17 @@ export default defineComponent({
   methods: {
     addSegment(event: MouseEvent) {
       const timeline = document.querySelectorAll('.timeline')[0].getBoundingClientRect();
-      this.engineOpts.videoInputs.push({
+      /*this.engineOpts.videoInputs.push({
+        crop_offsets: [],
         files: [],
         interval: [
           (event.clientX - timeline.left)
          / timeline.width * this.projLength, this.projLength
         ] as [number, number],
-        resolution: [],
-        screenStyle: ('....' as '....' | '|..' | '_..')
-      });
+        resolutions: [],
+        screenStyle: ('....' as '....' | '|..' | '_..'),
+        zoom_levels: []
+      });*/
     },
     deleteSegment(event: MouseEvent, id: number) {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment

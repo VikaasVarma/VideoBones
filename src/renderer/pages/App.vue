@@ -28,7 +28,6 @@
     @exit-recording="pageDisplayed = 'video-editor-page'"
     @recording-end="pageDisplayed = 'video-editor-page'"
   />
-  <ffmpeg-test v-else-if="pageDisplayed === 'ffmpeg-test'" />
 </template>
 
 <script lang="ts">
