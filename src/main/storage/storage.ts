@@ -114,8 +114,8 @@ export function writeDirectoryConfig(directory: string, cfg: Config): Promise<vo
  * @returns A promise which resolves when the write is complete
  */
 export function writeProjectConfig(projectHandle: ProjectHandle, cfg: Config): Promise<void> {
-  return writeDirectoryConfig(projectHandle.projectPath, cfg).catch(error => {
-    throw new Error(`Error writing config in project ${projectHandle.projectName}, reason: ${error}`);
+  return writeDirectoryConfig(projectHandle.projectPath, cfg).catch(reason => {
+    throw Error(`Error writing config in project ${projectHandle.projectName}, reason: ${reason}`);
   });
 }
 
@@ -130,7 +130,7 @@ export function readDirectoryConfig(directory: string): Promise<Config> {
 
   // just check the config file exists first
   if (!existsSync(configPath)) {
-    throw new Error(`No existing config in directory ${directory}.`);
+    throw Error(`No existing config in directory ${directory}.`);
   }
 
   // async read the config file in
@@ -141,9 +141,9 @@ export function readDirectoryConfig(directory: string): Promise<Config> {
       // ensure the config is properly formatted
       if (isConfig(cfg)) {
         return cfg;
+      } else {
+        throw Error(`Config is not correctly formatted: ${cfg}.`);
       }
-      throw new Error(`Config is not correctly formatted: ${cfg}.`);
-
 
       // TODO: add config version check and version updating if needed
     });

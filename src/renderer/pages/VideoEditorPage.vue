@@ -167,11 +167,14 @@ export default defineComponent({
       thumbnailEvery: '1/5'
     });
 
-    ipcRenderer.addListener('asynchronous-reply', (event, args) => {
+    ipcRenderer.addListener('engine-progress', (event, args) => {
+      // if the preview has rendered more than 2 secs, start the preview viewer
+      //if (args.renderedTime > 2) {
       const port = args.port;
       if (stream_url.value === '') {
         stream_url.value = `http://localhost:${  port.toString()  }/stream.mpd`;
       }
+      // }
     });
 
     return { engineOpts, stream_url };
@@ -474,19 +477,17 @@ export default defineComponent({
     },
     getPreview() {
       ipcRenderer.send(
-        'asynchronous-message',
+        'start-engine',
         {
-          data: JSON.parse(JSON.stringify(this.engineOpts)),
-          type: 'startEngine'
+          data: JSON.parse(JSON.stringify(this.engineOpts))
         }
       );
     },
     getThumbnails() {
       ipcRenderer.send(
-        'asynchronous-message',
+        'get-thumbnails',
         {
-          data: { ...JSON.parse(JSON.stringify(this.engineOpts)), outputType: 'thumbnail' },
-          type: 'getThumbnails'
+          data: { ...JSON.parse(JSON.stringify(this.engineOpts)), outputType: 'thumbnail' }
         }
       );
     },
@@ -497,7 +498,10 @@ export default defineComponent({
         const vidPlayer = (this.$refs.previewPlayer as any);
 
         this.previewCurrentTime = vidPlayer.getCurrentTime();
-        this.previewEndTime = vidPlayer.getEndTime();
+        ipcRenderer.addListener('engine-done',  (event, args) => {
+          // if the preview has rendered more than 2 secs, start the preview viewer
+          this.previewEndTime = vidPlayer.getEndTime();
+        });
 
         const playheadx = (this.previewCurrentTime / vidPlayer.getEndTime()) * timeline.width;
 
