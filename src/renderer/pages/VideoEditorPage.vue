@@ -377,14 +377,16 @@ export default defineComponent({
     });
 
     ipcRenderer.addListener('render-progress', (event, args) => {
+      console.log(args.renderedTime)
       if (this.isRendering) {
         const t = args.renderedTime;
-        const pct = t / this.engineOpts.videoInputs[this.engineOpts.videoInputs.length - 1].interval[2];
-        this.renderPct = pct;
+        const pct = t / this.engineOpts.videoInputs[this.engineOpts.videoInputs.length - 1].interval[1];
+        this.renderPct = pct * 100;
       }
     });
 
     ipcRenderer.addListener('render-done', (event, args) => {
+      console.log(args.outputFile)
       if (this.isRendering) {
         this.isRendering = false;
         alert(`Rendering finished, output in file: ${args.outputFile}.`);
@@ -404,6 +406,11 @@ export default defineComponent({
 
     //this.$forceUpdate();
 
+    ipcRenderer.addListener('engine-done',  (event, args) => {
+      // if the preview has rendered more than 2 secs, start the preview viewer
+      this.previewEndTime = (this.$refs.previewPlayer as any).getEndTime();
+    });
+
     // feels like the leas frequent we can get away with while making the playhead still seem smooth
     window.setInterval(this.playheadUpdate, 0.1);
 
@@ -411,6 +418,7 @@ export default defineComponent({
   },
   methods: {
     render() {
+      if (this.isRendering) return;
       console.log("Starting render!");
       console.log(JSON.parse(JSON.stringify(this.engineOpts)))
       this.isRendering = true;
@@ -533,10 +541,6 @@ export default defineComponent({
         const vidPlayer = (this.$refs.previewPlayer as any);
 
         this.previewCurrentTime = vidPlayer.getCurrentTime();
-        ipcRenderer.addListener('engine-done',  (event, args) => {
-          // if the preview has rendered more than 2 secs, start the preview viewer
-          this.previewEndTime = vidPlayer.getEndTime();
-        });
 
         const playheadx = (this.previewCurrentTime / vidPlayer.getEndTime()) * timeline.width;
 

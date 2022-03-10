@@ -1,6 +1,6 @@
 {
   "name": "video-bones",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "A simple-to-use video editor",
   "main": "build/main/index.js",
   "scripts": {
