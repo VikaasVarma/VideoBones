@@ -53,6 +53,15 @@ export function startHandler(port: number) {
       event.sender.send('thumbnail-reply', { thumbnailFiles });
     });
   });
+
+  ipcMain.addListener('export-render', (event, args) => {
+    start({ ...args.data, outputType: 'render' }, renderedTime => {
+      event.sender.send('render-progress', { renderedTime });
+    },
+    () => {
+      event.sender.send('render-done', { outputFile: args.data.outputFile });
+    });
+  });
 }
 
 export function stopHandler() {
