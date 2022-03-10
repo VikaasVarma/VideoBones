@@ -6,15 +6,16 @@ import { getTempDirectory } from '../storage/config';
 import { getPath } from './ffmpeg';
 import { AudioInput, EngineOptions, VideoInput } from './types';
 import { AudioInputOption, getAudioOptions } from './AudioOption';
+import { getVideoOptionMap, VideoInputOption } from './videoOption';
 
 
 const thumbnailResolutionDivisor = 4;
 
 /**
- * 
- * @param param0 Needs a structure of EngineOptions, go to: @interface EngineOptions 
- *  
- * @returns all the arguements that ffmpeg needs to do the rendering job 
+ *
+ * @param param0 Needs a structure of EngineOptions, go to: @interface EngineOptions
+ *
+ * @returns all the arguements that ffmpeg needs to do the rendering job
  */
 function buildArgs({
   aspectRatio = '16:9',
@@ -42,8 +43,8 @@ function buildArgs({
 
   //to figure out the indices for audio inputs
   const videoCount: number[] = videoInputs.map(videoArray => videoArray.files.length);
-  let videoSum: number = 0;
-  for (let n of videoCount){
+  let videoSum = 0;
+  for (const n of videoCount){
     videoSum += n;
   }
 
@@ -63,32 +64,40 @@ function buildArgs({
 
   //the audioInput part of the EngineOption is never used, instead, it uses the records from AudioOption
   const audioInputOptions: AudioInputOption[] = getAudioOptions();
+  //video effect part
+  const videoInputOptionsMap: Map<string, VideoInputOption> = getVideoOptionMap();
 
   //the filter is the main part of the arguements, it specifies the rendering type,
   //the video layout, timing and video/audio effects.
   const filter
     = (<string[]>[]).concat(
       videoInputs.map(input => input.files.map(file => [ '-i', file ])).flat(2),
-      audioInputOptions.map(input => [ '-i', input.file ]).flat(1),
+      audioInputOptions.flatMap(input => [ '-i', input.file ]),
       [
         '-filter_complex',
-         `${videoInputs.map((input, i) => (
+        `${videoInputs.map((input, i) => (
           [
-          input.resolution.map((res, j) => `[${offset[i] + j}:v]setpts=PTS-STARTPTS,scale=${res.width}x${res.height},trim=${input.interval[0]}:${input.interval[1]}[input${offset[i] + j}];`).join(''),
-          `${input.files.map((_, j) => `[input${offset[i] + j}]`).join('')}xstack=inputs=${input.files.length}:layout=${screenStyle_to_layout(input.screenStyle)}[matrix${i}];`,
-          `[matrix${i}]scale=${outputResolution.width}:${outputResolution.height},setsar=1:1[v${i}];`
-        ].join(''))).join('')  }`
-        +audioInputOptions.map((input: AudioInputOption, i: number) =>
-          `[${i+videoSum}:a]${input.getDeclickArgs()}${input.getDeclipArgs()}${input.getEchoArgs()}${input.getReverbArgs()}aformat=fltp:44100:stereo,volume=${input.volume / 256.0} [ainput${i}];`)
-          .join('')
-        +`${videoInputs.map((_, i) => `[v${i}]`).join('')}concat=n=${videoInputs.length},fps=${outputType === 'thumbnail' ? thumbnailEvery : framesPerSecond}[out];`
-        + [audioInputOptions.length === 0 ? '' : audioInputOptions.map((_,i:number) => `[ainput${i}]`).join('') + 'amerge=inputs='+audioInputOptions.length + '[aout]']
-     ],
+            input.resolution.map((res, j) =>
+              `[${offset[i] + j}:v]setpts=PTS-STARTPTS,${
+                videoInputOptionsMap.get(videoInputs[i].files[j]) === undefined
+                  ? ''
+                  : videoInputOptionsMap.get(videoInputs[i].files[j])?.getAllOptions()
+              }scale=${res.width}x${res.height},trim=${input.interval[0]}:${input.interval[1]}[input${offset[i] + j}];`).join(''),
+            `${input.files.map((_, j) => `[input${offset[i] + j}]`).join('')}xstack=inputs=${input.files.length}:layout=${screenStyle_to_layout(input.screenStyle)}[matrix${i}];`,
+            `[matrix${i}]scale=${outputResolution.width}:${outputResolution.height},setsar=1:1[v${i}];`
+          ].join(''))).join('')  }${
+          audioInputOptions.map((input: AudioInputOption, i: number) =>
+            `[${i + videoSum}:a]${input.getAllOptions()}aformat=fltp:44100:stereo,volume=${input.volume / 256} [ainput${i}];`)
+            .join('')
+        }${videoInputs.map((_, i) => `[v${i}]`).join('')}concat=n=${videoInputs.length},fps=${outputType === 'thumbnail' ? thumbnailEvery : framesPerSecond}[out];${
+          [ audioInputOptions.length === 0 ? '' : `${audioInputOptions.map((_, i: number) => `[ainput${i}]`).join('')  }amerge=inputs=${audioInputOptions.length  }[aout]` ]}`
+      ],
       [
         '-map', '[out]',
         '-map', '[aout]'
       ]
     );
+
   const args = outputType === 'thumbnail' ? [
     ...filter,
     '-preset', 'ultrafast',

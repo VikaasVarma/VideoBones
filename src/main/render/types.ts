@@ -25,7 +25,7 @@ interface EngineOptions {
  * Can be many audio files, along with a volume.
  * All the audio tracks in a single AudioInput are first volume scaled with their respective volume,
  * then overlayed and finally trimmed to the interval.
- * The AudioInput interface in mainly used in single editor page to passing a message to back end, 
+ * The AudioInput interface in mainly used in single editor page to passing a message to back end,
  * the audioOptions class will record them and apply the effect.
  */
 interface AudioInput{
@@ -38,8 +38,8 @@ interface AudioInput{
   declick_active: boolean;
   declip_active: boolean;
   echo_active: boolean;
-  echo_delay_identifier: number,
-  echo_decay_identifier: number
+  echo_delay_identifier: number;
+  echo_decay_identifier: number;
 }
 
 /**
@@ -49,7 +49,7 @@ interface AudioInput{
  * We also have a screen style, which describes (in an abstract way) how the videos will be layed out in the render.
  *
  * In usage, @interface VideoInput comes as an array, so that the program can specify the change of screen-layout.
- * 
+ *
  * All the videos in a single VideoInput are trimmed to the interval,
  * then transformed to conform to the layout specified in screenStyle.
  */
@@ -58,6 +58,20 @@ interface VideoInput {
   screenStyle: '....' | '|..' | '_..';
   interval: [number, number];
   resolution: Resolution[];
+}
+
+interface VideoOption {
+  file: string;
+  brightness_enable: boolean;
+  brightness: number;
+  contrast_enable: boolean;
+  contrast: number;
+  balance_enable: boolean;
+  r_balance: number;
+  g_balance: number;
+  b_balance: number;
+  blur_enable: boolean;
+  blur_radius: number;
 }
 
 interface Resolution {
@@ -75,5 +89,6 @@ export {
   EngineOptions,
   Position,
   Resolution,
-  VideoInput
+  VideoInput,
+  VideoOption
 };

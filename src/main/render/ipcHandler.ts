@@ -1,6 +1,7 @@
 import { ipcMain } from 'electron';
 import { getThumbnails, kill, start } from './engine';
 import { addAudioOption } from './AudioOption';
+import { addVideoOption } from './videoOption';
 
 
 /**
@@ -33,6 +34,9 @@ export function startHandler(port: number) {
         break;
       case 'audioOptions':
         addAudioOption(arg.data);
+        break;
+      case 'videoOptions':
+        addVideoOption(arg.data);
         break;
       case 'stopEngine':
         kill();

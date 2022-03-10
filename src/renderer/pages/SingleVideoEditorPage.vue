@@ -2,8 +2,6 @@
 <template id="SingleVideoEditorPage">
   <div>
     <menu class="grid-container" style="margin: auto;">
-
-        
       <div id="video-container">
         <video controls>
           <source :src="video_url" type="video/webm">
@@ -29,7 +27,7 @@
             Audio Effects
           </h3>
 
-          <tickbox-component tickbox_text="Enable Reverb"  @click="reverb_enabled=!reverb_enabled" />
+          <tickbox-component tickbox_text="Enable Reverb" @click="reverb_enabled=!reverb_enabled" />
 
           <slider-component
             v-if="reverb_enabled"
@@ -81,13 +79,13 @@ import TickboxComponent from '../components/TickboxComponent.vue';
 export default defineComponent({
   name: 'SingleVideoEditorPage',
   components: { SliderComponent, TickboxComponent },
-  emits: [ 'exit-single-editor' ],
-  props : {
-    video_name: { type:String, default:""}
+  props: {
+    video_name: { type: String, default: '' }
   },
+  emits: [ 'exit-single-editor' ],
   data() {
     return {
-      video_url: "../../DemoProject/recordings/"+this.video_name+".webm",
+      video_url: `../../DemoProject/recordings/${this.video_name  }.webm`,
       denoise_enabled: false,
       echo_enabled: false,
       echo_settings: { decay: 0, delay: 0 },

@@ -169,7 +169,7 @@ export default defineComponent({
         'asynchronous-message',
         {
           data: {
-            file: join(dir,'audio1.webm'),
+            file: join(dir, 'audio1.webm'),
             startTime: 0,
             volume: 0,
             reverb_active: false,
@@ -219,7 +219,82 @@ export default defineComponent({
             echo_delay_identifier: 50,
             echo_decay_identifier: 0.5
           },
-          type: 'audioOptions',
+          type: 'audioOptions'
+        }
+      );
+      ipcRenderer.send(
+        'asynchronous-message',
+        {
+          data: {
+            file: join(dir, 'video1.webm'),
+            brightness_enable: true,
+            brightness: 0.5,
+            contrast_enable: false,
+            contrast: 0,
+            balance_enable: false,
+            r_balance: 1,
+            g_balance: 1,
+            b_balance: 1,
+            blur_enable: false,
+            blur_radius: 1
+          },
+          type: 'videoOptions'
+        }
+      );
+      ipcRenderer.send(
+        'asynchronous-message',
+        {
+          data: {
+            file: join('../recordings', 'video2.webm'),
+            brightness_enable: false,
+            brightness: 0.5,
+            contrast_enable: false,
+            contrast: 20,
+            balance_enable: false,
+            r_balance: 1,
+            g_balance: 1,
+            b_balance: 1,
+            blur_enable: true,
+            blur_radius: 20
+          },
+          type: 'videoOptions'
+        }
+      );
+      ipcRenderer.send(
+        'asynchronous-message',
+        {
+          data: {
+            file: join('../recordings', 'video3.webm'),
+            brightness_enable: false,
+            brightness: 0.5,
+            contrast_enable: false,
+            contrast: 20,
+            balance_enable: true,
+            r_balance: 0.1,
+            g_balance: 3,
+            b_balance: 1,
+            blur_enable: false,
+            blur_radius: 0
+          },
+          type: 'videoOptions'
+        }
+      );ipcRenderer.send(
+        'asynchronous-message',
+        {
+          data: {
+            file: join('../recordings', 'video4.webm'),
+            brightness_enable: false,
+            brightness: 0.5,
+            contrast_enable: true,
+            contrast: 200,
+            balance_enable: false,
+            r_balance: 1,
+            g_balance: 1,
+            b_balance: 1,
+            blur_enable: false,
+            blur_radius: 0
+          },
+          type: 'videoOptions'
         }
       );
       const engineOpts = {

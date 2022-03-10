@@ -2,10 +2,10 @@ import { AudioInput } from './types';
 
 /**
  * The class receives message from IPC-handler and record the audio settings that are given
- * to each track. 
- * 
+ * to each track.
+ *
  * It will also generate the audio effect part of ffmpeg arguements.
- * 
+ *
  */
 export class AudioInputOption implements AudioInput{
   file: string;
@@ -29,9 +29,9 @@ export class AudioInputOption implements AudioInput{
     reverb_dacay = 0,
     declick_active = true,
     declip_active = true,
-    echo_active: boolean = false,
-    echo_delay_indentifier: number = 0,
-    echo_decay_indentifier: number = 0
+    echo_active = false,
+    echo_delay_indentifier = 0,
+    echo_decay_indentifier = 0
   ){
     this.file = file;
     this.startTime = startTime;
@@ -46,15 +46,23 @@ export class AudioInputOption implements AudioInput{
     this.echo_decay_identifier = echo_decay_indentifier;
   }
 
-  //the order should be: getDeclick -> getDeclip -> getEcho 
-  getEchoArgs():string{
+  //the order should be: getDeclick -> getDeclip -> getEcho -> reverb
+  getAllOptions(): string{
+    return this.getDeclickArgs()
+    + this.getDeclipArgs()
+    + this.getEchoArgs()
+    + this.getReverbArgs();
+  }
+
+  getEchoArgs(): string{
     //if reverb is active, echo will not take effect
     let s = '';
-    if (this.echo_active&&!this.reverb_active){
+    if (this.echo_active && !this.reverb_active){
       s += `aecho=0.8:0.8:${this.echo_delay_identifier}:${this.echo_decay_identifier},`;
     }
     return s;
   }
+
   getDeclickArgs(): string{
     return 'adeclick=55:75:2:2:2:add,';
   }
@@ -72,7 +80,7 @@ export class AudioInputOption implements AudioInput{
     if (this.reverb_active){
       s = 'aecho=0.8:0.9:';
       //add delays args
-      let s_delays:string = '';
+      let s_delays = '';
       let i = 0;
       while (i < 10){
         s_delays += `${(i + 1) * this.reverb_delay_identifier}`;
@@ -83,20 +91,20 @@ export class AudioInputOption implements AudioInput{
       //add decays args
       i = 0;
       let power = 1;
-      let s_decays:string = '';
+      let s_decays = '';
       while (i < 10){
         s_decays += `${Math.pow(this.reverb_decay_identifier, power)}`;
         if (i < 9) s_decays += '|';
         i++;
         power += 0.6;
       }
-      s += s_delays +':' + s_decays + ',';
+      s += `${s_delays }:${  s_decays  },`;
     }
     return s ;
   }
 }
 
-let audioOptions: AudioInputOption[] = [];
+const audioOptions: AudioInputOption[] = [];
 
 export function addAudioOption(option: AudioInput): void{
   audioOptions.push(new AudioInputOption(
@@ -104,8 +112,8 @@ export function addAudioOption(option: AudioInput): void{
     option.startTime,
     option.volume,
     option.reverb_active,
-    Math.max(option.reverb_delay_identifier * 5,90000),
-    Math.max(option.reverb_decay_identifier / 100.0, 0.1),
+    Math.max(option.reverb_delay_identifier * 5, 90000),
+    Math.max(option.reverb_decay_identifier / 100, 0.1),
     option.declick_active,
     option.declip_active,
     option.echo_active,
