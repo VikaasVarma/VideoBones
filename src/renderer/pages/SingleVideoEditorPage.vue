@@ -74,7 +74,7 @@
 
           <tickbox-component tickbox_text="Enable Brightness" @click="brigtness_enable=!brightness_enable" />
           <slider-component
-            v-if="brightness_enable"
+            v-if="true"
             v-model:slider_value="video_setting.brightness"
             slider_name="Brightness"
             @update:slider_value="updateVideoSetting()"
@@ -82,7 +82,7 @@
 
           <tickbox-component tickbox_text="Enable Contrast" @click="contrast_enable=!contrast_enable" />
           <slider-component
-            v-if="contrast_enable"
+            v-if="true"
             v-model:slider_value="video_setting.contrast"
             slider_name="Contrast"
             @update:slider_value="updateVideoSetting()"
@@ -90,19 +90,19 @@
 
           <tickbox-component tickbox_text="Enable Colour Correction" @click="correction_enable=!correction_enable" />
           <slider-component
-            v-if="correction_enable"
+            v-if="true"
             v-model:slider_value="video_setting.r_gamma"
             slider_name="Red"
             @update:slider_value="updateVideoSetting()"
           />
           <slider-component
-            v-if="correction_enable"
+            v-if="true"
             v-model:slider_value="video_setting.g_gamma"
             slider_name="Green"
             @update:slider_value="updateVideoSetting()"
           />
           <slider-component
-            v-if="correction_enable"
+            v-if="true"
             v-model:slider_value="video_setting.b_gamma"
             slider_name="Blue"
             @update:slider_value="updateVideoSetting()"
@@ -110,7 +110,7 @@
 
           <tickbox-component tickbox_text="Blur Enable" @click="blur_enable=!blur_enable" />
           <slider-component
-            v-if="blur_enable"
+            v-if="true"
             v-model:slider_value="video_setting.blur_radius"
             slider_name="Blur Radius"
             @update:slider_value="updateVideoSetting()"
@@ -171,15 +171,15 @@ export default defineComponent({
           data: {
             file: this.video_name,
             brightness_enable: this.birghtness_enable,
-            birghtness: this.video_setting.bightness,
+            birghtness: this.video_setting.bightness / 100.0,
             contrast_enable: this.contrast_enable,
-            contrast: this. video_setting.contrast,
+            contrast: (this. video_setting.contrast - 50) * 150,
             balance_enable: this.correction_enable,
-            r_balance: this.video_setting.r_gamma,
-            g_balance: this.video_setting.g_gamma,
-            b_balance: this.video_setting.b_gamma,
+            r_balance: this.video_setting.r_gamma / 10.0,
+            g_balance: this.video_setting.g_gamma / 10.0,
+            b_balance: this.video_setting.b_gamma / 10.0,
             blur_enable: this.blur_enable,
-            blur_radius: this.video_setting.blur_radius
+            blur_radius: this.video_setting.blur_radius /5.0
           }
         }
       );
