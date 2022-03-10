@@ -28,7 +28,6 @@
     @exit-recording="pageDisplayed = 'video-editor-page'"
     @recording-end="pageDisplayed = 'video-editor-page'"
   />
-  <ffmpeg-test v-else-if="pageDisplayed === 'ffmpeg-test'" />
 </template>
 
 <script lang="ts">
@@ -38,14 +37,12 @@ import CreateNewProjectPage from './CreateNewProjectPage.vue';
 import SingleVideoEditorPage from './SingleVideoEditorPage.vue';
 import VideoEditorPage from './VideoEditorPage.vue';
 import RecordingPage from './RecordingPage.vue';
-import FfmpegTest from './FfmpegTest.vue';
 
 
 export default defineComponent({
   name: 'App',
   components: {
     CreateNewProjectPage,
-    FfmpegTest,
     OnOpenPage,
     RecordingPage,
     SingleVideoEditorPage,

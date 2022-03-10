@@ -1,5 +1,8 @@
 <template id="SingleVideoEditorPage">
-  <div @mousemove="drag($event)" @mouseup="endTimelineDrag()">
+  <div
+    @mousemove="drag($event)"
+    @mouseup="endDrag($event)"
+  >
     <menu class="grid-container" style="margin: auto;">
       <div id="video-container">
         <video-player v-if="stream_url != '' " ref="previewPlayer" :manifest-url="stream_url" />
@@ -18,18 +21,30 @@
         <div
           ref="timeline"
           class="timeline"
-          style="display: flex; overflow: hidden;"
-          @mousedown="startTimelineDrag()"
+          @dblclick="addSegment($event)"
         >
-          <div v-for="i in timeline_images.length" :key="i">
-            <div :style="`aspect-ratio: 16/9; height:${timeline_seg_height};`">
-              <img alt="loading timeline..." :src="timeline_images[i - 1]" style="max-height: 100%; max-width: 100%;">
+          <div style="display: flex; overflow: hidden;">
+            <div v-for="image of timeline_images" :key="image">
+              <div :style="`aspect-ratio: 16/9; height:${timeline_seg_height};`">
+                <img alt="loading timeline..." :src="image" style="max-height: 100%; max-width: 100%;">
+              </div>
+              <div :style="`height:${timeline_seg_height}; width:5px`" />
             </div>
-            <div :style="`height:${timeline_seg_height}; width:5px`" />
           </div>
 
-          <div class="playhead" :style="`position:absolute; z-index:10; left: calc(-5px + ${playhead}px)`">
+          <div class="playhead" :style="`left: calc(-5px + ${playhead}px)`">
             <div /> <div />
+          </div>
+
+          <div v-for="input, id of engineOpts.videoInputs" :key="input.interval.toString()" class="sectionMarker">
+            <div
+              :class="['marker', activeSegment === id ? 'selected' : '']"
+              :style="{left: `${input.interval[0] / projLength * timelineWidth - 8}px`}"
+              @click.left="selectSegment(id)"
+              @click.right="deleteSegment($event, id)"
+            >
+              <img src="../../../assets/images/arrow.svg">
+            </div>
           </div>
         </div>
       </div>
@@ -46,10 +61,12 @@
             Tracks
           </h2>
           <track-selector
-            v-for="track in tracks"
+            v-for="track, id in tracks"
             :key="track.trackName"
             :track-name="track.trackName"
+            :track-number="id"
             @delete-clicked="deleteTrack(track.trackName)"
+            @dragged="dragTrack($event, track.trackName)"
             @edit-clicked="$emit('open-single-editor', track.trackName)"
           />
 
@@ -83,60 +100,97 @@
             :class="['screen-style', screenStyle === 2 ? 'selected' : '']"
             @click="setScreenStyle(2)"
           >
-            <div style="grid-column: 1 / 2; grid-row: 1 / 2;" />
-            <div style="grid-column: 1 / 2; grid-row: 2 / 3;" />
-            <div style="grid-column: 2 / 3; grid-row: 1 / 3;" />
+            <div style="grid-column: 1 / 2; grid-row: 1 / 3;" />
+            <div style="grid-column: 2 / 3; grid-row: 1 / 2;" />
+            <div style="grid-column: 2 / 3; grid-row: 2 / 3;" />
+          </div>
+          <div
+            :class="['screen-style', screenStyle === 3 ? 'selected' : '']"
+            @click="setScreenStyle(3)"
+          >
+            <div style="grid-column: 1 / 3; grid-row: 1 / 3;" />
           </div>
         </div>
       </menu>
+      <button class="button-primary" @click="render()">
+        RENDER
+      </button>
     </menu>
   </div>
 </template>
 
 <script lang="ts">
 import { join } from 'node:path';
-import { defineComponent, ref } from 'vue';
+import { defineComponent, Ref, ref } from 'vue';
 import { ipcRenderer } from 'electron';
 import TrackSelector from '../components/TrackSelector.vue';
 import MetronomeComponent from '../components/MetronomeComponent.vue';
 import VideoPlayer from '../components/VideoPlayer.vue';
+import { EngineOptions } from '../../main/render/types';
 
-
-const thumbnailFrequency = '1';
 
 export default defineComponent({
   name: 'VideoEditorPage',
   components: { MetronomeComponent, TrackSelector, VideoPlayer },
   emits: [ 'open-recording-page', 'open-single-editor' ],
   setup() {
-        interface Track {
-            trackName: string;
-        }
-
-        const tracks = ref([] as Track[]);
-        const stream_url = ref('');
-        const track_data = {
-          all_track_ids: [ 'Track_0', 'Track_1', 'Track_3', 'Track_3' ],
-          timeline_splits: [
-            { active_tracks: [ 0, 1, 2, 3 ], endpoint: 0.3, screenStyle: '....'  },
-            { active_tracks: [ 0, 2, 3 ], endpoint: 0.7, screenStyle: '_..' },
-            { active_tracks: [ 0, 1, 3 ], endpoint: 1, screenStyle: '|..'  }
+    const stream_url = ref('');
+    const engineOpts = ref({
+      outputType: 'preview' as const,
+      videoInputs: [
+        {
+          files: [ 'video1.webm', 'video2.webm', 'video3.webm' ].map(file => join('../recordings', (file))),
+          screenStyle: '|..',
+          resolutions: [
+            { width: 1280, height: 720 },
+            { width: 1280, height: 720 },
+            { width: 1280, height: 720 }
+          ],
+          interval: [ 0, 7 ]
+        },
+        {
+          files: [ 'video1.webm', 'video2.webm', 'video3.webm', 'video4.webm' ].map(file => join('../recordings', (file))),
+          screenStyle: '....',
+          interval: [ 7, 10 ],
+          resolutions: [
+            { width: 1280, height: 720 },
+            { width: 1280, height: 720 },
+            { width: 1280, height: 720 },
+            { width: 1280, height: 720 }
           ]
-        };
+        }
+      ],
+      audioInputs: [
+        /*{
+            file: join("../recordings", "audio1.webm"),
+            startTime: 0.02,
+            volume: 255,
+        },*/
+      ],
+      thumbnailEvery: '1/5'
+    });
 
-        ipcRenderer.addListener('asynchronous-reply', (event, args) => {
-          const port = args.port;
-          if (stream_url.value === '') {
-            stream_url.value = `http://localhost:${  port.toString()  }/stream.mpd`;
-          }
-        });
+    ipcRenderer.addListener('engine-progress', (event, args) => {
+      // if the preview has rendered more than 2 secs, start the preview viewer
+      if (args.renderedTime > 2) {
+      const port = args.port;
+      if (stream_url.value === '') {
+        stream_url.value = `http://localhost:${  port.toString()  }/stream.mpd`;
+      }
+      }
+    });
 
-        return { stream_url, track_data, tracks };
+    function render() {
+        console.log("render");
+    }
 
+    return { engineOpts, stream_url, render };
   },
   data() {
     return {
       activeSegment: 0,
+      dir: '',
+      draggingTrack: (null as null | HTMLElement),
       metronome: { initialBpm: 80 },
       mouse_down: false,
       playhead: 0.6,
@@ -145,13 +199,16 @@ export default defineComponent({
       previewEndTime: 0,
       previewPaused: false,
       previewPausedBeforeSeek: false,
-
+      projLength: 15,
       screenStyle: 0,
 
       timeline_images: ([] as string[]),
       timeline_max_time: 0,
       timeline_seg_height: 0,
-      timeline_segments_count: 0
+      timeline_segments_count: 0,
+      timelineWidth: 1,
+
+      tracks: ([] as {trackName: string}[])
     };
   },
   created() {
@@ -299,66 +356,29 @@ export default defineComponent({
           type: 'videoOptions'
         }
       );
-      const engineOpts = {
-        audioInputs: [
-        /*{
-                        file: join("../recordings", "audio1.webm"),
-                        startTime: 0.02,
-                        volume: 255,
-                    },*/
-        ],
-        outputType: 'preview',
-        thumbnailEvery: thumbnailFrequency,
-        videoInputs: [
-          {
-            files: [
-              join(dir, 'video1.webm'), join('../recordings', 'video2.webm'),
-              join('../recordings', 'video3.webm'), join('../recordings', 'video4.webm')
-            ],
-            interval: [ 0, 5 ],
-            resolution: [
-              {  height: 720, width: 1280 }, { height: 720, width: 1280  },
-              { height: 720, width: 1280  }, { height: 720, width: 1280  }
-            ],
-            screenStyle: '....'
-          },
-          {
-            files: [ join('../recordings', 'video1.webm'), join('../recordings', 'video2.webm'), join('../recordings', 'video3.webm') ],
-            interval: [ 5, 10 ],
-            resolution: [{ height: 1440, width: 1280 }, {  height: 720, width: 1280 }, { height: 720, width: 1280 }],
-            screenStyle: '|..'
-          }
-        ]
-      };
-      // the max time for the timeline is the end of the last video interval, which is the length of the whole video
-      this.timeline_max_time = engineOpts.videoInputs[engineOpts.videoInputs.length - 1].interval[1];
-      ipcRenderer.send(
-        'asynchronous-message',
-        {
-          data: engineOpts,
-          type: 'startEngine'
-        }
-      );
 
-      ipcRenderer.send(
-        'asynchronous-message',
-        {
-          data: { ...engineOpts, outputType: 'thumbnail' },
-          type: 'getThumbnails'
-        }
-      );
+      // the max time for the timeline is the end of the last video interval, which is the length of the whole video
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      this.dir = dir;
+      this.timeline_max_time = this.engineOpts.videoInputs.map(i => i.interval[1])
+      // eslint-disable-next-line unicorn/no-array-reduce
+        .reduce((max, video) => Math.max(max, video), 0);
+      this.getThumbnails();
+      this.getPreview();
     });
   },
   async mounted() {
     ipcRenderer.invoke('get-option', 'videoTracks').then(videoTracks => {
-      const data = JSON.parse(videoTracks);
-      for (const track of data) {
+      //const data = JSON.parse(videoTracks);
+      for (const track of videoTracks) {
         this.tracks.push({ trackName: track.slice(0, Math.max(0, track.indexOf('.webm'))) });
       }
     });
 
     const timeline_h = (this.$refs.timeline as HTMLElement).clientHeight;
     const timeline_w = (this.$refs.timeline as HTMLElement).clientWidth;
+    this.timelineWidth = timeline_w;
 
     this.timeline_seg_height = timeline_h;
 
@@ -371,13 +391,38 @@ export default defineComponent({
 
     // feels like the leas frequent we can get away with while making the playhead still seem smooth
     window.setInterval(this.playheadUpdate, 0.1);
+
+    this.previewPlay(false);
   },
   methods: {
+    addSegment(event: MouseEvent) {
+      const timeline = document.querySelectorAll('.timeline')[0].getBoundingClientRect();
+      /*this.engineOpts.videoInputs.push({
+        crop_offsets: [],
+        files: [],
+        interval: [
+          (event.clientX - timeline.left)
+         / timeline.width * this.projLength, this.projLength
+        ] as [number, number],
+        resolutions: [],
+        screenStyle: ('....' as '....' | '|..' | '_..'),
+        zoom_levels: []
+      });*/
+    },
+    deleteSegment(event: MouseEvent, id: number) {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore -- Trust me on this one
+      (event.target as HTMLElement).parentNode?.parentNode?.remove();
+    },
     deleteTrack(trackName: string) {
       this.tracks = this.tracks.filter(track => track.trackName !== trackName);
       ipcRenderer.send('remove-recording', trackName);
     },
     drag(event: MouseEvent) {
+      if (this.draggingTrack) {
+        this.draggingTrack.style.left = `${event.clientX - this.draggingTrack.clientWidth / 2}px`;
+        this.draggingTrack.style.top = `${event.clientY - this.draggingTrack.clientHeight / 2}px`;
+      }
       if (this.mouse_down) {
         const timeline = document.querySelectorAll('.timeline')[0].getBoundingClientRect();
         const x = event.clientX;
@@ -390,10 +435,50 @@ export default defineComponent({
         this.seekToPlayhead();
 
         this.previewCurrentTime = (this.playhead / timeline.width)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         * (this.$refs.previewPlayer as any).getEndTime();
       }
     },
-    endTimelineDrag: function() {
+    dragTrack(event: MouseEvent, trackName: string) {
+      this.draggingTrack = document.createElement('p');
+      this.draggingTrack.textContent = trackName;
+      this.draggingTrack.classList.add('track-draggable');
+      this.draggingTrack.style.position = 'absolute';
+      this.draggingTrack.style.cursor = 'grabbing';
+      this.draggingTrack.style.color = 'white';
+      this.draggingTrack.style.fontSize = '11px';
+      this.draggingTrack.style.userSelect = 'none';
+      this.draggingTrack.addEventListener('mousemove', this.drag.bind(this));
+      this.draggingTrack.addEventListener('mouseup', this.endDrag.bind(this));
+      document.body.append(this.draggingTrack);
+      this.draggingTrack.style.left = `${event.clientX - this.draggingTrack.clientWidth / 2}px`;
+      this.draggingTrack.style.top = `${event.clientY - this.draggingTrack.clientHeight / 2}px`;
+    },
+    endDrag(event: MouseEvent) {
+      if (this.draggingTrack) {
+        this.draggingTrack.remove();
+        const boxes = [ ...document.querySelectorAll('.screen-style.selected > div') ];
+        const box = boxes.find(box => {
+          const box_rect = box.getBoundingClientRect();
+          return (
+            event.clientX >= box_rect.x
+            && event.clientX <= box_rect.x + box_rect.width
+            && event.clientY >= box_rect.y
+            && event.clientY <= box_rect.y + box_rect.height
+          );
+        });
+        if (!box) {
+          this.draggingTrack = null;
+          return;
+        }
+        for (const child of box.childNodes) {
+          child.remove();
+        }
+        const indicator = document.createElement('p');
+        indicator.textContent = this.draggingTrack.textContent;
+        indicator.classList.add('track-inserted');
+        box.append(indicator);
+      }
       if (this.mouse_down) {
         this.seekToPlayhead();
 
@@ -401,13 +486,33 @@ export default defineComponent({
         this.mouse_down = false;
       }
     },
+    getPreview() {
+      ipcRenderer.send(
+        'start-engine',
+        {
+          data: JSON.parse(JSON.stringify(this.engineOpts))
+        }
+      );
+    },
+    getThumbnails() {
+      ipcRenderer.send(
+        'get-thumbnails',
+        {
+          data: { ...JSON.parse(JSON.stringify(this.engineOpts)), outputType: 'thumbnail' }
+        }
+      );
+    },
     playheadUpdate() {
       if (this.$refs.previewPlayer && !this.mouse_down && !this.previewPaused) {
         const timeline = document.querySelectorAll('.timeline')[0].getBoundingClientRect();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const vidPlayer = (this.$refs.previewPlayer as any);
 
         this.previewCurrentTime = vidPlayer.getCurrentTime();
-        this.previewEndTime = vidPlayer.getEndTime();
+        ipcRenderer.addListener('engine-done',  (event, args) => {
+          // if the preview has rendered more than 2 secs, start the preview viewer
+          this.previewEndTime = vidPlayer.getEndTime();
+        });
 
         const playheadx = (this.previewCurrentTime / vidPlayer.getEndTime()) * timeline.width;
 
@@ -421,6 +526,7 @@ export default defineComponent({
     previewPlay(playing: boolean) {
       this.previewPaused = !playing;
       if (this.$refs.previewPlayer) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const previewElement = (this.$refs.previewPlayer as any);
         if (playing) {
           previewElement.resumePlayback();
@@ -430,13 +536,20 @@ export default defineComponent({
       }
     },
     seekToPlayhead() {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const vidPlayer = (this.$refs.previewPlayer as any);
       const timeline = document.querySelectorAll('.timeline')[0].getBoundingClientRect();
       const newPlaybackTime = (this.playhead / timeline.width) * vidPlayer.getEndTime();
 
       vidPlayer.seekToTime(newPlaybackTime);
     },
+    selectSegment(id: number) {
+      this.activeSegment = id;
+    },
     setScreenStyle(style: number) {
+      for (const el of document.querySelectorAll('div.screen-style.selected > div > p')) {
+        el.remove();
+      }
       this.screenStyle = style;
     },
     startTimelineDrag: function() {
@@ -451,4 +564,12 @@ export default defineComponent({
 <style lang="scss" scoped>
   @import '../styles/main';
   @import '../styles/pages/video-editor';
+</style>
+
+<style lang="scss">
+p.track-inserted {
+  color: white;
+  font-size: 11px;
+  user-select: none;
+}
 </style>

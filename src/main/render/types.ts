@@ -1,21 +1,18 @@
-/**
- * Packages all the parameters for a run of the render process.
- */
 interface EngineOptions {
-  aspectRatio: string; // A:B format, e.g. 16:9
-  audioBitRate: string;
+  aspectRatio?: string; // A:B format, e.g. 16:9
+  audioBitRate?: string;
   audioInputs: AudioInput[]; // not required, audio inputs are from other ways, not deleted for consistent
-  audioSampleRate: number;
-  bufferSize: string;
-  framesPerSecond: number;
-  outputFile: string; // Ignored unless type is render
-  outputResolution: Resolution;
+  audioSampleRate?: number;
+  bufferSize?: string;
+  framesPerSecond?: number;
+  outputFile?: string; // Ignored unless type is render
+  outputResolution?: Resolution;
   outputType: 'thumbnail' | 'preview' | 'render'; // required
-  outputVolume: number;
-  previewManifest: string; // Ignored unless type is preview
-  thumbnailEvery: string; // X/Y format, X images every Y seconds
-  startTime: number; // Measured in seconds
-  videoBitRate: string;
+  outputVolume?: number;
+  previewManifest?: string; // Ignored unless type is preview
+  thumbnailEvery?: string; // X/Y format, X images every Y seconds
+  startTime?: number; // Measured in seconds
+  videoBitRate?: string;
   videoInputs: VideoInput[]; // required
 }
 
@@ -54,10 +51,22 @@ interface AudioInput{
  * then transformed to conform to the layout specified in screenStyle.
  */
 interface VideoInput {
-  files: string[];
-  screenStyle: '....' | '|..' | '_..';
-  interval: [number, number];
-  resolution: Resolution[];
+  files: string[]
+  screenStyle: '....' | '|..' | '_..'
+  interval: [number, number]
+  resolutions: Resolution[]
+  crop_offsets: Resolution[]
+  zoom_levels: number[]
+}
+
+interface VideoData {
+    id: [number, number],
+    file: string,
+    interval: [number, number],
+    position: Position,
+    resolution: Resolution,
+    crop_size: Resolution,
+    crop_offset: Position
 }
 
 interface VideoOption {
@@ -90,5 +99,6 @@ export {
   Position,
   Resolution,
   VideoInput,
+  VideoData,
   VideoOption
 };

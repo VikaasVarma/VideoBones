@@ -35,3 +35,22 @@ $color-highlight: #00FF2A;
     cursor: pointer;
   }
 }
+
+.button-close {
+	float: right;
+	color: darkgrey;
+	font-size: 4px;
+	cursor: pointer;
+	opacity: 1;
+	padding-bottom: auto;
+	appearance: none;
+	background: none;
+	border: none;
+
+	height: min-content;
+	width: min-content;
+
+	&::after {
+		content: "x";
+	}
+}
