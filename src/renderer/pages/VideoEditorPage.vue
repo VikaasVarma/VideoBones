@@ -377,14 +377,16 @@ export default defineComponent({
     });
 
     ipcRenderer.addListener('render-progress', (event, args) => {
+      console.log(args.renderedTime)
       if (this.isRendering) {
         const t = args.renderedTime;
-        const pct = t / this.engineOpts.videoInputs[this.engineOpts.videoInputs.length - 1].interval[2];
-        this.renderPct = pct;
+        const pct = t / this.engineOpts.videoInputs[this.engineOpts.videoInputs.length - 1].interval[1];
+        this.renderPct = pct * 100;
       }
     });
 
     ipcRenderer.addListener('render-done', (event, args) => {
+      console.log(args.outputFile)
       if (this.isRendering) {
         this.isRendering = false;
         alert(`Rendering finished, output in file: ${args.outputFile}.`);
@@ -411,6 +413,7 @@ export default defineComponent({
   },
   methods: {
     render() {
+      if (this.isRendering) return;
       console.log("Starting render!");
       console.log(JSON.parse(JSON.stringify(this.engineOpts)))
       this.isRendering = true;

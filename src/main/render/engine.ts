@@ -299,7 +299,7 @@ export function start(
     ffmpeg.stdout.on('data', data => {
       const values = data.toString().split(/\n|=/);
       const i = values.indexOf('out_time_ms') + 1;
-      const doneTime = values[i] / 2000;
+      const doneTime = parseInt(values[i]) / 1000000;
       statusCallback(doneTime);
     });
     ffmpeg.on('exit', doneCallback);
