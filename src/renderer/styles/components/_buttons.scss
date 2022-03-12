@@ -37,20 +37,19 @@ $color-highlight: #00FF2A;
 }
 
 .button-close {
-	float: right;
-	color: darkgrey;
-	font-size: 4px;
-	cursor: pointer;
-	opacity: 1;
-	padding-bottom: auto;
-	appearance: none;
-	background: none;
-	border: none;
+  appearance: none;
+  background: none;
+  border: none;
+  color: darkgrey;
+  cursor: pointer;
+  float: right;
+  font-size: 4px;
+  height: min-content;
+  opacity: 1;
+  padding-bottom: auto;
+  width: min-content;
 
-	height: min-content;
-	width: min-content;
-
-	&::after {
-		content: "x";
-	}
+  &::after {
+    content: 'x';
+  }
 }
