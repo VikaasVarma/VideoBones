@@ -1,10 +1,10 @@
+import { existsSync, rmSync } from 'node:fs';
+import { isAbsolute, join } from 'node:path';
 import { ipcMain } from 'electron';
+import { getTempDirectory } from '../storage/config';
 import { getThumbnails, kill, start } from './engine';
 import { addAudioOption } from './AudioOption';
 import { addVideoOption } from './videoOption';
-import { existsSync, rmSync } from 'node:fs';
-import { getTempDirectory } from '../storage/config';
-import { isAbsolute, join } from 'node:path';
 
 
 export function startHandler(port: number) {
@@ -49,7 +49,7 @@ export function startHandler(port: number) {
         console.warn('Unknown type from IPC', arg);
     }
   });
-  
+
   // start the thumbnail engine
   ipcMain.addListener('get-thumbnails', (event, arg) => {
     getThumbnails(arg.data, (thumbnailFiles: string[]) => {
@@ -61,15 +61,17 @@ export function startHandler(port: number) {
     args.data.outputFile = args.data.outputFile === undefined ? 'output.mp4' : args.data.outputFile;
     const p: string = isAbsolute(args.data.outputFile) ? args.data.outputFile : join(getTempDirectory(), args.data.outputFile);
     if (existsSync(p)) {
-      console.log(`overwriting ${p}`)
+      console.log(`overwriting ${p}`);
       rmSync(p);
     }
-    start({ ...args.data, outputType: 'render' }, renderedTime => {
-      event.sender.send('render-progress', { renderedTime });
-    },
-    () => {
-      event.sender.send('render-done', { outputFile: p });
-    });
+    start(
+      { ...args.data, outputType: 'render' }, renderedTime => {
+        event.sender.send('render-progress', { renderedTime });
+      },
+      () => {
+        event.sender.send('render-done', { outputFile: p });
+      }
+    );
   });
 }
 

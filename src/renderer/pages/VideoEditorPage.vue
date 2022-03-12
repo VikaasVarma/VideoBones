@@ -121,13 +121,13 @@
 
 <script lang="ts">
 import { join } from 'node:path';
+import { json } from 'node:stream/consumers';
 import { defineComponent, Ref, ref } from 'vue';
 import { ipcRenderer } from 'electron';
 import TrackSelector from '../components/TrackSelector.vue';
 import MetronomeComponent from '../components/MetronomeComponent.vue';
 import VideoPlayer from '../components/VideoPlayer.vue';
 import { EngineOptions } from '../../main/render/types';
-import { json } from 'stream/consumers';
 
 
 export default defineComponent({
@@ -174,10 +174,10 @@ export default defineComponent({
     ipcRenderer.addListener('engine-progress', (event, args) => {
       // if the preview has rendered more than 2 secs, start the preview viewer
       if (args.renderedTime > 2) {
-      const port = args.port;
-      if (stream_url.value === '') {
-        stream_url.value = `http://localhost:${  port.toString()  }/stream.mpd`;
-      }
+        const port = args.port;
+        if (stream_url.value === '') {
+          stream_url.value = `http://localhost:${  port.toString()  }/stream.mpd`;
+        }
       }
     });
 
@@ -377,7 +377,7 @@ export default defineComponent({
     });
 
     ipcRenderer.addListener('render-progress', (event, args) => {
-      console.log(args.renderedTime)
+      console.log(args.renderedTime);
       if (this.isRendering) {
         const t = args.renderedTime;
         const pct = t / this.engineOpts.videoInputs[this.engineOpts.videoInputs.length - 1].interval[1];
@@ -386,7 +386,7 @@ export default defineComponent({
     });
 
     ipcRenderer.addListener('render-done', (event, args) => {
-      console.log(args.outputFile)
+      console.log(args.outputFile);
       if (this.isRendering) {
         this.isRendering = false;
         alert(`Rendering finished, output in file: ${args.outputFile}.`);
@@ -425,8 +425,8 @@ export default defineComponent({
   methods: {
     render() {
       if (this.isRendering) return;
-      console.log("Starting render!");
-      console.log(JSON.parse(JSON.stringify(this.engineOpts)))
+      console.log('Starting render!');
+      console.log(JSON.parse(JSON.stringify(this.engineOpts)));
       this.isRendering = true;
       this.renderPct = 0;
       ipcRenderer.send('export-render', {

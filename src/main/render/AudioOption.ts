@@ -1,6 +1,6 @@
-import { AudioInput } from './types';
+import { join } from 'node:path';
 import { getRecordingsDirectory } from '../storage/config';
-import { join } from 'path';
+import { AudioInput } from './types';
 
 /**
  * The class receives message from IPC-handler and record the audio settings that are given
@@ -35,7 +35,7 @@ export class AudioInputOption implements AudioInput{
     echo_delay_indentifier = 0,
     echo_decay_indentifier = 0
   ){
-    this.file = file.replace('video','audio');
+    this.file = file.replace('video', 'audio');
     this.startTime = startTime;
     this.volume = volume;
     this.reverb_active = reverb_active;
@@ -109,9 +109,9 @@ export class AudioInputOption implements AudioInput{
 let audioOptions: AudioInputOption[] = [];
 
 export function addAudioOption(option: AudioInput): void{
-  audioOptions = audioOptions.filter((object) => object.file !== join(getRecordingsDirectory(), option.file) + '.webm');
+  audioOptions = audioOptions.filter(object => object.file !== `${join(getRecordingsDirectory(), option.file)  }.webm`);
   audioOptions.push(new AudioInputOption(
-    join(getRecordingsDirectory(), option.file) + '.webm',
+    `${join(getRecordingsDirectory(), option.file)  }.webm`,
     option.startTime,
     option.volume,
     option.reverb_active,

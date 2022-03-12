@@ -226,14 +226,14 @@ function buildArgs({
           videoSetup(videoData),
           videoOverlay(videoData),
           outputType === 'thumbnail' ? '' : audioInputOptions.map((input: AudioInputOption, i: number) =>
-            `[${i + videoDict.size}:a]${input.getAllOptions()}aformat=fltp:48000:stereo,volume=${Math.max(input.volume / 256.0, 0.1)}[ainput${i}]`)
+            `[${i + videoDict.size}:a]${input.getAllOptions()}aformat=fltp:48000:stereo,volume=${Math.max(input.volume / 256, 0.1)}[ainput${i}]`)
             .join(';'),
           outputType === 'thumbnail' ? '' : (audioInputOptions.length === 0 ? '' : `${audioInputOptions.map((_, i: number) => `[ainput${i}]`).join('')  }amerge=inputs=${audioInputOptions.length  }[aout]`)
         ).filter(el => el.length > 0).join(';')
       ],
       [
         '-map', '[out]',
-        outputType === 'thumbnail' ? '' : '-map', outputType === 'thumbnail' ? '' : '[aout]',
+        outputType === 'thumbnail' ? '' : '-map', outputType === 'thumbnail' ? '' : '[aout]'
       ]
     ).filter(el => el.length > 0);
 
@@ -303,7 +303,7 @@ export function start(
     ffmpeg.stdout.on('data', data => {
       const values = data.toString().split(/\n|=/);
       const i = values.indexOf('out_time_ms') + 1;
-      const doneTime = parseInt(values[i]) / 1000000;
+      const doneTime = Number.parseInt(values[i]) / 1000000;
       statusCallback(doneTime);
     });
     ffmpeg.on('exit', doneCallback);
@@ -333,7 +333,7 @@ export function getThumbnails(
 
   const bin = getPath();
   const args = buildArgs(options);
-  console.log("THUMBNAIL", bin, args);
+  console.log('THUMBNAIL', bin, args);
 
   if (bin) {
     console.log(getTempDirectory());

@@ -51,22 +51,22 @@ interface AudioInput{
  * then transformed to conform to the layout specified in screenStyle.
  */
 interface VideoInput {
-  files: string[]
-  screenStyle: '....' | '|..' | '_..'
-  interval: [number, number]
-  resolutions: Resolution[]
-  crop_offsets: Resolution[]
-  zoom_levels: number[]
+  files: string[];
+  screenStyle: '....' | '|..' | '_..';
+  interval: [number, number];
+  resolutions: Resolution[];
+  crop_offsets: Resolution[];
+  zoom_levels: number[];
 }
 
 interface VideoData {
-    id: [number, number],
-    file: string,
-    interval: [number, number],
-    position: Position,
-    resolution: Resolution,
-    crop_size: Resolution,
-    crop_offset: Position
+    id: [number, number];
+    file: string;
+    interval: [number, number];
+    position: Position;
+    resolution: Resolution;
+    crop_size: Resolution;
+    crop_offset: Position;
 }
 
 interface VideoOption {

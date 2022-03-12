@@ -34,7 +34,7 @@
             @update:slider_value="updateVolume()"
           />
 
-          <tickbox-component tickbox_text="Enable Reverb" @click="reverb_enabled=!reverb_enabled" />
+          <tickbox-component text="Enable Reverb" @click="reverb_enabled=!reverb_enabled" />
 
           <slider-component
             v-if="reverb_enabled"
@@ -50,7 +50,7 @@
             @update:slider_value="updateReverb()"
           />
 
-          <tickbox-component tickbox_text="Enable Echo" @click="echo_enabled=!echo_enabled" />
+          <tickbox-component text="Enable Echo" @click="echo_enabled=!echo_enabled" />
 
           <slider-component
             v-if="echo_enabled"
@@ -65,14 +65,14 @@
             @update:slider_value="updateEcho()"
           />
 
-          <tickbox-component tickbox_text="Denoise" @click="denoise_enabled=!denoise_enabled" />
+          <tickbox-component text="Denoise" @click="denoise_enabled=!denoise_enabled" />
         </div>
         <div>
           <h4 class="section-title">
             Video Effects
           </h4>
 
-          <tickbox-component tickbox_text="Enable Brightness" @click="brigtness_enable=!brightness_enable" />
+          <tickbox-component text="Enable Brightness" @click="brigtness_enable=!brightness_enable" />
           <slider-component
             v-if="true"
             v-model:slider_value="video_setting.brightness"
@@ -80,7 +80,7 @@
             @update:slider_value="updateVideoSetting()"
           />
 
-          <tickbox-component tickbox_text="Enable Contrast" @click="contrast_enable=!contrast_enable" />
+          <tickbox-component text="Enable Contrast" @click="contrast_enable=!contrast_enable" />
           <slider-component
             v-if="true"
             v-model:slider_value="video_setting.contrast"
@@ -88,7 +88,7 @@
             @update:slider_value="updateVideoSetting()"
           />
 
-          <tickbox-component tickbox_text="Enable Colour Correction" @click="correction_enable=!correction_enable" />
+          <tickbox-component text="Enable Colour Correction" @click="correction_enable=!correction_enable" />
           <slider-component
             v-if="true"
             v-model:slider_value="video_setting.r_gamma"
@@ -108,7 +108,7 @@
             @update:slider_value="updateVideoSetting()"
           />
 
-          <tickbox-component tickbox_text="Blur Enable" @click="blur_enable=!blur_enable" />
+          <tickbox-component text="Blur Enable" @click="blur_enable=!blur_enable" />
           <slider-component
             v-if="true"
             v-model:slider_value="video_setting.blur_radius"
@@ -163,20 +163,12 @@ export default defineComponent({
     };
   },
   methods: {
-    updateVideoSetting(){
-
-    },
-    updateVolume(){
-
-    },
-    updateEcho() {
-     
-    },
-    updateReverb() {
-
-  },
-  done(){
-    ipcRenderer.send(
+    updateVideoSetting(){},
+    updateVolume(){},
+    updateEcho() {},
+    updateReverb() {},
+    done(){
+      ipcRenderer.send(
         'asynchronous-message',
         {
           type: 'audioOptions',
@@ -199,18 +191,19 @@ export default defineComponent({
           data: {
             file: this.video_name,
             brightness_enable: this.birghtness_enable,
-            birghtness: this.video_setting.bightness / 100.0,
+            birghtness: this.video_setting.bightness / 100,
             contrast_enable: this.contrast_enable,
             contrast: (this. video_setting.contrast - 50) * 150,
             balance_enable: this.correction_enable,
-            r_balance: this.video_setting.r_gamma / 10.0,
-            g_balance: this.video_setting.g_gamma / 10.0,
-            b_balance: this.video_setting.b_gamma / 10.0,
+            r_balance: this.video_setting.r_gamma / 10,
+            g_balance: this.video_setting.g_gamma / 10,
+            b_balance: this.video_setting.b_gamma / 10,
             blur_enable: this.blur_enable,
-            blur_radius: this.video_setting.blur_radius /5.0
+            blur_radius: this.video_setting.blur_radius / 5
           }
         }
       );
+    }
   }
 });
 </script>
