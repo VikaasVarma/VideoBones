@@ -24,7 +24,7 @@ module.exports = {
     'declaration-block-semicolon-newline-after': 'always',
     'declaration-block-semicolon-newline-before': 'never-multi-line',
     'declaration-block-trailing-semicolon': 'always',
-    'declaration-colon-space-after': 'always',
+    'declaration-colon-space-after': 'always-single-line',
     'declaration-colon-space-before': 'never',
     'declaration-no-important': true,
     'function-name-case': 'lower',
