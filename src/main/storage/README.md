@@ -23,14 +23,14 @@ Mostly synchronous, with background file ops.
 
 ## Basic usage
 
-```
+```js
 import * as projects from '/storage/projects'
 import * as config from '/storage/config'
 ```
 
 #### Creating a new project
 
-```
+```js
 const project: Promise<ProjectHandle> = projects.createProject("{ Parent directory }", "{ Project name }")
 ```
 
@@ -38,13 +38,13 @@ Returns a promise resolving to a handle for the new project, which is then used 
 
 #### Add/remove projects
 
-```
+```js
 const projectHandlePromise: Promise<ProjectHandle> = projects.trackProject(projectDirectory:string)
 ```
 
 This attempts to find a project in projectDirectory. Could be used for locating projects which were removed accidentally, or if the project handles get corrupted, or for sharing projects (A sends B a zip of the project directory, B unzips and runs trackProject). Will fail if the directory is not a valid project for VideoBones.
 
-```
+```js
 projects.untrackProject(projectHandle: ProjectHandle)
 ```
 
@@ -52,13 +52,13 @@ Removes a project from the list of projects VideoBones knows about. Used to 'del
 
 #### Open a project
 
-```
+```js
 const projecList: Readonly<Array<ProjectHandle>> = projects.getTrackedProjects()
 ```
 
 Returns the list of handles for created projects.
 
-```
+```js
 const openPromise: Promise<void> = config.openProject("{ Project handle }")
 ```
 
@@ -66,25 +66,25 @@ Returns a promise which resolves when the project is open. Needs to be done befo
 
 ### Recordings
 
-```
+```js
 const recordingsDirectory: string = config.getRecordingsDirectory()
 ```
 
 Returns the full path to the recordings dir for the open project.
 
-```
+```js
 const recordings: Readonly<Array<string>> = config.getRecordingsList()
 ```
 
 Returns a readonly view of the recordings files currently associated with the project.
 
-```
+```js
 config.addRecording("{ Recording name }")
 ```
 
 Creates a file for a new recording for the open project within the projects getRecordingsDirectory. Returns a promise resolving to a file handle for the new file (use this to write into the file).
 
-```
+```js
 config.removeRecording({ Recording index })
 ```
 
@@ -92,19 +92,19 @@ Removes a recording file from the project, using the index from the getRecording
 
 ### Get/set options
 
-```
+```js
 config.setOption("{ Option name }", { Option value })
 ```
 
 Sets an option for this project, which is saved to file and persisted across executions. Basically just a key-value pair (string, object) which stores any JS object. Don't use BigInt or cyclic object as JSON.stringify hates.
 
-```
+```js
 const opt: any = config.getOption("{ Option name }")
 ```
 
 Returns the value associated with an option previously set. null if option was never set. Do your own type checking on the result.
 
-```
+```js
 config.removeOption("{ Option name }")
 ```
 
@@ -112,7 +112,7 @@ Removes an option from the project completely, as if it was never set.
 
 #### Temp files
 
-```
+```js
 const tempDirectory: string = config.getTempDirectory()
 ```
 
