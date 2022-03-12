@@ -1,7 +1,8 @@
-import * as fs from 'fs';
+import * as fs from 'node:fs';
 
-import { join } from 'path';
+import { join } from 'node:path';
 import { ipcRenderer } from 'electron';
+
 
 interface MetronomeOptions {
   bpm: number;
@@ -15,74 +16,12 @@ interface MetronomeOptions {
   lengthSub?: number;
 }
 
-export function generateMetronome({
-  bpm,
-  offset = 0,
-  beatsPerBar = 4,
-  freqMain = 440,
-  freqSub = 220,
-  gainMain = 1,
-  gainSub = 0.8,
-  lengthMain = 1 / 16,
-  lengthSub = 1 / 16
-}: MetronomeOptions) {
-  const ac = new AudioContext();
-  const length = 1 / (bpm / 60) * beatsPerBar;
-  const buf = ac.createBuffer(1, ac.sampleRate * length, ac.sampleRate);
-  const channel = buf.getChannelData(0);
-
-  let amplitude = gainMain;
-  let phase = 0;
-  const first = offset;
-
-  for (let i = 0; i < lengthMain * ac.sampleRate; i++) {
-    channel[i + first] = amplitude * Math.sin(phase);
-    phase += 2 * Math.PI * freqMain / ac.sampleRate;
-    if (phase > 2 * Math.PI) {
-      phase -= 2 * Math.PI;
-    }
-    amplitude -= gainMain / (lengthMain * ac.sampleRate);
-  }
-
-  for (let c = 1; c < beatsPerBar; c++) {
-    let amplitude = gainSub;
-    let phase = 0;
-    const first = Math.round(ac.sampleRate * 1 / (bpm / 60) * c) + offset;
-
-    for (let i = 0; i < lengthSub * ac.sampleRate; i++) {
-      channel[i + first] = amplitude * Math.sin(phase);
-      phase += 2 * Math.PI * freqSub / ac.sampleRate;
-      if (phase > 2 * Math.PI) {
-        phase -= 2 * Math.PI;
-      }
-      amplitude -= gainSub / (lengthSub * ac.sampleRate);
-    }
-  }
-
-  // get WAV file bytes and audio params of your audio source
-  const wavBytes = getWavBytes(channel.buffer, {
-    isFloat: true,       // floating point or 16-bit integer
-    numChannels: 1,
-    sampleRate: 48000
-  });
-  const wav = new Blob([ wavBytes ], { type: 'audio/wav' });
-
-  // Save the metronome file in the temp directory
-  wav.arrayBuffer().then(buffer => {
-    ipcRenderer.invoke('get-temp-directory').then((dir: string) => {
-      fs.writeFile(join(dir, 'metronome.wav'), new Uint8Array(buffer), err => {
-        if (err) throw err;
-      });
-    });
-  });
-}
-
 // Returns Uint8Array of WAV bytes
 function getWavBytes(buffer: ArrayBufferLike, options: WavOptions) {
   const type = options.isFloat ? Float32Array : Uint16Array;
   const numFrames = buffer.byteLength / type.BYTES_PER_ELEMENT;
 
-  const headerBytes = getWavHeader(Object.assign({}, options, { numFrames }));
+  const headerBytes = getWavHeader({ ...options, numFrames });
   const wavBytes = new Uint8Array(headerBytes.length + buffer.byteLength);
 
   // prepend header, then add pcmBytes
@@ -149,4 +88,66 @@ function getWavHeader(options: WavOptions) {
   writeUint32(dataSize);            // Subchunk2Size
 
   return new Uint8Array(buffer);
+}
+
+export function generateMetronome({
+  bpm,
+  offset = 0,
+  beatsPerBar = 4,
+  freqMain = 440,
+  freqSub = 220,
+  gainMain = 1,
+  gainSub = 0.8,
+  lengthMain = 1 / 16,
+  lengthSub = 1 / 16
+}: MetronomeOptions) {
+  const ac = new AudioContext();
+  const length = 1 / (bpm / 60) * beatsPerBar;
+  const buf = ac.createBuffer(1, ac.sampleRate * length, ac.sampleRate);
+  const channel = buf.getChannelData(0);
+
+  let amplitude = gainMain;
+  let phase = 0;
+  const first = offset;
+
+  for (let i = 0; i < lengthMain * ac.sampleRate; i++) {
+    channel[i + first] = amplitude * Math.sin(phase);
+    phase += 2 * Math.PI * freqMain / ac.sampleRate;
+    if (phase > 2 * Math.PI) {
+      phase -= 2 * Math.PI;
+    }
+    amplitude -= gainMain / (lengthMain * ac.sampleRate);
+  }
+
+  for (let c = 1; c < beatsPerBar; c++) {
+    let amplitude = gainSub;
+    let phase = 0;
+    const first = Math.round(ac.sampleRate * 1 / (bpm / 60) * c) + offset;
+
+    for (let i = 0; i < lengthSub * ac.sampleRate; i++) {
+      channel[i + first] = amplitude * Math.sin(phase);
+      phase += 2 * Math.PI * freqSub / ac.sampleRate;
+      if (phase > 2 * Math.PI) {
+        phase -= 2 * Math.PI;
+      }
+      amplitude -= gainSub / (lengthSub * ac.sampleRate);
+    }
+  }
+
+  // get WAV file bytes and audio params of your audio source
+  const wavBytes = getWavBytes(channel.buffer, {
+    isFloat: true,       // floating point or 16-bit integer
+    numChannels: 1,
+    sampleRate: 48000
+  });
+  const wav = new Blob([ wavBytes ], { type: 'audio/wav' });
+
+  // Save the metronome file in the temp directory
+  wav.arrayBuffer().then(buffer => {
+    ipcRenderer.invoke('get-temp-directory').then((dir: string) => {
+      fs.writeFile(join(dir, 'metronome.wav'), new Uint8Array(buffer), err => {
+        if (err) throw err;
+      });
+    });
+  });
 }
