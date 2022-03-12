@@ -1,9 +1,9 @@
 import { rename } from 'node:fs/promises';
 import { join } from 'node:path';
-import { app, BrowserWindow, dialog, ipcMain, Menu, MenuItem } from 'electron';
+import { app, BrowserWindow, dialog, ipcMain } from 'electron';
+
 import * as config from '../main/storage/config';
 import * as projects from '../main/storage/projects';
-
 import { startHandler, stopHandler } from './render/ipcHandler';
 import { startIntegratedServer, stopIntegratedServer } from './render/integratedServer';
 import { startStorageHandlers } from './storage/ipcHandler';
@@ -36,24 +36,6 @@ async function createWindow() {
   startStorageHandlers();
 
   mainWindow.maximize();
-
-  const menu = new Menu();
-  const exportItem = new MenuItem({
-    label: 'File',
-    submenu: [
-      { role: 'quit' },
-      {
-        click: () => {
-          // TODO implement
-        },
-        label: 'Export'
-      }
-    ]
-
-  });
-  menu.append(exportItem);
-
-  Menu.setApplicationMenu(menu);
 }
 
 app.whenReady().then(() => {
