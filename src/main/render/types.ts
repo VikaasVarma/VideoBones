@@ -1,4 +1,4 @@
-interface EngineOptions {
+export interface EngineOptions {
   aspectRatio?: string; // A:B format, e.g. 16:9
   audioBitRate?: string;
   audioInputs: AudioInput[]; // not required, audio inputs are from other ways, not deleted for consistent
@@ -25,7 +25,7 @@ interface EngineOptions {
  * The AudioInput interface in mainly used in single editor page to passing a message to back end,
  * the audioOptions class will record them and apply the effect.
  */
-interface AudioInput {
+export interface AudioInput {
   file: string;
   startTime: number;
   volume: number;
@@ -50,16 +50,16 @@ interface AudioInput {
  * All the videos in a single VideoInput are trimmed to the interval,
  * then transformed to conform to the layout specified in screenStyle.
  */
-interface VideoInput {
+export interface VideoInput {
   files: string[];
-  screenStyle: '....' | '|..' | '_..';
+  screenStyle: '....' | '|..' | '_..' | '.';
   interval: [number, number];
   resolutions: Resolution[];
   crop_offsets: Resolution[];
   zoom_levels: number[];
 }
 
-interface VideoData {
+export interface VideoData {
     id: [number, number];
     file: string;
     interval: [number, number];
@@ -69,7 +69,7 @@ interface VideoData {
     crop_offset: Position;
 }
 
-interface VideoOption {
+export interface VideoOption {
   file: string;
   brightness_enable: boolean;
   brightness: number;
@@ -83,22 +83,12 @@ interface VideoOption {
   blur_radius: number;
 }
 
-interface Resolution {
+export interface Resolution {
   width: number;
   height: number;
 }
 
-interface Position {
-  left: number | string;
-  top: number | string;
+export interface Position {
+  x: number;
+  y: number;
 }
-
-export {
-  AudioInput,
-  EngineOptions,
-  Position,
-  Resolution,
-  VideoInput,
-  VideoData,
-  VideoOption
-};
