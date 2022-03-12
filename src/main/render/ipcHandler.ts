@@ -3,8 +3,6 @@ import { isAbsolute, join } from 'node:path';
 import { ipcMain } from 'electron';
 import { getTempDirectory, getOption, setOption } from '../storage/config';
 import { getThumbnails, kill, start } from './engine';
-import { addAudioOption } from './AudioOption';
-import { addVideoOption } from './videoOption';
 
 
 export function startHandler(port: number) {
@@ -19,19 +17,6 @@ export function startHandler(port: number) {
 
   ipcMain.addListener('stop-engine', () => {
     kill();
-  });
-
-  ipcMain.addListener('asynchronous-message', (event, arg) => {
-    switch (arg.type) {
-      case 'audioOptions':
-        addAudioOption(arg.data);
-        break;
-      case 'videoOptions':
-        addVideoOption(arg.data);
-        break;
-      default:
-        console.warn('Unknown type from IPC', arg);
-    }
   });
 
   // start the thumbnail engine
