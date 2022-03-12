@@ -136,7 +136,7 @@ export function readDirectoryConfig(directory: string): Promise<Config> {
   // async read the config file in
   return fs.readFile(configPath)
     .then(buf => {
-      const cfg: Config = JSON.parse(buf.toString());
+      const cfg = JSON.parse(buf.toString());
 
       // ensure the config is properly formatted
       if (isConfig(cfg)) {

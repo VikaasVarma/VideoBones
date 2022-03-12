@@ -1,10 +1,12 @@
+/* eslint-disable unicorn/consistent-function-scoping */
+
 import { Readable } from 'node:stream';
 import { join } from 'node:path';
 import { ChildProcessByStdio, spawn } from 'node:child_process';
 import { existsSync, mkdirSync, readdirSync, rmSync } from 'node:fs';
 import { getTempDirectory } from '../storage/config';
 import { getPath } from './ffmpeg';
-import { AudioInput, EngineOptions, VideoInput, VideoData, Resolution, Position } from './types';
+import { AudioInput, EngineOptions, VideoInput, VideoData, VideoFilter, Resolution, Position } from './types';
 
 
 /**
@@ -26,6 +28,7 @@ function buildArgs({
   outputVolume = 256,
   previewManifest = 'stream.mpd',
   videoBitRate = '6M',
+  videoFilters = [] as VideoFilter[],
   videoInputs = [] as VideoInput[]
 }: EngineOptions): string[] {
 
@@ -147,6 +150,57 @@ function buildArgs({
     return videoData;
   }
 
+  function reverbForSomeReason(reverbDelay: number, reverbDecay: number): string {
+    let s_delays = '';
+    let i = 0;
+    while (i < 10) {
+      s_delays += `${Math.min((i + 1) * reverbDelay * 5, 90000)}`;
+      if (i < 9) s_delays += '|';
+      i++;
+    }
+
+    i = 0;
+    let power = 1;
+    let s_decays = '';
+    while (i < 10) {
+      s_decays += `${Math.pow(reverbDecay / 100, power)}`;
+      if (i < 9) s_decays += '|';
+      i++;
+      power += 0.6;
+    }
+
+    return `aecho=0.8:0.9:${s_delays}:${s_decays}`;
+  }
+
+  function getAudioFilters(input: AudioInput): string {
+    return [
+      !input.enableEcho ? '' : `aecho=0.8:0.8:${input.echoDelay}:${input.echoDecay}`,
+      !input.enableDeclick ? '' : 'adeclick=55:75:2:2:2:add',
+      !input.enableDeclip ? '' : 'adeclip=55:75:8:10:1000:a',
+      !input.enableReverb ? '' : reverbForSomeReason(input.reverbDelay, input.reverbDecay)
+    ].filter(el => el.length > 0).join(',');
+  }
+
+  function getVideoFilters(filters: VideoFilter[], file: string): string {
+    const filter = filters.find(filter => filter.file === file);
+    if (!filter) {
+      return '';
+    }
+    return [
+      [
+        `eq=${filter.enableContrast ? filter.contrast.toString() : '1'}`,
+        filter.enableBrightness ? filter.brightness.toString() : '1',
+        '1.0',
+        '1.0',
+        filter.enableCorrections ? filter.balanceR.toString() : '1.0',
+        filter.enableCorrections ? filter.balanceG.toString() : '1.0',
+        filter.enableCorrections ? filter.balanceB.toString() : '1.0',
+        '1.0'
+      ].join(':'),
+      `avgblur=${filter.blurRadius}`
+    ].filter(el => el.length > 0).join(',');
+  }
+
   function genVideoDict(videoInputs: VideoInput[]): Map<string, number> {
     const videoDict = new Map<string, number>();
     let i = 0;
@@ -177,11 +231,11 @@ function buildArgs({
     });
   }
 
-  function videoSetup(videoData: VideoData[][]): string[] {
+  function videoSetup(videoFilters: VideoFilter[], videoData: VideoData[][]): string[] {
     return videoData.flatMap(screen => screen.map(input => {
       const [ i, j, res, c_size, c_offset ]
       = [ input.id[0], input.id[1], input.resolution, input.cropSize, input.cropOffset ];
-      return `[v${i}${j}]scale=${res.width}x${res.height},crop=${c_size.width}:${c_size.height}:${c_offset.left}:${c_offset.top}[i${i}${j}]`;
+      return `[v${i}${j}]${getVideoFilters(videoFilters, input.file)}scale=${res.width}x${res.height},crop=${c_size.width}:${c_size.height}:${c_offset.x}:${c_offset.y}[i${i}${j}]`;
     }));
   }
 
@@ -199,27 +253,27 @@ function buildArgs({
 
   const videoDict: Map<string, number> = genVideoDict(videoInputs);
   const videoData: VideoData[][] = genVideoData(videoInputs, videoDict);
-  const audioData: AudioInputOption[] = getAudioOptions(audioInputs);
+
 
   //the filter is the main part of the arguements, it specifies the rendering type,
   //the video layout, timing and video/audio effects.
   const filter = [
     ...[ ...videoDict.keys() ].flatMap(file => [ '-i', file ]),
-    ...audioData.flatMap(input => [ '-i', input.file ]),
+    ...audioInputs.flatMap(input => [ '-i', input.file ]),
 
     '-filter_complex', [
       `color=s=${outputResolution.width}x${outputResolution.height}:c=black[tmp0]`,
       ...splitInstr(videoData, videoDict),
-      ...videoSetup(videoData),
+      ...videoSetup(videoFilters, videoData),
       ...videoOverlay(videoData),
-      outputType === 'thumbnail' ? '' : audioData.map((input: AudioInputOption, i: number) =>
-        `[${i + videoDict.size}:a]${input.getAllOptions()}aformat=fltp:48000:stereo,volume=${Math.max(input.volume / 256, 0.1)}[ainput${i}]`)
+      outputType === 'thumbnail' ? '' : audioInputs.map((input: AudioInput, i: number) =>
+        `[${i + videoDict.size}:a]aformat=fltp:48000:stereo,volume=${input.volume / 256},${getAudioFilters(input)}[ainput${i}]`)
         .join(';'),
-      outputType === 'thumbnail' ? '' : (audioData.length === 0 ? '' : `${audioData.map((_, i: number) => `[ainput${i}]`).join('')}amerge=inputs=${audioData.length}[aout]`)
+      outputType === 'thumbnail' ? '' : (audioInputs.length === 0 ? '' : `${audioInputs.map((_, i: number) => `[ainput${i}]`).join('')}amerge=inputs=${audioInputs.length}[aout]`)
     ].filter(el => el.length > 0).join(';'),
 
     '-map', '[out]',
-    (outputType === 'thumbnail' || audioData.length === 0) ? '' : '-map', (outputType === 'thumbnail' || audioData.length === 0) ? '' : '[aout]'
+    (outputType === 'thumbnail' || audioInputs.length === 0) ? '' : '-map', (outputType === 'thumbnail' || audioInputs.length === 0) ? '' : '[aout]'
 
   ].filter(el => el.length > 0);
 

@@ -24,11 +24,11 @@
           @dblclick="addSegment($event)"
         >
           <div style="display: flex; overflow: hidden;">
-            <div v-for="image of timeline_images" :key="image">
-              <div :style="`aspect-ratio: 16/9; height:${timeline_seg_height};`">
+            <div v-for="image of timelineImages" :key="image">
+              <div :style="`aspect-ratio: 16/9; height:${timelineSegHeight};`">
                 <img alt="loading timeline..." :src="image" style="max-height: 100%; max-width: 100%;">
               </div>
-              <div :style="`height:${timeline_seg_height}; width:5px`" />
+              <div :style="`height:${timelineSegHeight}; width:5px`" />
             </div>
           </div>
 
@@ -120,9 +120,9 @@
 </template>
 
 <script lang="ts">
-import { join } from 'node:path';
-import { defineComponent, ref } from 'vue';
+import { defineComponent, ref, Ref } from 'vue';
 import { ipcRenderer } from 'electron';
+import { EngineOptions, AudioInput, VideoInput } from '../../main/render/types';
 import TrackSelector from '../components/TrackSelector.vue';
 import MetronomeComponent from '../components/MetronomeComponent.vue';
 import VideoPlayer from '../components/VideoPlayer.vue';
@@ -134,40 +134,10 @@ export default defineComponent({
   emits: [ 'open-recording-page', 'open-single-editor' ],
   setup() {
     const stream_url = ref('');
-    const engineOpts = ref({
-      /*outputType: 'preview' as const,
-      videoInputs: [
-        {
-          files: [ 'video1.webm', 'video2.webm', 'video3.webm' ].map(file => join('../recordings', (file))),
-          screenStyle: '|..',
-          resolutions: [
-            { width: 1280, height: 720 },
-            { width: 1280, height: 720 },
-            { width: 1280, height: 720 }
-          ],
-          interval: [ 0, 7 ]
-        },
-        {
-          files: [ 'video1.webm', 'video2.webm', 'video3.webm', 'video4.webm' ]
-          .map(file => join('../recordings', (file))),
-          screenStyle: '....',
-          interval: [ 7, 10 ],
-          resolutions: [
-            { width: 1280, height: 720 },
-            { width: 1280, height: 720 },
-            { width: 1280, height: 720 },
-            { width: 1280, height: 720 }
-          ]
-        }
-      ],
-      audioInputs: [
-        {
-            file: join("../recordings", "audio1.webm"),
-            startTime: 0.02,
-            volume: 255,
-        },
-      ],
-      thumbnailEvery: '1/5' */
+    const engineOpts: Ref<EngineOptions> = ref({
+      audioInputs: [] as AudioInput[],
+      outputType: 'preview' as const,
+      videoInputs: [] as VideoInput[],
     });
 
     ipcRenderer.addListener('engine-progress', (event, args) => {
@@ -189,7 +159,7 @@ export default defineComponent({
       draggingTrack: (null as null | HTMLElement),
       isRendering: false,
       metronomeBpm: 80,
-      mouse_down: false,
+      mouseIsDown: false,
       playhead: 0.6,
 
       previewCurrentTime: 0,
@@ -200,10 +170,10 @@ export default defineComponent({
       renderPct: 0,
       screenStyle: 0,
 
-      timeline_images: ([] as string[]),
-      timeline_max_time: 0,
-      timeline_seg_height: 0,
-      timeline_segments_count: 0,
+      timelineImages: ([] as string[]),
+      timelineMaxTime: 0,
+      timelineSegHeight: 0,
+      timelineSegmentsCount: 0,
       timelineWidth: 1,
 
       tracks: ([] as {trackId: number; trackName: string}[])
@@ -211,155 +181,20 @@ export default defineComponent({
   },
   created() {
     ipcRenderer.on('thumbnail-reply', (event, args) => {
-      this.timeline_images = [];
-      for (let i = 0; i < this.timeline_segments_count; ++i) {
-        this.timeline_images.push(args.thumbnailFiles[
-          Math.floor((i / this.timeline_segments_count) * args.thumbnailFiles.length)
+      this.timelineImages = [];
+      for (let i = 0; i < this.timelineSegmentsCount; ++i) {
+        this.timelineImages.push(args.thumbnailFiles[
+          Math.floor((i / this.timelineSegmentsCount) * args.thumbnailFiles.length)
         ]);
       }
     });
 
     ipcRenderer.invoke('get-recordings-directory').then(dir => {
-      //the follow 100 lines or so are for test case for video/audio effect, do not need them in the app
-      //the setting should be set in single-video-editor
-      // ipcRenderer.send(
-      //   'asynchronous-message',
-      //   {
-      //     data: {
-      //       file: join(dir, 'audio1.webm'),
-      //       startTime: 0,
-      //       volume: 200,
-      //       reverb_active: false,
-      //       reverb_delay_identifier: 500,
-      //       reverb_decay_identifier: 0.5,
-      //       declick_active: true,
-      //       declip_active: true,
-      //       echo_active: false,
-      //       echo_delay_identifier: 50,
-      //       echo_decay_identifier: 0.5
-      //     },
-      //     type: 'audioOptions'
-      //   }
-      // );
-      // ipcRenderer.send(
-      //   'asynchronous-message',
-      //   {
-      //     data: {
-      //       file: join(dir, 'audio2.webm'),
-      //       startTime: 0,
-      //       volume: 200,
-      //       reverb_active: false,
-      //       reverb_delay_identifier: 900,
-      //       reverb_decay_identifier: 0.5,
-      //       declick_active: false,
-      //       declip_active: true,
-      //       echo_active: false,
-      //       echo_delay_identifier: 50,
-      //       echo_decay_identifier: 0.5
-      //     },
-      //     type: 'audioOptions'
-      //   }
-      // );
-      // ipcRenderer.send(
-      //   'asynchronous-message',
-      //   {
-      //     data: {
-      //       file: join(dir, 'audio3.webm'),
-      //       startTime: 0,
-      //       volume: 200,
-      //       reverb_active: false,
-      //       reverb_delay_identifier: 200,
-      //       reverb_decay_identifier: 0.6,
-      //       declick_active: true,
-      //       declip_active: true,
-      //       echo_active: true,
-      //       echo_delay_identifier: 50,
-      //       echo_decay_identifier: 0.5
-      //     },
-      //     type: 'audioOptions'
-      //   }
-      // );
-      // ipcRenderer.send(
-      //   'asynchronous-message',
-      //   {
-      //     data: {
-      //       file: join(dir, 'video1.webm'),
-      //       brightness_enable: true,
-      //       brightness: 0.5,
-      //       contrast_enable: false,
-      //       contrast: 0,
-      //       balance_enable: false,
-      //       r_balance: 1,
-      //       g_balance: 1,
-      //       b_balance: 1,
-      //       blur_enable: false,
-      //       blur_radius: 1
-      //     },
-      //     type: 'videoOptions'
-      //   }
-      // );
-      // ipcRenderer.send(
-      //   'asynchronous-message',
-      //   {
-      //     data: {
-      //       file: join('../recordings', 'video2.webm'),
-      //       brightness_enable: false,
-      //       brightness: 0.5,
-      //       contrast_enable: false,
-      //       contrast: 20,
-      //       balance_enable: false,
-      //       r_balance: 1,
-      //       g_balance: 1,
-      //       b_balance: 1,
-      //       blur_enable: true,
-      //       blur_radius: 20
-      //     },
-      //     type: 'videoOptions'
-      //   }
-      // );
-      // ipcRenderer.send(
-      //   'asynchronous-message',
-      //   {
-      //     data: {
-      //       file: join('../recordings', 'video3.webm'),
-      //       brightness_enable: false,
-      //       brightness: 0.5,
-      //       contrast_enable: false,
-      //       contrast: 20,
-      //       balance_enable: true,
-      //       r_balance: 0.1,
-      //       g_balance: 3,
-      //       b_balance: 1,
-      //       blur_enable: false,
-      //       blur_radius: 0
-      //     },
-      //     type: 'videoOptions'
-      //   }
-      // );ipcRenderer.send(
-      //   'asynchronous-message',
-      //   {
-      //     data: {
-      //       file: join('../recordings', 'video4.webm'),
-      //       brightness_enable: false,
-      //       brightness: 0.5,
-      //       contrast_enable: true,
-      //       contrast: 200,
-      //       balance_enable: false,
-      //       r_balance: 1,
-      //       g_balance: 1,
-      //       b_balance: 1,
-      //       blur_enable: false,
-      //       blur_radius: 0
-      //     },
-      //     type: 'videoOptions'
-      //   }
-      // );
-
       // the max time for the timeline is the end of the last video interval, which is the length of the whole video
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       this.dir = dir;
-      this.timeline_max_time = this.engineOpts.videoInputs.map(i => i.interval[1])
+      this.timelineMaxTime = this.engineOpts.videoInputs.map(i => i.interval[1])
       // eslint-disable-next-line unicorn/no-array-reduce
         .reduce((max, video) => Math.max(max, video), 0);
       this.getThumbnails();
@@ -393,12 +228,12 @@ export default defineComponent({
     const timeline_w = (this.$refs.timeline as HTMLElement).clientWidth;
     this.timelineWidth = timeline_w;
 
-    this.timeline_seg_height = timeline_h;
+    this.timelineSegHeight = timeline_h;
 
     // TODO: update this if we change the aspect ratio
     const timeline_seg_width = Math.floor((timeline_h / 9) * 16);
 
-    this.timeline_segments_count = Math.ceil(timeline_w / timeline_seg_width);
+    this.timelineSegmentsCount = Math.ceil(timeline_w / timeline_seg_width);
 
     //this.$forceUpdate();
 
@@ -448,7 +283,7 @@ export default defineComponent({
         this.draggingTrack.style.left = `${event.clientX - this.draggingTrack.clientWidth / 2}px`;
         this.draggingTrack.style.top = `${event.clientY - this.draggingTrack.clientHeight / 2}px`;
       }
-      if (this.mouse_down) {
+      if (this.mouseIsDown) {
         const timeline = document.querySelectorAll('.timeline')[0].getBoundingClientRect();
         const x = event.clientX;
         this.playhead = Math.min(timeline.width, Math.max(0, (x - timeline.x)));
@@ -507,11 +342,11 @@ export default defineComponent({
         indicator.classList.add('track-inserted');
         box.append(indicator);
       }
-      if (this.mouse_down) {
+      if (this.mouseIsDown) {
         this.seekToPlayhead();
 
         if (!this.previewPausedBeforeSeek) this.previewPlay(false);
-        this.mouse_down = false;
+        this.mouseIsDown = false;
       }
     },
     getPreview() {
@@ -531,7 +366,7 @@ export default defineComponent({
       );
     },
     playheadUpdate() {
-      if (this.$refs.previewPlayer && !this.mouse_down && !this.previewPaused) {
+      if (this.$refs.previewPlayer && !this.mouseIsDown && !this.previewPaused) {
         const timeline = document.querySelectorAll('.timeline')[0].getBoundingClientRect();
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const vidPlayer = (this.$refs.previewPlayer as any);
@@ -587,7 +422,7 @@ export default defineComponent({
       this.screenStyle = style;
     },
     startTimelineDrag: function() {
-      this.mouse_down = true;
+      this.mouseIsDown = true;
       this.previewPausedBeforeSeek = this.previewPaused;
       this.previewPlay(true);
     }
