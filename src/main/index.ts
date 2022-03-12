@@ -109,6 +109,7 @@ ipcMain.handle('create-project-clicked', async (event, projectName, projectLocat
         await config.openProject(handle);
         config.setOption('audioTracks', []);
         config.setOption('videoTracks', []);
+        config.setOption('metronome', 80);
       });
 
     mainWindow?.setTitle(`${projectName} - Video Bones`);

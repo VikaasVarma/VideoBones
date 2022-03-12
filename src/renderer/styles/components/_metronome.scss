@@ -1,5 +1,7 @@
+@use '../utilities/variables';
+
 .metronome-container {
-  background-color: $color-middleground;
+  background-color: variables.$color-middleground;
   border-radius: 5px;
   display: inline-flex;
   height: fit-content;
@@ -11,7 +13,7 @@
 
   & > h2 {
     color: white;
-    font-size: $scaling-factor * 30px;
+    font-size: variables.$scaling-factor * 30px;
     width: 80%;
   }
 
@@ -22,9 +24,9 @@
   :nth-child(2) {
 
     & > img {
-      height: $scaling-factor * 15;
+      height: variables.$scaling-factor * 15;
       margin-top: 5px;
-      width: $scaling-factor * 20;
+      width: variables.$scaling-factor * 20;
 
       &:hover {
         cursor: pointer;
