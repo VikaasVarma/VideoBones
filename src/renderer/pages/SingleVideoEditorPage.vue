@@ -150,16 +150,15 @@ export default defineComponent({
   },
   methods: {
     done() {
-      ipcRenderer.send('save-video-settings', this.videoId, this.settings);
-      this.$emit('exit-single-editor');
       ipcRenderer.send(
         'edit-video',
-        {
+        JSON.parse(JSON.stringify({
           ...this.settings,
           videoId: this.videoId,
           volume: this.volume * 2.55
-        }
+        }))
       );
+      this.$emit('exit-single-editor');
     }
   }
 });
