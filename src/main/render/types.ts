@@ -49,22 +49,22 @@ export interface AudioInput {
  * then transformed to conform to the layout specified in screenStyle.
  */
 export interface VideoInput {
+  cropOffsets: Resolution[];
   files: string[];
-  screenStyle: '....' | '|..' | '_..' | '.';
   interval: [number, number];
+  screenStyle: '....' | '|..' | '_..' | '.';
   resolutions: Resolution[];
-  crop_offsets: Resolution[];
-  zoom_levels: number[];
+  zoomLevels: number[];
 }
 
 export interface VideoData {
-    id: [number, number];
-    file: string;
-    interval: [number, number];
-    position: Position;
-    resolution: Resolution;
-    crop_size: Resolution;
-    crop_offset: Position;
+  cropOffset: Position;
+  cropSize: Resolution;
+  id: [number, number];
+  file: string;
+  interval: [number, number];
+  position: Position;
+  resolution: Resolution;
 }
 
 export interface VideoOption {
@@ -82,8 +82,8 @@ export interface VideoOption {
 }
 
 export interface Resolution {
-  width: number;
   height: number;
+  width: number;
 }
 
 export interface Position {

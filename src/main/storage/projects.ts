@@ -47,18 +47,11 @@ const projectHandlesFile = path.join(app.getPath('userData'), 'handles.json');
  * Read in at startup (or initialised to empty list if file not present).
  */
 const handles = {
-  // TODO: find out if promises resolve before exit,
-  //        or find out how to make sure they do (so we dont lose a write on exit if still unresolved)
-  /**
-   * Keeps track of the last write promise active on the handles file.
-   *
-   * Allows us to chain future writes to the handles file after this promise is resolved.
-   */
-  currentHandlesFileWritePromise: Promise.resolve(),
   array: existsSync(projectHandlesFile)
     ? (() => {
       const json = JSON.parse(readFileSync(projectHandlesFile).toString());
       const out: ProjectHandle[] = [];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       json.forEach((e: any) => {
         if (ProjectHandle.isProjectHandle(e)) {
           if (existsSync(e.projectPath)){
@@ -74,18 +67,26 @@ const handles = {
       return out;
     })()
     : [],
-  push: function(handle: ProjectHandle) {
+  // TODO: find out if promises resolve before exit,
+  //        or find out how to make sure they do (so we dont lose a write on exit if still unresolved)
+  /**
+     * Keeps track of the last write promise active on the handles file.
+     *
+     * Allows us to chain future writes to the handles file after this promise is resolved.
+     */
+  currentHandlesFileWritePromise: Promise.resolve(),
+  push(handle: ProjectHandle) {
     this.array.push(handle);
     this.write();
   },
-  remove: function(handle: ProjectHandle) {
+  remove(handle: ProjectHandle) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const indexToRemove = this.array.findIndex((e: any) => {
       if (ProjectHandle.isProjectHandle(e)) {
         return handle.equals(e);
       }
       // there is a malformed entry, ignore it
       return false;
-
     });
 
     if (indexToRemove === -1) return;
@@ -95,7 +96,7 @@ const handles = {
 
     this.write();
   },
-  write: function() {
+  write() {
     this.currentHandlesFileWritePromise = this.currentHandlesFileWritePromise
       .then(() => fs.writeFile(projectHandlesFile, JSON.stringify(this.array)))
       .catch(error => {
@@ -141,7 +142,7 @@ function createProject(parentDirectory: string, projectName: string): Promise<Pr
  */
 function createProjectDirectory(parentDirectory: string, projectName: string): Promise<string> {
 
-  const projectDirectory = path.format({ dir: parentDirectory, base: projectName });
+  const projectDirectory = path.format({ base: projectName, dir: parentDirectory });
 
   if (existsSync(projectDirectory)) {
     throw new Error(`Project directory already exists: ${projectDirectory}`);

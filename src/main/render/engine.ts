@@ -79,6 +79,12 @@ function buildArgs({
         ];
         break;
 
+      case '.':
+        templateSizes = [{ height: screenHeight, width: screenWidth }];
+
+        anchors = [{ x: 0, y: 0 }];
+        break;
+
       default:
         throw new Error('Error: invalid screenstyle');
     }
@@ -127,8 +133,8 @@ function buildArgs({
 
         appearances[file] = (appearances[file] ?? 0) + 1;
         data.push({
-          crop_offset: { x: 0, y: 0 },
-          crop_size: { height: layout.layout_resolutions[i].height, width: layout.layout_resolutions[i].width },
+          cropOffset: { x: 0, y: 0 },
+          cropSize: { height: layout.layout_resolutions[i].height, width: layout.layout_resolutions[i].width },
           file: file,
           id: [ id, appearances[file] - 1 ],
           interval: input.interval,
@@ -174,7 +180,7 @@ function buildArgs({
   function videoSetup(videoData: VideoData[][]): string[] {
     return videoData.flatMap(screen => screen.map(input => {
       const [ i, j, res, c_size, c_offset ]
-      = [ input.id[0], input.id[1], input.resolution, input.crop_size, input.crop_offset ];
+      = [ input.id[0], input.id[1], input.resolution, input.cropSize, input.cropOffset ];
       return `[v${i}${j}]scale=${res.width}x${res.height},crop=${c_size.width}:${c_size.height}:${c_offset.left}:${c_offset.top}[i${i}${j}]`;
     }));
   }
@@ -183,7 +189,7 @@ function buildArgs({
     let index = 0;
     const overlay = videoData.flatMap(screen => screen.map(input => {
       const [ i, j, x, y, start, end ]
-      = [ input.id[0], input.id[1], input.position.left, input.position.top, input.interval[0], input.interval[1] ];
+      = [ input.id[0], input.id[1], input.position.x, input.position.y, input.interval[0], input.interval[1] ];
       index++;
       return `[tmp${index - 1}][i${i}${j}]overlay=shortest=1:x=${x}:y=${y}:enable='between(t,${start},${end})'[tmp${index}]`;
     }));
@@ -193,39 +199,38 @@ function buildArgs({
 
   const videoDict: Map<string, number> = genVideoDict(videoInputs);
   const videoData: VideoData[][] = genVideoData(videoInputs, videoDict);
-  //the audioInput part of the EngineOption is never used, instead, it uses the records from AudioOption
-  const audioInputOptions: AudioInputOption[] = getAudioOptions();
+  const audioData: AudioInputOption[] = getAudioOptions(audioInputs);
 
   //the filter is the main part of the arguements, it specifies the rendering type,
   //the video layout, timing and video/audio effects.
   const filter = [
     ...[ ...videoDict.keys() ].flatMap(file => [ '-i', file ]),
-    ...audioInputOptions.flatMap(input => [ '-i', input.file ]),
+    ...audioData.flatMap(input => [ '-i', input.file ]),
 
     '-filter_complex', [
       `color=s=${outputResolution.width}x${outputResolution.height}:c=black[tmp0]`,
       ...splitInstr(videoData, videoDict),
       ...videoSetup(videoData),
       ...videoOverlay(videoData),
-      outputType === 'thumbnail' ? '' : audioInputOptions.map((input: AudioInputOption, i: number) =>
+      outputType === 'thumbnail' ? '' : audioData.map((input: AudioInputOption, i: number) =>
         `[${i + videoDict.size}:a]${input.getAllOptions()}aformat=fltp:48000:stereo,volume=${Math.max(input.volume / 256, 0.1)}[ainput${i}]`)
         .join(';'),
-      outputType === 'thumbnail' ? '' : (audioInputOptions.length === 0 ? '' : `${audioInputOptions.map((_, i: number) => `[ainput${i}]`).join('')}amerge=inputs=${audioInputOptions.length}[aout]`)
+      outputType === 'thumbnail' ? '' : (audioData.length === 0 ? '' : `${audioData.map((_, i: number) => `[ainput${i}]`).join('')}amerge=inputs=${audioData.length}[aout]`)
     ].filter(el => el.length > 0).join(';'),
 
     '-map', '[out]',
-    (outputType === 'thumbnail' || audioInputOptions.length === 0) ? '' : '-map', (outputType === 'thumbnail' || audioInputOptions.length === 0) ? '' : '[aout]'
+    (outputType === 'thumbnail' || audioData.length === 0) ? '' : '-map', (outputType === 'thumbnail' || audioData.length === 0) ? '' : '[aout]'
 
   ].filter(el => el.length > 0);
 
-  const args = outputType === 'thumbnail' ? [
+  return outputType === 'thumbnail' ? [
     ...filter,
     '-preset', 'ultrafast',
     '-aspect', aspectRatio,
     '-progress', '-', '-nostats', // get it to print stats
     '-r', '1',
     'thumbs/%04d.png'
-  ] : [
+  ].filter(el => el.length > 0) : [
     outputType === 'preview' ? '-re' : '',
     ...filter,
     '-c:v', 'libx264',
@@ -233,8 +238,7 @@ function buildArgs({
     '-ac', '2',
     '-ar', audioSampleRate.toString(),
     '-x264opts', `keyint=${framesPerSecond}:min-keyint=${framesPerSecond}:no-scenecut`,
-    { 'preview': '-f', 'render': '-f' }[outputType],
-    { 'preview': 'dash', 'render': 'mp4' }[outputType],
+    '-f', outputType === 'preview' ? 'dash' : 'mp4',
     //'-min_seg_duration', '2000000',
     '-b:v', videoBitRate,
     '-b:a', audioBitRate,
@@ -251,7 +255,6 @@ function buildArgs({
     '-stats',
     outputType === 'render' ? outputFile : previewManifest
   ].filter(el => el.length > 0);
-  return args;
 }
 
 let ffmpeg: ChildProcessByStdio<null, Readable, null> | null;

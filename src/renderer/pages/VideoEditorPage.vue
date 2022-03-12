@@ -404,6 +404,7 @@ export default defineComponent({
 
     ipcRenderer.addListener('engine-done', () => {
       // if the preview has rendered more than 2 secs, start the preview viewer
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       this.previewEndTime = (this.$refs.previewPlayer as any).getEndTime();
     });
 
@@ -419,16 +420,6 @@ export default defineComponent({
     ipcRenderer.removeAllListeners('render-progress');
   },
   methods: {
-    render() {
-      if (this.isRendering) return;
-      console.log('Starting render!');
-      console.log(JSON.parse(JSON.stringify(this.engineOpts)));
-      this.isRendering = true;
-      this.renderPct = 0;
-      ipcRenderer.send('export-render', {
-        data: JSON.parse(JSON.stringify(this.engineOpts))
-      });
-    },
     addSegment(event: MouseEvent) {
       const timeline = document.querySelectorAll('.timeline')[0].getBoundingClientRect();
       /*this.engineOpts.videoInputs.push({
@@ -475,7 +466,10 @@ export default defineComponent({
     },
     dragTrack(event: MouseEvent, trackId: number) {
       this.draggingTrack = document.createElement('p');
-      this.draggingTrack.textContent = this.tracks.find(track => track.trackId === trackId)!.trackName.replace('.webm', '');
+      const track = this.tracks.find(track => track.trackId === trackId);
+      if (track) {
+        this.draggingTrack.textContent = track.trackName.replace('.webm', '');
+      }
       this.draggingTrack.classList.add('track-draggable');
       this.draggingTrack.style.position = 'absolute';
       this.draggingTrack.style.cursor = 'grabbing';
@@ -564,6 +558,16 @@ export default defineComponent({
           previewElement.pausePlayback();
         }
       }
+    },
+    render() {
+      if (this.isRendering) return;
+      console.log('Starting render!');
+      console.log(JSON.parse(JSON.stringify(this.engineOpts)));
+      this.isRendering = true;
+      this.renderPct = 0;
+      ipcRenderer.send('export-render', {
+        data: JSON.parse(JSON.stringify(this.engineOpts))
+      });
     },
     seekToPlayhead() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
