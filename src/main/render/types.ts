@@ -25,7 +25,7 @@ interface EngineOptions {
  * The AudioInput interface in mainly used in single editor page to passing a message to back end,
  * the audioOptions class will record them and apply the effect.
  */
-interface AudioInput{
+interface AudioInput {
   file: string;
   startTime: number;
   volume: number;

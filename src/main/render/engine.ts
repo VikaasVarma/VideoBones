@@ -4,12 +4,10 @@ import { ChildProcessByStdio, spawn } from 'node:child_process';
 import { existsSync, mkdirSync, readdirSync, rmSync } from 'node:fs';
 import { getTempDirectory } from '../storage/config';
 import { getPath } from './ffmpeg';
-import { AudioInput, EngineOptions, VideoInput, VideoData, VideoOption } from './types';
+import { AudioInput, EngineOptions, VideoInput, VideoData } from './types';
 import { AudioInputOption, getAudioOptions } from './AudioOption';
 import { getVideoOptionMap, VideoInputOption } from './videoOption';
 
-
-const thumbnailResolutionDivisor = 4;
 
 /**
  *
@@ -34,20 +32,6 @@ function buildArgs({
   videoBitRate = '6M',
   videoInputs = [] as VideoInput[]
 }: EngineOptions): string[] {
-
-  //to figure out the indices for video inputs
-  console.log(videoInputs);
-  const cumsum = ((sum: number) => (value: VideoInput) => {
-    sum += value.files.length; return sum - value.files.length;
-  })(0);
-  const offset = videoInputs.map(cumsum);
-
-  //to figure out the indices for audio inputs
-  const videoCount: number[] = videoInputs.map(videoArray => videoArray.files.length);
-  let videoSum = 0;
-  for (const n of videoCount){
-    videoSum += n;
-  }
 
   // The holy ffmpeg argument builder
   function getTemplateSizeAndAnchors(screenStyle: string): { anchors: any[]; templateSizes: any[] } {
@@ -100,7 +84,7 @@ function buildArgs({
         break;
 
       default:
-        throw new Error('Fuck you: invalid screenstyle');
+        throw new Error('Error: invalid screenstyle');
     }
     return { anchors, templateSizes };
   }

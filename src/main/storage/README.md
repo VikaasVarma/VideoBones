@@ -2,8 +2,6 @@
 
 The apis provided here make heavy use of promises, it will be easier to use this code if you understand the JS promises stuff.
 
-If you notice any spelling errors
-Fuck off.
 
 ## Modules
 

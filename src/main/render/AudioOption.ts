@@ -2,6 +2,30 @@ import { join } from 'node:path';
 import { getRecordingsDirectory } from '../storage/config';
 import { AudioInput } from './types';
 
+
+let audioOptions: AudioInputOption[] = [];
+
+export function addAudioOption(option: AudioInput): void{
+  audioOptions = audioOptions.filter(object => object.file !== `${join(getRecordingsDirectory(), option.file)  }.webm`);
+  audioOptions.push(new AudioInputOption(
+    `${join(getRecordingsDirectory(), option.file)  }.webm`,
+    option.startTime,
+    option.volume,
+    option.reverb_active,
+    Math.max(option.reverb_delay_identifier * 5, 90000),
+    Math.max(option.reverb_decay_identifier / 100, 0.1),
+    option.declick_active,
+    option.declip_active,
+    option.echo_active,
+    option.echo_delay_identifier,
+    option.echo_decay_identifier
+  ));
+}
+
+export function getAudioOptions(): AudioInputOption[]{
+  return audioOptions;
+}
+
 /**
  * The class receives message from IPC-handler and record the audio settings that are given
  * to each track.
@@ -9,7 +33,7 @@ import { AudioInput } from './types';
  * It will also generate the audio effect part of ffmpeg arguements.
  *
  */
-export class AudioInputOption implements AudioInput{
+export class AudioInputOption implements AudioInput {
   file: string;
   startTime: number;
   volume: number;
@@ -28,7 +52,7 @@ export class AudioInputOption implements AudioInput{
     volume = 1,
     reverb_active = false,
     reverb_delay = 0,
-    reverb_dacay = 0,
+    reverb_decay = 0,
     declick_active = true,
     declip_active = true,
     echo_active = false,
@@ -40,7 +64,7 @@ export class AudioInputOption implements AudioInput{
     this.volume = volume;
     this.reverb_active = reverb_active;
     this.reverb_delay_identifier = reverb_delay;
-    this.reverb_decay_identifier = 0.5;
+    this.reverb_decay_identifier = reverb_decay;
     this.declick_active = declick_active;
     this.declip_active = declip_active;
     this.echo_active = echo_active;
@@ -100,31 +124,8 @@ export class AudioInputOption implements AudioInput{
         i++;
         power += 0.6;
       }
-      s += `${s_delays }:${  s_decays  },`;
+      s += `${s_delays}:${s_decays},`;
     }
     return s ;
   }
-}
-
-let audioOptions: AudioInputOption[] = [];
-
-export function addAudioOption(option: AudioInput): void{
-  audioOptions = audioOptions.filter(object => object.file !== `${join(getRecordingsDirectory(), option.file)  }.webm`);
-  audioOptions.push(new AudioInputOption(
-    `${join(getRecordingsDirectory(), option.file)  }.webm`,
-    option.startTime,
-    option.volume,
-    option.reverb_active,
-    Math.max(option.reverb_delay_identifier * 5, 90000),
-    Math.max(option.reverb_decay_identifier / 100, 0.1),
-    option.declick_active,
-    option.declip_active,
-    option.echo_active,
-    option.echo_delay_identifier,
-    option.echo_decay_identifier
-  ));
-}
-
-export function getAudioOptions(): AudioInputOption[]{
-  return audioOptions;
 }

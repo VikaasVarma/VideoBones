@@ -1,4 +1,5 @@
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { app, BrowserWindow, dialog, ipcMain, Menu, MenuItem } from 'electron';
 import * as config from '../main/storage/config';
 import * as projects from '../main/storage/projects';
@@ -29,7 +30,7 @@ async function createWindow() {
     return;
   }
   startHandler(serverPort);
-  const path = app.isPackaged ? join('..', 'renderer', 'index.html') : join(__dirname, '..', 'renderer', 'index.html');
+  const path = app.isPackaged ? join('..', 'renderer', 'index.html') : join(dirname(fileURLToPath(import.meta.url)), '..', 'renderer', 'index.html');
   mainWindow.loadFile(path);
   !app.isPackaged && mainWindow.webContents.openDevTools();
   startStorageHandlers();
@@ -42,7 +43,9 @@ async function createWindow() {
     submenu: [
       { role: 'quit' },
       {
-        click: () => {},
+        click: () => {
+          // TODO implement
+        },
         label: 'Export'
       }
     ]
