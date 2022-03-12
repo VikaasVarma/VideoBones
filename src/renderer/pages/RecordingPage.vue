@@ -123,17 +123,15 @@ export default defineComponent({
         return;
       }
       // Get number to append to file names
-      let videoTracks = 1;
-      ipcRenderer.invoke('get-option', 'videoTracks').then(function(recordings: string) {
-        JSON.parse(recordings).forEach(() => {
-          videoTracks++;
-        });
+      let videoCount = 1;
+      ipcRenderer.invoke('get-option', 'videoTracks').then((recordings: string) => {
+        videoCount = JSON.parse(recordings).length;
       });
 
       // Write video data to file in project folder
       const videoBlob = new Blob(this.videoChunks, { type: 'video/webm' });
       videoBlob.arrayBuffer().then(async buffer => {
-        ipcRenderer.invoke('add-recording', `video${  videoTracks  }.webm`).then(filePath => {
+        ipcRenderer.invoke('add-recording', `video${videoCount + 1}.webm`).then(filePath => {
           fs.writeFile(filePath, new Uint8Array(buffer), err => {
             if (err) throw err;
           });
@@ -141,7 +139,7 @@ export default defineComponent({
           // Update the audioTracks option to hold the new audio track
           ipcRenderer.invoke('get-option', 'videoTracks').then(option => {
             const copy = JSON.parse(option);
-            copy.push(`video${  videoTracks  }.webm`);
+            copy.push({ trackId: videoCount + 1, trackName: `video${videoCount + 1}.webm` });
             ipcRenderer.send('set-option', 'videoTracks', copy);
 
             // Emit "recording-end" to switch page
@@ -151,17 +149,15 @@ export default defineComponent({
       });
       this.$data.videoChunks = [];
 
-      let audioTracks = 1;
+      let audioCount = 1;
       ipcRenderer.invoke('get-option', 'audioTracks').then(function(recordings: string) {
-        JSON.parse(recordings).forEach(() => {
-          audioTracks++;
-        });
+        audioCount = JSON.parse(recordings).length;
       });
 
       // Write audio data to file in project folder
       const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
       audioBlob.arrayBuffer().then(buffer => {
-        ipcRenderer.invoke('add-recording', `audio${  audioTracks  }.webm`).then(filePath => {
+        ipcRenderer.invoke('add-recording', `audio${audioCount + 1}.webm`).then(filePath => {
           fs.writeFile(filePath, new Uint8Array(buffer), err => {
             if (err) throw err;
           });
@@ -169,7 +165,7 @@ export default defineComponent({
           // Update the audioTracks option to hold the new audio track
           ipcRenderer.invoke('get-option', 'audioTracks').then(option => {
             const copy = JSON.parse(option);
-            copy.push(`audio${  audioTracks  }.webm`);
+            copy.push({ trackId: audioCount + 1, trackName: `audio${audioCount + 1}.webm` });
             ipcRenderer.send('set-option', 'audioTracks', copy);
           });
         });

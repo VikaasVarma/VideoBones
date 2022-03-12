@@ -19,7 +19,7 @@
 
   <single-video-editor-page
     v-else-if="pageDisplayed === 'single-video-editor-page'"
-    :video-id="single_video"
+    :video-id="videoId"
     @exit-single-editor="pageDisplayed = 'video-editor-page'"
   />
 
@@ -51,13 +51,13 @@ export default defineComponent({
   data() {
     return {
       pageDisplayed: 'on-open-page',
-      single_video: ''
+      videoId: 0
       // pageDisplayed: 'single-video-editor-page',
     };
   },
   methods: {
-    openSingleEditor(track: string) {
-      this.single_video = track;
+    openSingleEditor(track: number) {
+      this.videoId = track;
       this.pageDisplayed = 'single-video-editor-page';
     }
   }

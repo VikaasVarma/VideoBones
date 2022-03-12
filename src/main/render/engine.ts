@@ -171,7 +171,8 @@ function buildArgs({
 
   function videoSetup(videoData: VideoData[][]): string[] {
     return videoData.flatMap(screen => screen.map(input => {
-      const [ i, j, res, c_size, c_offset ] = [ input.id[0], input.id[1], input.resolution, input.crop_size, input.crop_offset ];
+      const [ i, j, res, c_size, c_offset ]
+      = [ input.id[0], input.id[1], input.resolution, input.crop_size, input.crop_offset ];
       return `[v${i}${j}]scale=${res.width}x${res.height},crop=${c_size.width}:${c_size.height}:${c_offset.left}:${c_offset.top}[i${i}${j}]`;
     }));
   }
@@ -179,7 +180,8 @@ function buildArgs({
   function videoOverlay(videoData: VideoData[][]): string[] {
     let index = 0;
     const overlay = videoData.flatMap(screen => screen.map(input => {
-      const [ i, j, x, y, start, end ] = [ input.id[0], input.id[1], input.position.left, input.position.top, input.interval[0], input.interval[1] ];
+      const [ i, j, x, y, start, end ]
+      = [ input.id[0], input.id[1], input.position.left, input.position.top, input.interval[0], input.interval[1] ];
       index++;
       return `[tmp${index - 1}][i${i}${j}]overlay=shortest=1:x=${x}:y=${y}:enable='between(t,${start},${end})'[tmp${index}]`;
     }));
@@ -200,26 +202,25 @@ function buildArgs({
 
   //the filter is the main part of the arguements, it specifies the rendering type,
   //the video layout, timing and video/audio effects.
-  const filter
-    = (<string[]>[]).concat(
-      [ ...videoDict.keys() ].flatMap(file => [ '-i', file ]),
-      audioInputOptions.flatMap(input => [ '-i', input.file ]),
-      [
-        '-filter_complex',  [ ...(<string[]>[]), `color=s=${outputResolution.width}x${outputResolution.height}:c=black[tmp0]` ].concat(
-          splitInstr(videoData, videoDict),
-          videoSetup(videoData),
-          videoOverlay(videoData),
-          outputType === 'thumbnail' ? '' : audioInputOptions.map((input: AudioInputOption, i: number) =>
-            `[${i + videoDict.size}:a]${input.getAllOptions()}aformat=fltp:48000:stereo,volume=${Math.max(input.volume / 256, 0.1)}[ainput${i}]`)
-            .join(';'),
-          outputType === 'thumbnail' ? '' : (audioInputOptions.length === 0 ? '' : `${audioInputOptions.map((_, i: number) => `[ainput${i}]`).join('')}amerge=inputs=${audioInputOptions.length}[aout]`)
-        ).filter(el => el.length > 0).join(';')
-      ],
-      [
-        '-map', '[out]',
-        (outputType === 'thumbnail' || audioInputOptions.length === 0) ? '' : '-map', (outputType === 'thumbnail' || audioInputOptions.length === 0) ? '' : '[aout]'
-      ]
-    ).filter(el => el.length > 0);
+  const filter = [
+    ...[ ...videoDict.keys() ].flatMap(file => [ '-i', file ]),
+    ...audioInputOptions.flatMap(input => [ '-i', input.file ]),
+
+    '-filter_complex', [
+      `color=s=${outputResolution.width}x${outputResolution.height}:c=black[tmp0]`,
+      ...splitInstr(videoData, videoDict),
+      ...videoSetup(videoData),
+      ...videoOverlay(videoData),
+      outputType === 'thumbnail' ? '' : audioInputOptions.map((input: AudioInputOption, i: number) =>
+        `[${i + videoDict.size}:a]${input.getAllOptions()}aformat=fltp:48000:stereo,volume=${Math.max(input.volume / 256, 0.1)}[ainput${i}]`)
+        .join(';'),
+      outputType === 'thumbnail' ? '' : (audioInputOptions.length === 0 ? '' : `${audioInputOptions.map((_, i: number) => `[ainput${i}]`).join('')}amerge=inputs=${audioInputOptions.length}[aout]`)
+    ].filter(el => el.length > 0).join(';'),
+
+    '-map', '[out]',
+    (outputType === 'thumbnail' || audioInputOptions.length === 0) ? '' : '-map', (outputType === 'thumbnail' || audioInputOptions.length === 0) ? '' : '[aout]'
+
+  ].filter(el => el.length > 0);
 
   const args = outputType === 'thumbnail' ? [
     ...filter,

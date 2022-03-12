@@ -62,17 +62,17 @@
           </h2>
           <track-selector
             v-for="track, id in tracks"
-            :key="track.trackName"
-            :track-name="track.trackName"
+            :key="track.trackId"
+            :track-name="track.trackName.replace('.webm', '')"
             :track-number="id"
-            @delete-clicked="deleteTrack(track.trackName)"
-            @dragged="dragTrack($event, track.trackName)"
-            @edit-clicked="$emit('open-single-editor', track.trackName)"
+            @delete-clicked="deleteTrack(track.trackId)"
+            @dragged="dragTrack($event, track.trackId)"
+            @edit-clicked="$emit('open-single-editor', track.trackId)"
           />
 
           <div class="add-item-container" @click="$emit('open-recording-page')">
             <img src="../../../assets/images/addIcon.png">
-            <h3>Add New Track</h3>
+            <h3>Record New Track</h3>
           </div>
         </div>
         <div>
@@ -174,7 +174,7 @@ export default defineComponent({
       if (args.renderedTime > 2) {
         const port = args.port;
         if (stream_url.value === '') {
-          stream_url.value = `http://localhost:${  port.toString()  }/stream.mpd`;
+          stream_url.value = `http://localhost:${port.toString()}/stream.mpd`;
         }
       }
     });
@@ -186,6 +186,7 @@ export default defineComponent({
       activeSegment: 0,
       dir: '',
       draggingTrack: (null as null | HTMLElement),
+      isRendering: false,
       metronomeBpm: 80,
       mouse_down: false,
       playhead: 0.6,
@@ -195,6 +196,7 @@ export default defineComponent({
       previewPaused: false,
       previewPausedBeforeSeek: false,
       projLength: 15,
+      renderPct: 0,
       screenStyle: 0,
 
       timeline_images: ([] as string[]),
@@ -203,10 +205,7 @@ export default defineComponent({
       timeline_segments_count: 0,
       timelineWidth: 1,
 
-      tracks: ([] as {trackName: string}[]),
-
-      isRendering: false,
-      renderPct: 0
+      tracks: ([] as {trackId: number; trackName: string}[])
     };
   },
   created() {
@@ -368,10 +367,7 @@ export default defineComponent({
   },
   async mounted() {
     ipcRenderer.invoke('get-option', 'videoTracks').then(videoTracks => {
-      const data = JSON.parse(videoTracks);
-      for (const track of data) {
-        this.tracks.push({ trackName: track.slice(0, Math.max(0, track.indexOf('.webm'))) });
-      }
+      this.tracks = JSON.parse(videoTracks);
     });
 
     ipcRenderer.addListener('render-progress', (event, args) => {
@@ -404,7 +400,7 @@ export default defineComponent({
 
     //this.$forceUpdate();
 
-    ipcRenderer.addListener('engine-done',  (event, args) => {
+    ipcRenderer.addListener('engine-done', () => {
       // if the preview has rendered more than 2 secs, start the preview viewer
       this.previewEndTime = (this.$refs.previewPlayer as any).getEndTime();
     });
@@ -450,9 +446,9 @@ export default defineComponent({
       // @ts-ignore -- Trust me on this one
       (event.target as HTMLElement).parentNode?.parentNode?.remove();
     },
-    deleteTrack(trackName: string) {
-      this.tracks = this.tracks.filter(track => track.trackName !== trackName);
-      ipcRenderer.send('remove-recording', trackName);
+    deleteTrack(trackId: number) {
+      this.tracks = this.tracks.filter(track => track.trackId !== trackId);
+      ipcRenderer.send('remove-recording', trackId);
     },
     drag(event: MouseEvent) {
       if (this.draggingTrack) {
@@ -475,9 +471,9 @@ export default defineComponent({
         * (this.$refs.previewPlayer as any).getEndTime();
       }
     },
-    dragTrack(event: MouseEvent, trackName: string) {
+    dragTrack(event: MouseEvent, trackId: number) {
       this.draggingTrack = document.createElement('p');
-      this.draggingTrack.textContent = trackName;
+      this.draggingTrack.textContent = this.tracks.find(track => track.trackId === trackId)!.trackName.replace('.webm', '');
       this.draggingTrack.classList.add('track-draggable');
       this.draggingTrack.style.position = 'absolute';
       this.draggingTrack.style.cursor = 'grabbing';

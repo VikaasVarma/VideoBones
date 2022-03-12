@@ -43,15 +43,14 @@ export function startStorageHandlers() {
   });
 
   ipcMain.addListener('remove-recording', (event, index: number) => {
-    const track = config.getRecordingsList()[index];
     let videos = config.getOption('videoTracks');
     let audios = config.getOption('audioTracks');
 
-    if (Array.isArray(videos) && videos.includes(track)) {
-      videos = videos.splice(videos.indexOf(track));
+    if (Array.isArray(videos)) {
+      videos = videos.filter(item => item.trackId !== index);
       config.setOption('videoTracks', videos);
-    } else if (Array.isArray(audios) && audios.includes(track)) {
-      audios = audios.splice(audios.indexOf(track));
+    } else if (Array.isArray(audios)) {
+      audios = audios.filter(item => item.trackId !== index);
       config.setOption('audioTracks', audios);
     }
 

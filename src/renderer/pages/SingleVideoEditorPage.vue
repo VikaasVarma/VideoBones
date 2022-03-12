@@ -120,7 +120,7 @@ export default defineComponent({
   name: 'SingleVideoEditorPage',
   components: { SliderComponent, TickboxComponent },
   props: {
-    videoId: { type: String, default: '' }
+    videoId: { type: Number, required: true }
   },
   emits: [ 'exit-single-editor' ],
   data() {
