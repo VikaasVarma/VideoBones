@@ -1,38 +1,42 @@
 <template>
   <div class="slider-container">
-    <h3>{{ slider_name }}</h3>
+    <h3>{{ name }}</h3>
     <input
+      v-model="value"
       max="100"
       min="1"
       type="range"
-      :value="slider_value"
       @mouseup="onValueChange"
     >
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent } from 'vue';
 
 
 export default defineComponent({
   name: 'SliderComponent',
   props: {
-    slider_name: String,
-    slider_value: Number
-  },
-  setup(props, context) {
-
-    function onValueChange(e: any) {
-      context.emit('update:slider_value', +e.currentTarget.value);
+    name: {
+      required: true,
+      type: String
     }
-
-    return { onValueChange };
+  },
+  emits: [ 'update' ],
+  data() {
+    return {
+      value: 0
+    };
+  },
+  methods: {
+    onValueChange(e: Event) {
+      this.$emit('update', + (e.currentTarget as HTMLInputElement).value);
+    }
   }
 });
 
 </script>
 <style lang="scss" scoped>
   @import "../styles/main.scss";
-  @import "../styles/pages/video-editor.scss";
 </style>

@@ -121,13 +121,11 @@
 
 <script lang="ts">
 import { join } from 'node:path';
-import { json } from 'node:stream/consumers';
-import { defineComponent, Ref, ref } from 'vue';
+import { defineComponent, ref } from 'vue';
 import { ipcRenderer } from 'electron';
 import TrackSelector from '../components/TrackSelector.vue';
 import MetronomeComponent from '../components/MetronomeComponent.vue';
 import VideoPlayer from '../components/VideoPlayer.vue';
-import { EngineOptions } from '../../main/render/types';
 
 
 export default defineComponent({

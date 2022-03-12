@@ -29,91 +29,81 @@
 
           <slider-component
             v-if="true"
-            v-model:slider_value="volume"
-            slider_name="Volume"
-            @update:slider_value="updateVolume()"
+            v-model:value="volume"
+            name="Volume"
+            @update:value="updateVolume()"
           />
 
-          <tickbox-component text="Enable Reverb" @click="reverb_enabled=!reverb_enabled" />
+          <tickbox-component text="Enable Reverb" @click="reverbEnabled = !reverbEnabled" />
 
           <slider-component
-            v-if="reverb_enabled"
-            v-model:slider_value="reverb_settings.delay"
-            slider_name="Delay"
-            @update:slider_value="updateReverb()"
+            v-if="reverbEnabled"
+            v-model:value="reverbSettings.delay"
+            name="Delay"
           />
 
           <slider-component
-            v-if="reverb_enabled"
-            v-model:slider_value="reverb_settings.decay"
-            slider_name="Decay"
-            @update:slider_value="updateReverb()"
+            v-if="reverbEnabled"
+            v-model:value="reverbSettings.decay"
+            name="Decay"
           />
 
-          <tickbox-component text="Enable Echo" @click="echo_enabled=!echo_enabled" />
+          <tickbox-component text="Enable Echo" @click="echoEnabled = !echoEnabled" />
 
           <slider-component
-            v-if="echo_enabled"
-            v-model:slider_value="echo_settings.delay"
-            slider_name="Delay"
-            @update:slider_value="updateEcho()"
+            v-if="echoEnabled"
+            v-model:value="echoSettings.delay"
+            name="Delay"
           />
           <slider-component
-            v-if="echo_enabled"
-            v-model:slider_value="echo_settings.decay"
-            slider_name="Decay"
-            @update:slider_value="updateEcho()"
+            v-if="echoEnabled"
+            v-model:value="echoSettings.decay"
+            name="Decay"
           />
 
-          <tickbox-component text="Denoise" @click="denoise_enabled=!denoise_enabled" />
+          <tickbox-component text="Denoise" @click="denoiseEnabled = !denoiseEnabled" />
         </div>
         <div>
           <h4 class="section-title">
             Video Effects
           </h4>
 
-          <tickbox-component text="Enable Brightness" @click="brigtness_enable=!brightness_enable" />
+          <tickbox-component text="Enable Brightness" @click="brightnessEnabled = !brightnessEnabled" />
           <slider-component
-            v-if="true"
-            v-model:slider_value="video_setting.brightness"
-            slider_name="Brightness"
-            @update:slider_value="updateVideoSetting()"
+            v-if="brightnessEnabled"
+            v-model:value="settings.brightness"
+            name="Brightness"
           />
 
-          <tickbox-component text="Enable Contrast" @click="contrast_enable=!contrast_enable" />
+          <tickbox-component text="Enable Contrast" @click="contrastEnabled = !contrastEnabled" />
           <slider-component
-            v-if="true"
-            v-model:slider_value="video_setting.contrast"
-            slider_name="Contrast"
-            @update:slider_value="updateVideoSetting()"
+            v-if="contrastEnabled"
+            v-model:value="settings.contrast"
+            name="Contrast"
           />
 
-          <tickbox-component text="Enable Colour Correction" @click="correction_enable=!correction_enable" />
+          <tickbox-component text="Enable Colour Correction" @click="correctionEnabled = !correctionEnabled" />
           <slider-component
-            v-if="true"
-            v-model:slider_value="video_setting.r_gamma"
-            slider_name="Red"
-            @update:slider_value="updateVideoSetting()"
+            v-if="correctionEnabled"
+            v-model:value="settings.gammaR"
+            name="Red"
           />
           <slider-component
-            v-if="true"
-            v-model:slider_value="video_setting.g_gamma"
-            slider_name="Green"
-            @update:slider_value="updateVideoSetting()"
+            v-if="correctionEnabled"
+            v-model:value="settings.gammaG"
+            name="Green"
           />
           <slider-component
-            v-if="true"
-            v-model:slider_value="video_setting.b_gamma"
-            slider_name="Blue"
-            @update:slider_value="updateVideoSetting()"
+            v-if="correctionEnabled"
+            v-model:value="settings.gammaB"
+            name="Blue"
           />
 
-          <tickbox-component text="Blur Enable" @click="blur_enable=!blur_enable" />
+          <tickbox-component text="Blur Enable" @click="blurEnabled = !blurEnabled" />
           <slider-component
-            v-if="true"
-            v-model:slider_value="video_setting.blur_radius"
-            slider_name="Blur Radius"
-            @update:slider_value="updateVideoSetting()"
+            v-if="blurEnabled"
+            v-model:value="settings.blurRadius"
+            name="Blur Radius"
           />
         </div>
       </menu>
@@ -136,51 +126,47 @@ export default defineComponent({
   name: 'SingleVideoEditorPage',
   components: { SliderComponent, TickboxComponent },
   props: {
-    video_name: { type: String, default: '' }
+    videoId: { type: String, default: '' }
   },
   emits: [ 'exit-single-editor' ],
   data() {
     return {
-      video_url: `../../DemoProject/recordings/${this.video_name  }.webm`,
-      denoise_enabled: false,
-      volume: 255,
-      echo_enabled: false,
-      echo_settings: { decay: 0, delay: 0 },
-      reverb_enabled: false,
-      reverb_settings: { decay: 0, delay: 0 },
-      birghtness_enable: false,
-      contrast_enable: false,
-      correction_enable: false,
-      blur_enable: false,
-      video_setting: {
-        bightness: 0,
+      blurEnabled: false,
+      brightnessEnabled: false,
+      contrastEnabled: false,
+      correctionEnabled: false,
+      denoiseEnabled: false,
+      echoEnabled: false,
+      echoSettings: { decay: 0, delay: 0 },
+      reverbEnabled: false,
+      reverbSettings: { decay: 0, delay: 0 },
+      settings: {
+        blurRadius: 0,
+        brightness: 0,
         contrast: 0,
-        r_gamma: 0,
-        g_gamma: 0,
-        b_gamma: 0,
-        blur_radius: 0
-      }
+        gammaB: 0,
+        gammaG: 0,
+        gammaR: 0,
+      },
+      video_url: `../../DemoProject/recordings/video${this.videoId}.webm`,
+      volume: 100,
     };
   },
   methods: {
-    updateVideoSetting(){},
-    updateVolume(){},
-    updateEcho() {},
-    updateReverb() {},
     done(){
       ipcRenderer.send(
         'asynchronous-message',
         {
           type: 'audioOptions',
           data: {
-            file: this.video_name,
+            file: this.videoId,
             startTime: 0,
-            volume: this.volume,
-            reverb_active: this.reverb_enabled,
-            reverb_delay_identifier: this.reverb_settings.delay,
-            reverb_decay_indentifier: this.reverb_settings.decay,
-            declick_active: this.denoise_enabled,
-            declip_active: this.denoise_enabled
+            volume: this.volume * 2.55,
+            reverb_active: this.reverbEnabled,
+            reverb_delay_identifier: this.reverbSettings.delay,
+            reverb_decay_indentifier: this.reverbSettings.decay,
+            declick_active: this.denoiseEnabled,
+            declip_active: this.denoiseEnabled
           }
         }
       );
@@ -189,17 +175,17 @@ export default defineComponent({
         {
           type: 'videoOpitons',
           data: {
-            file: this.video_name,
-            brightness_enable: this.birghtness_enable,
-            birghtness: this.video_setting.bightness / 100,
-            contrast_enable: this.contrast_enable,
-            contrast: (this. video_setting.contrast - 50) * 150,
-            balance_enable: this.correction_enable,
-            r_balance: this.video_setting.r_gamma / 10,
-            g_balance: this.video_setting.g_gamma / 10,
-            b_balance: this.video_setting.b_gamma / 10,
-            blur_enable: this.blur_enable,
-            blur_radius: this.video_setting.blur_radius / 5
+            file: this.videoId,
+            brightness_enable: this.brightnessEnabled,
+            birghtness: this.settings.brightness / 100,
+            contrast_enable: this.contrastEnabled,
+            contrast: (this. settings.contrast - 50) * 150,
+            balance_enable: this.correctionEnabled,
+            r_balance: this.settings.gammaR / 10,
+            g_balance: this.settings.gammaG / 10,
+            b_balance: this.settings.gammaB / 10,
+            blur_enable: this.blurEnabled,
+            blur_radius: this.settings.blurRadius / 5
           }
         }
       );
