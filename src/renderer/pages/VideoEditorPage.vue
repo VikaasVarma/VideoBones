@@ -379,11 +379,12 @@ export default defineComponent({
       }
     });
 
-    ipcRenderer.addListener('render-done', (event, args) => {
+    ipcRenderer.addListener('render-done', async (event, args) => {
       console.log(args.outputFile);
       if (this.isRendering) {
         this.isRendering = false;
-        alert(`Rendering finished, output in file: ${args.outputFile}.`);
+        const file = await ipcRenderer.invoke('save-render', args.outputFile);
+        alert(`Rendering finished, output in file: ${file}.`);
       }
     });
 

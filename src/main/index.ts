@@ -1,3 +1,4 @@
+import { rename } from 'node:fs/promises';
 import { join } from 'node:path';
 import { app, BrowserWindow, dialog, ipcMain, Menu, MenuItem } from 'electron';
 import * as config from '../main/storage/config';
@@ -78,6 +79,15 @@ app.on('window-all-closed', function() {
 ipcMain.handle('browse-directory-clicked', async () => {
   const selected = await dialog.showOpenDialog({ properties: [ 'createDirectory', 'openDirectory' ] });
   return selected.filePaths[0];
+});
+
+ipcMain.handle('save-render', async (event, tempPath: string) => {
+  const file = await dialog.showSaveDialog({ defaultPath: 'final.mp4', properties: [ 'showOverwriteConfirmation' ] });
+  if (file.filePath) {
+    rename(tempPath, file.filePath);
+    return file.filePath;
+  }
+  return tempPath;
 });
 
 ipcMain.handle('open-project-clicked', async () => {
