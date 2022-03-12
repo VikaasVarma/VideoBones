@@ -1,98 +1,108 @@
 <template id="CreateNewProject">
-    <div>
-        <h1 class="page-title" style="margin-bottom: 5vh; margin-top: 10vh;">VIDEO BONES</h1>
+  <div>
+    <h1 class="page-title" style="margin-bottom: 5vh; margin-top: 10vh;">
+      VIDEO BONES
+    </h1>
 
-        <menu class="options-menu" style="margin: auto;">
+    <menu class="options-menu" style="margin: auto;">
+      <div class="named-input-container" style="grid-column: 1 / 3; grid-row: 1 / 2;">
+        <h3>Project Name</h3>
+        <input
+          id="project-name-input"
+          placeholder="Ex: Gangnam Style A Capella"
+          type="text"
+          @input="updateLocation()"
+        >
+      </div>
 
-            <div style="grid-column: 1 / 3; grid-row: 1 / 2;" class="named-input-container">
-                <h3>Project Name</h3>
-                <input @input="updateLocation()" id="project-name-input" placeholder="Ex: Gangnam Style A Capella" type="text">
-            </div>
+      <div class="named-input-container action-input-container" style="grid-column: 1 / 3; grid-row: 2 / 3;">
+        <h3 style="margin-bottom: 5px;">
+          Project location
+        </h3>
+        <input id="project-location-input" type="text" @input="usingDefaultPath = false">
+        <button class="image-container" @click="browseDirectory()">
+          <img alt="" src="../../../assets/images/folderIcon.png">
+        </button>
+      </div>
 
-            <div class="named-input-container action-input-container" style="grid-column: 1 / 3; grid-row: 2 / 3;">
-                <h3 style="margin-bottom: 5px;">Project location</h3>
-                <input @input="usingDefaultPath = false" id="project-location-input" type="text">
-                <button @click="browseDirectory()" class="image-container">
-                    <img src="../../../assets/images/folderIcon.png" alt="">
-                </button>
-            </div>
-
-            <div style="grid-column: 1 / 3; grid-row: 3 / 4; margin-top: auto;">
-                <div style="display: flex; justify-content: right;">
-                    <div @click="$emit('cancel')" class="button-secondary">Cancel</div>
-                    <div @click="createProject()" class="button-primary">Create Project</div>
-                </div>
-            </div>
-
-        </menu>
-    </div>
+      <div style="grid-column: 1 / 3; grid-row: 3 / 4; margin-top: auto;">
+        <div style="display: flex; justify-content: right;">
+          <div class="button-secondary" @click="$emit('cancel')">
+            Cancel
+          </div>
+          <div class="button-primary" @click="createProject()">
+            Create Project
+          </div>
+        </div>
+      </div>
+    </menu>
+  </div>
 </template>
 
 <script lang="ts">
+import { join } from 'node:path';
 import { defineComponent } from 'vue';
 import { ipcRenderer } from 'electron';
-import {join} from 'path';
+
 
 export default defineComponent({
-    name: "create-new-project-page",
-    emits: ["create-project", "cancel"],
-    setup(props, context) {
-        let usingDefaultPath = true;
-        let selectedDirectory = '';
+  name: 'CreateNewProjectPage',
+  emits: [ 'create-project', 'cancel' ],
+  setup(props, context) {
+    let usingDefaultPath = true;
+    let selectedDirectory = '';
 
-        async function createProject() {
-            let inputButton = <HTMLInputElement>document.getElementById("project-name-input")
-            let projectName = inputButton.value
+    async function createProject() {
+      const inputButton = document.querySelector('#project-name-input') as HTMLInputElement;
+      const projectName = inputButton.value;
 
-            let otherButton = <HTMLInputElement>document.getElementById("project-location-input")
-            let projectLocation = otherButton.value
+      const otherButton = document.querySelector('#project-location-input') as HTMLInputElement;
+      const projectLocation = otherButton.value;
 
-            if (projectName == "") {
-                alert("Please name your project")
-                return
-            }
-            if (projectLocation == "") {
-                alert("Please select a location for your project")
-                return
-            }
-            
-            ipcRenderer.invoke("create-project-clicked", projectName, projectLocation).then(
-            (result) => {
-                if (result.failed) {
-                    if (result.alert) {
-                        alert(result.output)
-                    }
-                } else {
-                    context.emit('create-project')
-                }
-            }
-          )
+      if (projectName === '') {
+        alert('Please name your project');
+        return;
+      }
+      if (projectLocation === '') {
+        alert('Please select a location for your project');
+        return;
+      }
+
+      ipcRenderer.invoke('create-project-clicked', projectName, projectLocation).then(result => {
+        if (result.failed) {
+          if (result.alert) {
+            alert(result.output);
+          }
+        } else {
+          context.emit('create-project');
         }
-
-        function updateLocation() {
-            if (!usingDefaultPath) {
-                return;
-            }
-            let inputButton = <HTMLInputElement>document.getElementById("project-location-input")
-            inputButton.value = join(selectedDirectory, (<HTMLInputElement>document.getElementById("project-name-input")).value)
-        }
-
-        async function browseDirectory() {
-            usingDefaultPath = true
-            selectedDirectory = await ipcRenderer.invoke("browse-directory-clicked")
-  
-            let inputButton = <HTMLInputElement>document.getElementById("project-location-input")
-            inputButton.value = join(selectedDirectory, (<HTMLInputElement>document.getElementById("project-name-input")).value)
-        }
-
-        ipcRenderer.invoke('get-default-project-directory').then(dir => {
-            selectedDirectory = dir;
-            (<HTMLInputElement>document.getElementById("project-location-input")).value = dir;
-        })
-
-        return { browseDirectory, createProject, updateLocation, usingDefaultPath }
-
+      });
     }
+
+    function updateLocation() {
+      if (!usingDefaultPath) {
+        return;
+      }
+      const inputButton = document.querySelector('#project-location-input') as HTMLInputElement;
+      inputButton.value = join(selectedDirectory, (document.querySelector('#project-name-input') as HTMLInputElement).value);
+    }
+
+    async function browseDirectory() {
+      usingDefaultPath = true;
+      selectedDirectory = await ipcRenderer.invoke('browse-directory-clicked');
+
+      const inputButton = document.querySelector('#project-location-input') as HTMLInputElement;
+      inputButton.value = join(selectedDirectory, (document.querySelector('#project-name-input') as HTMLInputElement).value);
+    }
+
+    ipcRenderer.invoke('get-default-project-directory').then(dir => {
+      selectedDirectory = dir;
+      (document.querySelector('#project-location-input') as HTMLInputElement).value = dir;
+    });
+
+    return { browseDirectory, createProject, updateLocation, usingDefaultPath };
+
+  }
 });
 </script>
 
@@ -100,4 +110,3 @@ export default defineComponent({
   @import '../styles/main';
   @import '../styles/pages/create-new-project';
 </style>
-

@@ -147,7 +147,7 @@ module.exports = {
     'space-before-function-paren': [ 'error', { anonymous: 'never', asyncArrow: 'always', named: 'never' }],
     'space-in-parens': [ 'warn', 'never' ],
     'space-infix-ops': 'warn',
-    'unicorn/filename-case': [ 'warn', { cases: { kebabCase: true, pascalCase: true } }],
+    'unicorn/filename-case': [ 'warn', { cases: { camelCase: true, kebabCase: true, pascalCase: true } }],
     'unicorn/no-array-for-each': 'off',
     'unicorn/no-null': 'off',
     'unicorn/numeric-separators-style': [ 'warn', { onlyIfContainsSeparator: true }],
