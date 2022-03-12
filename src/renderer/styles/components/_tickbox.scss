@@ -1,4 +1,4 @@
-$color_tickbox: #404451;
+$color-tickbox: #404451;
 
 .tickbox-container {
   display: block;
@@ -17,7 +17,7 @@ $color_tickbox: #404451;
   .tickbox {
     // Remove base tickbox styling
     appearance: none;
-    background-color: $color_tickbox;
+    background-color: $color-tickbox;
     box-shadow: 0 1px 2px rgb(0 0 0 / 5%),
       inset 0 -15px 10px -12px rgb(0 0 0 / 5%);
     display: inline-grid;
@@ -36,7 +36,7 @@ $color_tickbox: #404451;
       &::after {
         color: white;
         content: 'x';
-        font-family: VBFont;
+        font-family: VBFont, Arial, sans-serif;
         font-size: 18px;
         font-weight: bold;
         left: 4.5px;

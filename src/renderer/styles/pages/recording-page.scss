@@ -1,7 +1,6 @@
 .recording-grid {
   display: grid;
-  grid-column-gap: 20px;
-  grid-row-gap: 20px;
+  gap: 20px;
   grid-template-columns: 2fr 1fr 1fr;
   margin: 20px;
   margin-top: 0;
@@ -58,7 +57,7 @@
   }
 }
 
-.recording-button {
+.recording-button, %recording-button {
   background: none;
   border: 2px solid white;
   border-radius: $scaling-factor * 30px;
@@ -74,15 +73,14 @@
     border-radius: $scaling-factor * 5px;
     height: $scaling-factor * 27px;
     margin: auto;
-    transition: border-radius 100ms ease-out,
-      width 100ms ease-out,
-      height 100ms ease-out;
+    // stylelint-disable-next-line plugin/no-low-performance-animation-properties
+    transition: border-radius 100ms ease-out, width 100ms ease-out, height 100ms ease-out;
     width: $scaling-factor * 27px;
   }
 }
 
 .not-recording-button {
-  @extend .recording-button;
+  @extend %recording-button;
 
   & > div {
     border-radius: $scaling-factor * 18px;

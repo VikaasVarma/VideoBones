@@ -32,12 +32,14 @@ p, h1, h2, h3, h4, h5, h6 {
   overflow-wrap: break-word;
 }
 
-:not(input):not(textarea):not(.image-container:first), :not(input):not(textarea):not(.image-container:first)::after, :not(input):not(textarea):not(.image-container:first)::before {
-  cursor: default;
-  user-select: none;
-  user-select: none;
-}
-
 input, button, textarea, :focus {
   outline: none; // You should add some other style for :focus to help UX/a11y
 }
+
+:not(input):not(textarea):not(.image-container),
+:not(input):not(textarea):not(.image-container)::after,
+:not(input):not(textarea):not(.image-container)::before {
+  cursor: default;
+  user-select: none;
+}
+

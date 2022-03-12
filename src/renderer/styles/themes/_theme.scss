@@ -2,6 +2,6 @@ body {
   background-color: $color-background;
 
   & > * {
-    font-family: VBFont;
+    font-family: VBFont, Arial, sans-serif;
   }
 }

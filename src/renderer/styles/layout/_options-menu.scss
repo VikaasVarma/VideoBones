@@ -2,8 +2,7 @@
   background-color: $color-outline;
   border-radius: 20px;
   display: grid;
-  grid-column-gap: 40px;
-  grid-row-gap: 15px;
+  gap: 15px 40px;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 1fr 1fr;
   height: fit-content;
@@ -19,8 +18,7 @@
 .vertical-options-menu {
   background-color: $color-outline;
   display: grid;
-  grid-column-gap: 40px;
-  grid-row-gap: 15px;
+  gap: 15px 40px;
   grid-template-columns: 1fr;
   grid-template-rows: 1fr 1fr;
   height: fit-content;
