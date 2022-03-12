@@ -120,6 +120,7 @@
 </template>
 
 <script lang="ts">
+import { join } from 'node:path';
 import { defineComponent, ref, Ref } from 'vue';
 import { ipcRenderer } from 'electron';
 import { EngineOptions, AudioInput, VideoInput } from '../../main/render/types';
@@ -204,6 +205,24 @@ export default defineComponent({
   async mounted() {
     ipcRenderer.invoke('get-option', 'videoTracks').then(videoTracks => {
       this.tracks = JSON.parse(videoTracks);
+
+      ipcRenderer.invoke('get-option', 'segments').then(segmentData => {
+        const segments = JSON.parse(segmentData);
+        this.engineOpts.videoInputs = [];
+        for (const segment of segments) {
+          this.engineOpts.videoInputs.push({
+            cropOffsets: segment.cropOffsets,
+            files: segment.trackIds
+              .map((f: number) => this.tracks.find(t => t.trackId === f))
+              .map((t: {trackId: number; trackName: string}) => t.trackName)
+              .map((f: string) => join(this.dir, f)),
+            interval: segment.interval,
+            resolutions: segment.resolutions,
+            screenStyle: segment.screenStyle,
+            zoomLevels: segment.zoomLevels
+          });
+        }
+      });
     });
 
     ipcRenderer.addListener('render-progress', (event, args) => {
