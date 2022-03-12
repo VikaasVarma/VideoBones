@@ -20,30 +20,14 @@ export function startHandler(port: number) {
   ipcMain.addListener('stop-engine', () => {
     kill();
   });
+
   ipcMain.addListener('asynchronous-message', (event, arg) => {
     switch (arg.type) {
-      case 'startEngine':
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        start(arg.data, (elapsedTime, donePercentage) => {
-          event.sender.send('asynchronous-reply', { donePercentage, elapsedTime, event: 'progress', port });
-        }, () => {
-          event.sender.send('asynchronous-reply', { event: 'done', port });
-        });
-        break;
-      case 'getThumbnails':
-        getThumbnails(arg.data, (thumbnailFiles: string[]) => {
-          event.sender.send('thumbnail-reply', { event: 'thumbnails', thumbnailFiles });
-        });
-        break;
       case 'audioOptions':
         addAudioOption(arg.data);
         break;
       case 'videoOptions':
         addVideoOption(arg.data);
-        break;
-      case 'stopEngine':
-        kill();
         break;
       default:
         console.warn('Unknown type from IPC', arg);
@@ -59,7 +43,7 @@ export function startHandler(port: number) {
 
   ipcMain.addListener('export-render', (event, args) => {
     args.data.outputFile = args.data.outputFile === undefined ? 'output.mp4' : args.data.outputFile;
-    const p: string = isAbsolute(args.data.outputFile) ? args.data.outputFile : join(getTempDirectory(), args.data.outputFile);
+    const p = isAbsolute(args.data.outputFile) ? args.data.outputFile : join(getTempDirectory(), args.data.outputFile);
     if (existsSync(p)) {
       console.log(`overwriting ${p}`);
       rmSync(p);
