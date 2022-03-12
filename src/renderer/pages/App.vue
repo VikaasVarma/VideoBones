@@ -19,7 +19,7 @@
 
   <single-video-editor-page
     v-else-if="pageDisplayed === 'single-video-editor-page'"
-    :video_name="single_video"
+    :video-id="single_video"
     @exit-single-editor="pageDisplayed = 'video-editor-page'"
   />
 

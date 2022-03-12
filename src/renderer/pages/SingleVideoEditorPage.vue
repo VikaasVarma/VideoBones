@@ -4,7 +4,7 @@
     <menu class="grid-container" style="margin: auto;">
       <div id="video-container">
         <video controls>
-          <source :src="video_url" type="video/webm">
+          <source :src="previewUrl" type="video/webm">
         </video>
       </div>
 
@@ -20,89 +20,83 @@
         <div class="timeline" />
       </div>
 
-
       <menu class="vertical-options-menu">
         <div>
           <h3 class="section-title">
             Audio Effects
           </h3>
 
-          <slider-component
-            v-if="true"
-            v-model:value="volume"
-            name="Volume"
-            @update:value="updateVolume()"
-          />
+          <slider-component v-model="volume" name="Volume" />
 
-          <tickbox-component text="Enable Reverb" @click="reverbEnabled = !reverbEnabled" />
+          <tickbox-component v-model="settings.reverbEnabled" text="Enable Reverb" />
 
           <slider-component
-            v-if="reverbEnabled"
-            v-model:value="reverbSettings.delay"
+            v-if="settings.reverbEnabled"
+            v-model="settings.reverbDelay"
             name="Delay"
           />
 
           <slider-component
-            v-if="reverbEnabled"
-            v-model:value="reverbSettings.decay"
+            v-if="settings.reverbEnabled"
+            v-model="settings.reverbDecay"
             name="Decay"
           />
 
-          <tickbox-component text="Enable Echo" @click="echoEnabled = !echoEnabled" />
+          <tickbox-component v-model="settings.echoEnabled" text="Enable Echo" />
 
           <slider-component
-            v-if="echoEnabled"
-            v-model:value="echoSettings.delay"
+            v-if="settings.echoEnabled"
+            v-model="settings.echoDelay"
             name="Delay"
           />
           <slider-component
-            v-if="echoEnabled"
-            v-model:value="echoSettings.decay"
+            v-if="settings.echoEnabled"
+            v-model="settings.echoDecay"
             name="Decay"
           />
 
-          <tickbox-component text="Denoise" @click="denoiseEnabled = !denoiseEnabled" />
+          <tickbox-component v-model="settings.denoiseEnabled" text="Denoise" />
         </div>
         <div>
           <h4 class="section-title">
             Video Effects
           </h4>
 
-          <tickbox-component text="Enable Brightness" @click="brightnessEnabled = !brightnessEnabled" />
+          <tickbox-component v-model="settings.brightnessEnabled" text="Brightness" />
           <slider-component
-            v-if="brightnessEnabled"
-            v-model:value="settings.brightness"
+            v-if="settings.brightnessEnabled"
+            v-model="settings.brightness"
             name="Brightness"
           />
 
-          <tickbox-component text="Enable Contrast" @click="contrastEnabled = !contrastEnabled" />
+          <tickbox-component v-model="settings.contrastEnabled" text="Contrast" />
           <slider-component
-            v-if="contrastEnabled"
-            v-model:value="settings.contrast"
+            v-if="settings.contrastEnabled"
+            v-model="settings.contrast"
             name="Contrast"
           />
 
-          <tickbox-component text="Enable Colour Correction" @click="correctionEnabled = !correctionEnabled" />
+          <tickbox-component v-model="settings.correctionEnabled" text="Color Correction" />
           <slider-component
-            v-if="correctionEnabled"
-            v-model:value="settings.gammaR"
+            v-if="settings.correctionEnabled"
+            v-model="settings.gammaR"
             name="Red"
           />
           <slider-component
-            v-if="correctionEnabled"
-            v-model:value="settings.gammaG"
+            v-if="settings.correctionEnabled"
+            v-model="settings.gammaG"
             name="Green"
           />
           <slider-component
-            v-if="correctionEnabled"
-            v-model:value="settings.gammaB"
+            v-if="settings.correctionEnabled"
+            v-model="settings.gammaB"
             name="Blue"
           />
 
-          <tickbox-component text="Blur Enable" @click="blurEnabled = !blurEnabled" />
+          <tickbox-component v-model="settings.blurEnabled" text="Blur" />
           <slider-component
-            v-if="blurEnabled"
-            v-model:value="settings.blurRadius"
+            v-if="settings.blurEnabled"
+            v-model="settings.blurRadius"
             name="Blur Radius"
           />
         </div>
@@ -131,62 +125,39 @@ export default defineComponent({
   emits: [ 'exit-single-editor' ],
   data() {
     return {
-      blurEnabled: false,
-      brightnessEnabled: false,
-      contrastEnabled: false,
-      correctionEnabled: false,
-      denoiseEnabled: false,
-      echoEnabled: false,
-      echoSettings: { decay: 0, delay: 0 },
-      reverbEnabled: false,
-      reverbSettings: { decay: 0, delay: 0 },
+      previewUrl: `../../DemoProject/recordings/video${this.videoId}.webm`,
       settings: {
+        blurEnabled: false,
         blurRadius: 0,
         brightness: 0,
+        brightnessEnabled: false,
         contrast: 0,
+        contrastEnabled: false,
+        correctionEnabled: false,
+        denoiseEnabled: false,
+        echoDecay: 0,
+        echoDelay: 0,
+        echoEnabled: false,
         gammaB: 0,
         gammaG: 0,
         gammaR: 0,
+        reverbDecay: 0,
+        reverbDelay: 0,
+        reverbEnabled: false
       },
-      video_url: `../../DemoProject/recordings/video${this.videoId}.webm`,
-      volume: 100,
+      volume: 20
     };
   },
   methods: {
-    done(){
+    done() {
+      ipcRenderer.send('save-video-settings', this.videoId, this.settings);
+      this.$emit('exit-single-editor');
       ipcRenderer.send(
-        'asynchronous-message',
+        'edit-video',
         {
-          type: 'audioOptions',
-          data: {
-            file: this.videoId,
-            startTime: 0,
-            volume: this.volume * 2.55,
-            reverb_active: this.reverbEnabled,
-            reverb_delay_identifier: this.reverbSettings.delay,
-            reverb_decay_indentifier: this.reverbSettings.decay,
-            declick_active: this.denoiseEnabled,
-            declip_active: this.denoiseEnabled
-          }
-        }
-      );
-      ipcRenderer.send(
-        'asynchronous-message',
-        {
-          type: 'videoOpitons',
-          data: {
-            file: this.videoId,
-            brightness_enable: this.brightnessEnabled,
-            birghtness: this.settings.brightness / 100,
-            contrast_enable: this.contrastEnabled,
-            contrast: (this. settings.contrast - 50) * 150,
-            balance_enable: this.correctionEnabled,
-            r_balance: this.settings.gammaR / 10,
-            g_balance: this.settings.gammaG / 10,
-            b_balance: this.settings.gammaB / 10,
-            blur_enable: this.blurEnabled,
-            blur_radius: this.settings.blurRadius / 5
-          }
+          ...this.settings,
+          videoId: this.videoId,
+          volume: this.volume * 2.55
         }
       );
     }
@@ -195,6 +166,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-  @import "../styles/main.scss";
-  @import "../styles/pages/single-video-editor.scss";
+  @import '../styles/main';
+  @import '../styles/pages/single-video-editor';
 </style>

@@ -1,9 +1,10 @@
 <template>
   <div class="tickbox-container">
     <input
+      v-model="modelValue"
       class="tickbox"
       type="checkbox"
-      @change="changed($event)"
+      @change="$emit('update:modelValue', modelValue)"
     >
     <h3>{{ text }}</h3>
   </div>
@@ -25,21 +26,16 @@ export default defineComponent({
       type: String
     }
   },
-  emits: [ 'update' ],
+  emits: [ 'update:modelValue' ],
   data() {
     return {
-      ticked: false
+      modelValue: false
     };
-  },
-  methods: {
-    changed(event: Event) {
-      this.ticked = (event.target as HTMLInputElement).checked;
-    }
   }
 });
 
 </script>
 
 <style lang="scss" scoped>
-  @import "../styles/main.scss";
+  @import '../styles/main';
 </style>

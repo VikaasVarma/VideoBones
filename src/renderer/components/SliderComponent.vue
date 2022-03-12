@@ -2,11 +2,11 @@
   <div class="slider-container">
     <h3>{{ name }}</h3>
     <input
-      v-model="value"
+      v-model="modelValue"
       max="100"
       min="1"
       type="range"
-      @mouseup="onValueChange"
+      @change="$emit('update:modelValue', modelValue)"
     >
   </div>
 </template>
@@ -23,20 +23,15 @@ export default defineComponent({
       type: String
     }
   },
-  emits: [ 'update' ],
+  emits: [ 'update:modelValue' ],
   data() {
     return {
-      value: 0
+      modelValue: 0
     };
-  },
-  methods: {
-    onValueChange(e: Event) {
-      this.$emit('update', + (e.currentTarget as HTMLInputElement).value);
-    }
   }
 });
 
 </script>
 <style lang="scss" scoped>
-  @import "../styles/main.scss";
+  @import '../styles/components/slider';
 </style>
