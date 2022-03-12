@@ -57,6 +57,29 @@ export function startStorageHandlers() {
     config.removeRecording(index);
   });
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ipcMain.addListener('add-segment', (event, value: any) => {
+    const segments = config.getOption('segments');
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    config.setOption('segments', [ ...segments, value ]);
+  });
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ipcMain.addListener('edit-segment', (event, id: number, value: any) => {
+    const segments = config.getOption('segments');
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    config.setOption('segments', segments.map((segment, index) => index === id ? { ...segment, ...value } : segment));
+  });
+
+  ipcMain.addListener('delete-segment', (event, id: number) => {
+    const segments = config.getOption('segments');
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    config.setOption('segments', segments.filter((_, i) => i !== id));
+  });
+
   ipcMain.addListener('set-option', (event, optionName: string, optionValue: string) => {
     config.setOption(optionName, optionValue);
   });

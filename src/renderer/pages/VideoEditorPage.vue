@@ -123,7 +123,7 @@
 import { join } from 'node:path';
 import { defineComponent, ref, Ref } from 'vue';
 import { ipcRenderer } from 'electron';
-import { EngineOptions, AudioInput, VideoInput } from '../../main/render/types';
+import { EngineOptions, AudioInput, VideoInput, Resolution } from '../../main/render/types';
 import TrackSelector from '../components/TrackSelector.vue';
 import MetronomeComponent from '../components/MetronomeComponent.vue';
 import VideoPlayer from '../components/VideoPlayer.vue';
@@ -177,7 +177,7 @@ export default defineComponent({
       timelineSegmentsCount: 0,
       timelineWidth: 1,
 
-      tracks: ([] as {trackId: number; trackName: string}[])
+      tracks: ([] as { trackId: number; trackName: string }[])
     };
   },
   created() {
@@ -198,32 +198,10 @@ export default defineComponent({
       this.timelineMaxTime = this.engineOpts.videoInputs.map(i => i.interval[1])
       // eslint-disable-next-line unicorn/no-array-reduce
         .reduce((max, video) => Math.max(max, video), 0);
-      this.getThumbnails();
-      this.getPreview();
     });
   },
   async mounted() {
-    ipcRenderer.invoke('get-option', 'videoTracks').then(videoTracks => {
-      this.tracks = JSON.parse(videoTracks);
-
-      ipcRenderer.invoke('get-option', 'segments').then(segmentData => {
-        const segments = JSON.parse(segmentData);
-        this.engineOpts.videoInputs = [];
-        for (const segment of segments) {
-          this.engineOpts.videoInputs.push({
-            cropOffsets: segment.cropOffsets,
-            files: segment.trackIds
-              .map((f: number) => this.tracks.find(t => t.trackId === f))
-              .map((t: {trackId: number; trackName: string}) => t.trackName)
-              .map((f: string) => join(this.dir, f)),
-            interval: segment.interval,
-            resolutions: segment.resolutions,
-            screenStyle: segment.screenStyle,
-            zoomLevels: segment.zoomLevels
-          });
-        }
-      });
-    });
+    this.updateEverythingPreview();
 
     ipcRenderer.addListener('render-progress', (event, args) => {
       console.log(args.renderedTime);
@@ -276,22 +254,31 @@ export default defineComponent({
   methods: {
     addSegment(event: MouseEvent) {
       const timeline = document.querySelectorAll('.timeline')[0].getBoundingClientRect();
-      /*this.engineOpts.videoInputs.push({
-        crop_offsets: [],
+      let time = (event.clientX - timeline.left) / timeline.width * this.projLength;
+      if (time <= 0.4) {
+        time = 0;
+      }
+      if (this.engineOpts.videoInputs.length > 0) {
+        ipcRenderer.send('edit-segment', this.engineOpts.videoInputs.length - 1, {
+          interval: [ this.engineOpts.videoInputs[this.engineOpts.videoInputs.length - 1].interval[0], time ]
+        });
+      }
+      ipcRenderer.send('add-segment', {
+        cropOffsets: [],
         files: [],
-        interval: [
-          (event.clientX - timeline.left)
-         / timeline.width * this.projLength, this.projLength
-        ] as [number, number],
-        resolutions: [],
-        screenStyle: ('....' as '....' | '|..' | '_..'),
-        zoom_levels: []
-      });*/
+        interval: [ time, this.projLength ],
+        screenStyle: [ '....', '_..', '|..', '.' ][this.screenStyle]
+      });
+
+      this.updateEverythingPreview();
     },
     deleteSegment(event: MouseEvent, id: number) {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore -- Trust me on this one
       (event.target as HTMLElement).parentNode?.parentNode?.remove();
+      ipcRenderer.send('delete-segment', id);
+
+      this.updateEverythingPreview();
     },
     deleteTrack(trackId: number) {
       this.tracks = this.tracks.filter(track => track.trackId !== trackId);
@@ -360,6 +347,7 @@ export default defineComponent({
         indicator.textContent = this.draggingTrack.textContent;
         indicator.classList.add('track-inserted');
         box.append(indicator);
+        this.draggingTrack = null;
       }
       if (this.mouseIsDown) {
         this.seekToPlayhead();
@@ -435,15 +423,51 @@ export default defineComponent({
       this.activeSegment = id;
     },
     setScreenStyle(style: number) {
-      for (const el of document.querySelectorAll('div.screen-style.selected > div > p')) {
-        el.remove();
+      if (this.screenStyle !== style) {
+
+        for (const el of document.querySelectorAll('div.screen-style.selected > div > p')) {
+          el.remove();
+        }
+        this.screenStyle = style;
+
+
+        this.updateEverythingPreview();
       }
-      this.screenStyle = style;
     },
-    startTimelineDrag: function() {
+    startTimelineDrag() {
       this.mouseIsDown = true;
       this.previewPausedBeforeSeek = this.previewPaused;
       this.previewPlay(true);
+    },
+    updateEverythingPreview() {
+      ipcRenderer.invoke('get-option', 'videoTracks').then(videoTracks => {
+        this.tracks = JSON.parse(videoTracks);
+
+        ipcRenderer.invoke('get-option', 'segments').then(segmentData => {
+          const segments = JSON.parse(segmentData);
+          if (segments === null) {
+            return;
+          }
+
+          this.engineOpts.videoInputs = [];
+          for (const segment of segments) {
+            this.engineOpts.videoInputs.push({
+              cropOffsets: segment.cropOffsets as Resolution[],
+              files: segment.files
+                .map((f: number) => this.tracks.find(t => t.trackId === f))
+                .map((t: { trackId: number; trackName: string }) => t.trackName)
+                .map((f: string) => join(this.dir, f)),
+              interval: segment.interval,
+              // eslint-disable-next-line unicorn/prefer-spread
+              resolutions: Array.from<Resolution>(segment.cropOffsets.length).fill({ height: 720, width: 1280 }),
+              screenStyle: segment.screenStyle,
+              zoomLevels: [] // Not implemented
+            });
+          }
+          this.getThumbnails();
+          this.getPreview();
+        });
+      });
     }
   }
 });
