@@ -11,6 +11,7 @@ export interface EngineOptions {
   outputVolume?: number;
   previewManifest?: string; // Ignored unless type is preview
   videoBitRate?: string;
+  videoFilters?: VideoFilter[];
   videoInputs: VideoInput[]; // required
 }
 
@@ -25,16 +26,16 @@ export interface EngineOptions {
  */
 export interface AudioInput {
   file: string;
+  enableDeclick: boolean;
+  enableDeclip: boolean;
+  enableEcho: boolean;
+  enableReverb: boolean;
+  echoDelay: number;
+  echoDecay: number;
+  reverbDecay: number;   //between 0 and 1
+  reverbDelay: number;  //in ms
   startTime: number;
   volume: number;
-  reverb_active: boolean;
-  reverb_delay_identifier: number;  //in ms
-  reverb_decay_identifier: number;   //between 0 and 1
-  declick_active: boolean;
-  declip_active: boolean;
-  echo_active: boolean;
-  echo_delay_identifier: number;
-  echo_decay_identifier: number;
 }
 
 /**
@@ -67,18 +68,18 @@ export interface VideoData {
   resolution: Resolution;
 }
 
-export interface VideoOption {
-  file: string;
-  brightness_enable: boolean;
+export interface VideoFilter {
+  balanceB: number;
+  balanceG: number;
+  balanceR: number;
+  blurRadius: number;
   brightness: number;
-  contrast_enable: boolean;
   contrast: number;
-  balance_enable: boolean;
-  r_balance: number;
-  g_balance: number;
-  b_balance: number;
-  blur_enable: boolean;
-  blur_radius: number;
+  enableBlur: boolean;
+  enableBrightness: boolean;
+  enableContrast: boolean;
+  enableCorrections: boolean;
+  file: string;
 }
 
 export interface Resolution {
