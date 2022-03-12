@@ -5,7 +5,7 @@
   >
     <menu class="grid-container" style="margin: auto;">
       <div id="video-container">
-        <video-player v-if="stream_url != '' " ref="previewPlayer" :manifest-url="stream_url" />
+        <video-player v-if="streamUrl != '' " ref="previewPlayer" :manifest-url="streamUrl" />
       </div>
 
       <div id="video-controls" class="horizontal-spacer">
@@ -133,7 +133,7 @@ export default defineComponent({
   components: { MetronomeComponent, TrackSelector, VideoPlayer },
   emits: [ 'open-recording-page', 'open-single-editor' ],
   setup() {
-    const stream_url = ref('');
+    const streamUrl = ref('');
     const engineOpts: Ref<EngineOptions> = ref({
       audioInputs: [] as AudioInput[],
       outputType: 'preview' as const,
@@ -144,13 +144,13 @@ export default defineComponent({
       // if the preview has rendered more than 2 secs, start the preview viewer
       if (args.renderedTime > 2) {
         const port = args.port;
-        if (stream_url.value === '') {
-          stream_url.value = `http://localhost:${port.toString()}/stream.mpd`;
+        if (streamUrl.value === '') {
+          streamUrl.value = `http://localhost:${port.toString()}/stream.mpd`;
         }
       }
     });
 
-    return { engineOpts, stream_url };
+    return { engineOpts, streamUrl };
   },
   data() {
     return {
