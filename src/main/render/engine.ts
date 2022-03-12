@@ -91,7 +91,6 @@ function buildArgs({
 
   function calculateLayout(videoInput: VideoInput) {
     const screenStyle = videoInput.screenStyle;
-    console.log(`\n\n\n${  screenStyle  }\n\n\n`);
     if (videoInput.files.length !== screenStyle.length) {
       throw new Error('Incorrect number of videos supplied');
     }
@@ -123,8 +122,6 @@ function buildArgs({
       const data: VideoData[] = [];
       input.files.map((file, i) => {
         const layout = calculateLayout(input);
-
-        console.log('\n\n\n', layout, '\n\n\n');
 
         appearances[file] = (appearances[file] ?? 0) + 1;
         data.push({
@@ -194,9 +191,6 @@ function buildArgs({
   //the audioInput part of the EngineOption is never used, instead, it uses the records from AudioOption
   const audioInputOptions: AudioInputOption[] = getAudioOptions();
 
-  //test
-  console.log('--------------------------------');
-  console.log(audioInputOptions);
   //video effect part
   const videoInputOptionsMap: Map<string, VideoInputOption> = getVideoOptionMap();
 
@@ -255,7 +249,6 @@ function buildArgs({
     '-stats'
     ,  outputType === 'render' ? outputFile : previewManifest
   ].filter(el => el.length > 0);
-  console.log(args);
   return args;
 }
 
@@ -282,7 +275,6 @@ export function start(
   console.log(bin, args);
 
   if (bin) {
-    console.log(getTempDirectory());
     ffmpeg = spawn(bin, args, { cwd: getTempDirectory(), stdio: [ 'ignore', 'pipe', process.stderr ] });
     ffmpeg.stdout.on('data', data => {
       const values = data.toString().split(/\n|=/);
@@ -320,7 +312,6 @@ export function getThumbnails(
   console.log('THUMBNAIL', bin, args);
 
   if (bin) {
-    console.log(getTempDirectory());
     ffmpeg_thumbs = spawn(bin, args, { cwd: getTempDirectory(), stdio: [ 'ignore', 'pipe', process.stderr ] });
     ffmpeg_thumbs.on('exit', function() {
       const files = readdirSync(thumbs);

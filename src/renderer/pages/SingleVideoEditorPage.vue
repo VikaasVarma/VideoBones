@@ -26,7 +26,7 @@
             Audio Effects
           </h3>
 
-          <slider-component v-model="volume" name="Volume" />
+          <slider-component v-model="settings.volume" name="Volume" />
 
           <tickbox-component v-model="settings.reverbEnabled" text="Enable Reverb" />
 
@@ -143,20 +143,47 @@ export default defineComponent({
         gammaR: 0,
         reverbDecay: 0,
         reverbDelay: 0,
-        reverbEnabled: false
-      },
-      volume: 20
+        reverbEnabled: false,
+        volume: 50
+      }
     };
+  },
+  mounted() {
+    ipcRenderer.invoke('get-option', 'videoTracks').then(JSON.parse).then(tracks => tracks.find((track: { trackId: number }) => track.trackId === this.videoId)).then(data => {
+      console.log('video', data);
+      this.settings.blurEnabled = data.blurEnabled ?? false;
+      this.settings.blurRadius = Number.parseFloat(data.blurRadius) ?? 0;
+      this.settings.brightness = Number.parseFloat(data.brightness) ?? 0;
+      this.settings.brightnessEnabled = data.brightnessEnabled ?? false;
+      this.settings.contrast = Number.parseFloat(data.contrast) ?? 0;
+      this.settings.contrastEnabled = data.contrastEnabled ?? false;
+      this.settings.correctionEnabled = data.correctionEnabled ?? false;
+      this.settings.gammaB = Number.parseFloat(data.gammaB) ?? 0;
+      this.settings.gammaG = Number.parseFloat(data.gammaG) ?? 0;
+      this.settings.gammaR = Number.parseFloat(data.gammaR) ?? 0;
+    });
+    ipcRenderer.invoke('get-option', 'audioTracks').then(JSON.parse).then(tracks => tracks.find((track: { trackId: number }) => track.trackId === this.videoId)).then(data => {
+      console.log('audio', data);
+      this.settings.denoiseEnabled = data.denoiseEnabled ?? false;
+      this.settings.echoDecay = Number.parseFloat(data.echoDecay) ?? 0;
+      this.settings.echoDelay = Number.parseFloat(data.echoDelay) ?? 0;
+      this.settings.echoEnabled = data.echoEnabled ?? false;
+      this.settings.reverbDecay = Number.parseFloat(data.reverbDecay) ?? 0;
+      this.settings.reverbDelay = Number.parseFloat(data.reverbDelay) ?? 0;
+      this.settings.reverbEnabled = data.reverbEnabled ?? false;
+      this.settings.volume = data.volume ?? 50;
+    });
   },
   methods: {
     done() {
       ipcRenderer.send(
-        'edit-video',
-        JSON.parse(JSON.stringify({
-          ...this.settings,
+        'save-track-data',
+        this.videoId,
+        {
+          ...JSON.parse(JSON.stringify(this.settings)),
           videoId: this.videoId,
-          volume: this.volume * 2.55
-        }))
+          volume: this.settings.volume * 2.55
+        }
       );
       this.$emit('exit-single-editor');
     }

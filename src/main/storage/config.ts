@@ -111,7 +111,7 @@ class OpenProjectData {
     this.writeConfig();
   }
 
-  getConfigOption(option: string): unknown{
+  getConfigOption(option: string): unknown {
     return option in this.projectConfig.options ? this.projectConfig.options[option] : null;
   }
 

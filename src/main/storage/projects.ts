@@ -58,13 +58,13 @@ const handles = {
   array: existsSync(projectHandlesFile)
     ? (() => {
       const json = JSON.parse(readFileSync(projectHandlesFile).toString());
-      const out: Array<ProjectHandle> = [];
+      const out: ProjectHandle[] = [];
       json.forEach((e: any) => {
         if (ProjectHandle.isProjectHandle(e)) {
           if (existsSync(e.projectPath)){
             out.push(ProjectHandle.copy(e));
           } else {
-            console.log(`The project folder for handle ${e} does not exist, removing the handle.`);
+            console.log(`The project folder for handle ${JSON.stringify(e)} does not exist, removing the handle.`);
             // TODO: actually remove the handle
           }
         } else {
@@ -75,16 +75,11 @@ const handles = {
     })()
     : [],
   write: function() {
-    const doWrite = () => {
-      return fs.writeFile(projectHandlesFile, JSON.stringify(this.array));
-    };
-    this.currentHandlesFileWritePromise = this.currentHandlesFileWritePromise.then(
-      doWrite,
-      error => {
+    this.currentHandlesFileWritePromise = this.currentHandlesFileWritePromise
+      .then(() => fs.writeFile(projectHandlesFile, JSON.stringify(this.array)))
+      .catch(error => {
         console.log(`Previous handles write failed, reason: ${error}`);
-        return doWrite();
-      }
-    );
+      });
   },
   push: function(handle: ProjectHandle) {
     this.array.push(handle);
@@ -201,7 +196,7 @@ function untrackProject(projectHandle: ProjectHandle): void {
 /**
  * Get a readonly view of the tracked project handles list.
  */
-function getTrackedProjects(): Readonly<Array<ProjectHandle>> {
+function getTrackedProjects(): Readonly<ProjectHandle[]> {
   return handles.array;
 }
 

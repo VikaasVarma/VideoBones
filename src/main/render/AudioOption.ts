@@ -6,9 +6,9 @@ import { AudioInput } from './types';
 let audioOptions: AudioInputOption[] = [];
 
 export function addAudioOption(option: AudioInput): void{
-  audioOptions = audioOptions.filter(object => object.file !== `${join(getRecordingsDirectory(), option.file)  }.webm`);
+  audioOptions = audioOptions.filter(object => object.file !== `${join(getRecordingsDirectory(), option.file)}.webm`);
   audioOptions.push(new AudioInputOption(
-    `${join(getRecordingsDirectory(), option.file)  }.webm`,
+    `${join(getRecordingsDirectory(), option.file)}.webm`,
     option.startTime,
     option.volume,
     option.reverb_active,
