@@ -228,12 +228,12 @@ function buildArgs({
           outputType === 'thumbnail' ? '' : audioInputOptions.map((input: AudioInputOption, i: number) =>
             `[${i + videoDict.size}:a]${input.getAllOptions()}aformat=fltp:48000:stereo,volume=${Math.max(input.volume / 256, 0.1)}[ainput${i}]`)
             .join(';'),
-          outputType === 'thumbnail' ? '' : (audioInputOptions.length === 0 ? '' : `${audioInputOptions.map((_, i: number) => `[ainput${i}]`).join('')  }amerge=inputs=${audioInputOptions.length  }[aout]`)
+          outputType === 'thumbnail' ? '' : (audioInputOptions.length === 0 ? '' : `${audioInputOptions.map((_, i: number) => `[ainput${i}]`).join('')}amerge=inputs=${audioInputOptions.length}[aout]`)
         ).filter(el => el.length > 0).join(';')
       ],
       [
         '-map', '[out]',
-        outputType === 'thumbnail' ? '' : '-map', outputType === 'thumbnail' ? '' : '[aout]'
+        (outputType === 'thumbnail' || audioInputOptions.length === 0) ? '' : '-map', (outputType === 'thumbnail' || audioInputOptions.length === 0) ? '' : '[aout]'
       ]
     ).filter(el => el.length > 0);
 
@@ -245,7 +245,8 @@ function buildArgs({
     '-r', '1'
     ,  'thumbs/%04d.png'
   ] : [
-    ...[ outputType === 'preview' ? '-re' : 'REMOVED' ].concat(filter),
+    outputType === 'preview' ? '-re' : '',
+    ...filter,
     '-c:v', 'libx264',
     '-c:a', 'aac',
     '-ac', '2',
@@ -268,9 +269,7 @@ function buildArgs({
     '-progress', '-', '-nostats', // get it to print stats
     '-stats'
     ,  outputType === 'render' ? outputFile : previewManifest
-  ].filter(str => {
-    return str !== 'REMOVED';
-  });
+  ].filter(el => el.length > 0);
   console.log(args);
   return args;
 }
