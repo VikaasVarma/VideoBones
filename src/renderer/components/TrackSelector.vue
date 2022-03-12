@@ -33,5 +33,5 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-  @import '../styles/components/_track';
+  @import '../styles/components/track';
 </style>

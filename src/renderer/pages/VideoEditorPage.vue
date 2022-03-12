@@ -137,7 +137,7 @@ export default defineComponent({
     const engineOpts: Ref<EngineOptions> = ref({
       audioInputs: [] as AudioInput[],
       outputType: 'preview' as const,
-      videoInputs: [] as VideoInput[],
+      videoInputs: [] as VideoInput[]
     });
 
     ipcRenderer.addListener('engine-progress', (event, args) => {
