@@ -83,32 +83,32 @@
             :class="['screen-style', screenStyle === 0 ? 'selected' : '']"
             @click="setScreenStyle(0)"
           >
-            <div style="grid-column: 1 / 2; grid-row: 1 / 2;" />
-            <div style="grid-column: 2 / 3; grid-row: 1 / 2;" />
-            <div style="grid-column: 1 / 2; grid-row: 2 / 3;" />
-            <div style="grid-column: 2 / 3; grid-row: 2 / 3;" />
+            <div data-box="0" style="grid-column: 1 / 2; grid-row: 1 / 2;" />
+            <div data-box="1" style="grid-column: 2 / 3; grid-row: 1 / 2;" />
+            <div data-box="2" style="grid-column: 1 / 2; grid-row: 2 / 3;" />
+            <div data-box="3" style="grid-column: 2 / 3; grid-row: 2 / 3;" />
           </div>
           <div
             :class="['screen-style', screenStyle === 1 ? 'selected' : '']"
             @click="setScreenStyle(1)"
           >
-            <div style="grid-column: 1 / 3; grid-row: 1 / 2;" />
-            <div style="grid-column: 1 / 2; grid-row: 2 / 3;" />
-            <div style="grid-column: 2 / 3; grid-row: 2 / 3;" />
+            <div data-box="0" style="grid-column: 1 / 3; grid-row: 1 / 2;" />
+            <div data-box="1" style="grid-column: 1 / 2; grid-row: 2 / 3;" />
+            <div data-box="2" style="grid-column: 2 / 3; grid-row: 2 / 3;" />
           </div>
           <div
             :class="['screen-style', screenStyle === 2 ? 'selected' : '']"
             @click="setScreenStyle(2)"
           >
-            <div style="grid-column: 1 / 2; grid-row: 1 / 3;" />
-            <div style="grid-column: 2 / 3; grid-row: 1 / 2;" />
-            <div style="grid-column: 2 / 3; grid-row: 2 / 3;" />
+            <div data-box="0" style="grid-column: 1 / 2; grid-row: 1 / 3;" />
+            <div data-box="1" style="grid-column: 2 / 3; grid-row: 1 / 2;" />
+            <div data-box="2" style="grid-column: 2 / 3; grid-row: 2 / 3;" />
           </div>
           <div
             :class="['screen-style', screenStyle === 3 ? 'selected' : '']"
             @click="setScreenStyle(3)"
           >
-            <div style="grid-column: 1 / 3; grid-row: 1 / 3;" />
+            <div data-box="0" style="grid-column: 1 / 3; grid-row: 1 / 3;" />
           </div>
         </div>
       </menu>
@@ -263,11 +263,12 @@ export default defineComponent({
           interval: [ this.engineOpts.videoInputs[this.engineOpts.videoInputs.length - 1].interval[0], time ]
         });
       }
+      const screenStyle = [ '....', '_..', '|..', '.' ][this.screenStyle];
       ipcRenderer.send('add-segment', {
-        cropOffsets: [],
-        files: [],
+        cropOffsets: Array.from<Resolution>({length: screenStyle.length }).fill({height: 720, width: 1280}),
+        files: Array.from<string>({length: screenStyle.length}).fill(''),
         interval: [ time, this.projLength ],
-        screenStyle: [ '....', '_..', '|..', '.' ][this.screenStyle]
+        screenStyle
       });
 
       this.updateEverythingPreview();
@@ -335,19 +336,34 @@ export default defineComponent({
             && event.clientY >= box_rect.y
             && event.clientY <= box_rect.y + box_rect.height
           );
-        });
+        }) as HTMLElement | undefined;
         if (!box) {
           this.draggingTrack = null;
           return;
         }
+        const id = box.dataset.box;
         for (const child of box.childNodes) {
           child.remove();
         }
+        ipcRenderer.invoke('get-option', 'segments').then(segments => {
+          if (this.draggingTrack === null) {
+            return;
+          }
+
+          const segment = JSON.parse(segments)[this.activeSegment];
+          console.log(segment, this.activeSegment);
+          ipcRenderer.send('edit-segment', this.activeSegment, {
+            cropSizes: segment.cropSize.splice(id, 1, { height: 720, width: 1280 }),
+            files: segment.files.splice(id, 1, `${this.draggingTrack.textContent}.webm`),
+            screenStyle: [ '....', '_..', '|..', '.' ][this.screenStyle]
+          });
+          this.draggingTrack = null;
+        });
+
         const indicator = document.createElement('p');
         indicator.textContent = this.draggingTrack.textContent;
         indicator.classList.add('track-inserted');
         box.append(indicator);
-        this.draggingTrack = null;
       }
       if (this.mouseIsDown) {
         this.seekToPlayhead();
@@ -430,6 +446,11 @@ export default defineComponent({
         }
         this.screenStyle = style;
 
+        ipcRenderer.send('edit-segment', this.activeSegment, {
+          cropSizes: [],
+          files: [],
+          screenStyle: [ '....', '_..', '|..', '.' ][this.screenStyle]
+        });
 
         this.updateEverythingPreview();
       }
@@ -455,7 +476,7 @@ export default defineComponent({
               cropOffsets: segment.cropOffsets as Resolution[],
               files: segment.files
                 .map((f: number) => this.tracks.find(t => t.trackId === f))
-                .map((t: { trackId: number; trackName: string }) => t.trackName)
+                .map((t: { trackId: number; trackName: string }) => t !== undefined ? t.trackName : '')
                 .map((f: string) => join(this.dir, f)),
               interval: segment.interval,
               // eslint-disable-next-line unicorn/prefer-spread
