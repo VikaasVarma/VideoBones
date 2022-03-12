@@ -59,7 +59,7 @@ export function startHandler(port: number) {
   });
 
   ipcMain.addListener('save-track-data', async (event, id: number, data) => {
-    console.log("DATA", data);
+    console.log('DATA', data);
     let videos = getOption('videoTracks');
     let audios = getOption('audioTracks');
 
@@ -88,14 +88,14 @@ export function startHandler(port: number) {
         reverbDecay: data.reverbDecay ?? 0,
         reverbDelay: data.reverbDelay ?? 0,
         reverbEnabled: data.reverbEnabled ?? false,
-        volume: data.volume ?? 0,
+        volume: data.volume ?? 0
       });
       setOption('audioTracks', audios);
     }
   });
 
   ipcMain.addListener('edit-layout', async (event, args) => {
-
+    
   });
 }
 

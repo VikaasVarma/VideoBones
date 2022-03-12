@@ -9,9 +9,9 @@ interface Operation {
 function createOperation(execute: () => void, undo: () => void): Operation {
   return {
     'execute': execute,
-    'undo': undo,
     'next': null,
-    'prev': null
+    'prev': null,
+    'undo': undo
   };
 }
 

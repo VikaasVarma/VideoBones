@@ -66,7 +66,7 @@ export default defineComponent({
       }
 
       (this.$refs.videoPlayer as HTMLVideoElement).currentTime = newTime;
-    },
+    }
   }
 });
 </script>

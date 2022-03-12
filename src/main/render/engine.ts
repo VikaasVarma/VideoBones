@@ -4,7 +4,7 @@ import { ChildProcessByStdio, spawn } from 'node:child_process';
 import { existsSync, mkdirSync, readdirSync, rmSync } from 'node:fs';
 import { getTempDirectory } from '../storage/config';
 import { getPath } from './ffmpeg';
-import { AudioInput, EngineOptions, VideoInput, VideoData } from './types';
+import { AudioInput, EngineOptions, VideoInput, VideoData, Resolution, Position } from './types';
 import { AudioInputOption, getAudioOptions } from './AudioOption';
 import { getVideoOptionMap, VideoInputOption } from './videoOption';
 
@@ -34,7 +34,7 @@ function buildArgs({
 }: EngineOptions): string[] {
 
   // The holy ffmpeg argument builder
-  function getTemplateSizeAndAnchors(screenStyle: string): { anchors: any[]; templateSizes: any[] } {
+  function getTemplateSizeAndAnchors(screenStyle: string): { anchors: Position[]; templateSizes: Resolution[] } {
     let templateSizes;
     let anchors;
     const screenWidth = outputResolution.width;

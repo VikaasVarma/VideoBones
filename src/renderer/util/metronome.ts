@@ -58,6 +58,7 @@ function getWavHeader(options: WavOptions) {
 
   function writeString(s: string) {
     for (let i = 0; i < s.length; i++) {
+      // eslint-disable-next-line unicorn/prefer-code-point
       dv.setUint8(p + i, s.charCodeAt(i));
     }
     p += s.length;
