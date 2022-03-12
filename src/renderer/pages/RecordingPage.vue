@@ -329,6 +329,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-  @import "../styles/main.scss";
-  @import "../styles/pages/recording-page.scss";
+  @import '../styles/main';
+  @import '../styles/pages/recording-page';
 </style>
