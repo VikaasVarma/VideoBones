@@ -93,10 +93,6 @@ export function startHandler(port: number) {
       setOption('audioTracks', audios);
     }
   });
-
-  ipcMain.addListener('edit-layout', async (event, args) => {
-    
-  });
 }
 
 export function stopHandler() {

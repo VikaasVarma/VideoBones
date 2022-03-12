@@ -10,8 +10,6 @@ export interface EngineOptions {
   outputType: 'thumbnail' | 'preview' | 'render'; // required
   outputVolume?: number;
   previewManifest?: string; // Ignored unless type is preview
-  thumbnailEvery?: string; // X/Y format, X images every Y seconds
-  startTime?: number; // Measured in seconds
   videoBitRate?: string;
   videoInputs: VideoInput[]; // required
 }

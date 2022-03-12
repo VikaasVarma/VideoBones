@@ -36,11 +36,11 @@ interface Config {
  *
  * @returns True if o is a valid Config object
  */
-function isConfig(o: any): o is Config {
+function isConfig(o: Record<string, unknown>): boolean {
   return  'projectName' in o && typeof o.projectName === 'string'
-          && 'version' in o && typeof o.version === 'number'
-          && 'recordings' in o && typeof o.recordings === typeof []
-          && 'options' in o && o.options.constructor === Object;
+    && 'version' in o && typeof o.version === 'number'
+    && 'recordings' in o && typeof o.recordings === typeof []
+    && 'options' in o && typeof o.options === 'object' && o.options !== null;
 }
 
 class ConfigBuilder {

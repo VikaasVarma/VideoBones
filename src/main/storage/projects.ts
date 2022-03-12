@@ -29,7 +29,7 @@ class ProjectHandle {
   /**
    * User-defined type guard for project handles.
    */
-  static isProjectHandle(h: any): h is ProjectHandle {
+  static isProjectHandle(h: Record<string, unknown>): boolean {
     return 'projectPath' in h && typeof h.projectPath === 'string'
     && 'projectName' in h && typeof h.projectName === 'string';
   }
@@ -74,13 +74,6 @@ const handles = {
       return out;
     })()
     : [],
-  write: function() {
-    this.currentHandlesFileWritePromise = this.currentHandlesFileWritePromise
-      .then(() => fs.writeFile(projectHandlesFile, JSON.stringify(this.array)))
-      .catch(error => {
-        console.log(`Previous handles write failed, reason: ${error}`);
-      });
-  },
   push: function(handle: ProjectHandle) {
     this.array.push(handle);
     this.write();
@@ -101,6 +94,13 @@ const handles = {
     this.array.splice(indexToRemove, 1);
 
     this.write();
+  },
+  write: function() {
+    this.currentHandlesFileWritePromise = this.currentHandlesFileWritePromise
+      .then(() => fs.writeFile(projectHandlesFile, JSON.stringify(this.array)))
+      .catch(error => {
+        console.log(`Previous handles write failed, reason: ${error}`);
+      });
   }
 };
 

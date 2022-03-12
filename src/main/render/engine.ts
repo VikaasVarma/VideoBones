@@ -5,8 +5,6 @@ import { existsSync, mkdirSync, readdirSync, rmSync } from 'node:fs';
 import { getTempDirectory } from '../storage/config';
 import { getPath } from './ffmpeg';
 import { AudioInput, EngineOptions, VideoInput, VideoData, Resolution, Position } from './types';
-import { AudioInputOption, getAudioOptions } from './AudioOption';
-import { getVideoOptionMap, VideoInputOption } from './videoOption';
 
 
 /**
@@ -23,28 +21,26 @@ function buildArgs({
   bufferSize = '32M',
   framesPerSecond = 60,
   outputFile = 'output.mp4',
-  outputResolution = { width: 1920, height: 1080 },
+  outputResolution = { height: 1080, width: 1920 },
   outputType,
   outputVolume = 256,
   previewManifest = 'stream.mpd',
-  startTime = 0,
-  thumbnailEvery = '1/5',
   videoBitRate = '6M',
   videoInputs = [] as VideoInput[]
 }: EngineOptions): string[] {
 
   // The holy ffmpeg argument builder
   function getTemplateSizeAndAnchors(screenStyle: string): { anchors: Position[]; templateSizes: Resolution[] } {
-    let templateSizes;
-    let anchors;
+    let templateSizes: Resolution[];
+    let anchors: Position[];
     const screenWidth = outputResolution.width;
     const screenHeight = outputResolution.height;
 
     switch (screenStyle) {
       case '....':
-        templateSizes = Array.from({ length: 4 }).fill({
-          width: screenWidth / 2,
-          height: screenHeight / 2
+        templateSizes = Array.from<Resolution>({ length: 4 }).fill({
+          height: screenHeight / 2,
+          width: screenWidth / 2
         });
 
         anchors = [
@@ -57,9 +53,9 @@ function buildArgs({
 
       case '|..':
         templateSizes = [
-          { width: screenWidth / 2, height: screenHeight },
-          { width: screenWidth / 2, height: screenHeight / 2 },
-          { width: screenWidth / 2, height: screenHeight / 2 }
+          { height: screenHeight, width: screenWidth / 2 },
+          { height: screenHeight / 2, width: screenWidth / 2 },
+          { height: screenHeight / 2, width: screenWidth / 2 }
         ];
 
         anchors = [
@@ -71,9 +67,9 @@ function buildArgs({
 
       case '_..':
         templateSizes = [
-          { width: screenWidth, height: screenHeight / 2 },
-          { width: screenWidth / 2, height: screenHeight / 2 },
-          { width: screenWidth / 2, height: screenHeight / 2 }
+          { height: screenHeight / 2, width: screenWidth },
+          { height: screenHeight / 2, width: screenWidth / 2 },
+          { height: screenHeight / 2, width: screenWidth / 2 }
         ];
 
         anchors = [
@@ -106,13 +102,15 @@ function buildArgs({
         res.height / template_data.templateSizes[i].height
       );
       real_resolutions.push({
-        width: res.width / res_ratio,
-        height: res.height / res_ratio
+        height: res.height / res_ratio,
+        width: res.width / res_ratio
       });
     }
-    return { video_anchors,
+    return {
+      layout_resolutions: template_data.templateSizes,
       real_resolutions,
-      layout_resolutions: template_data.templateSizes };
+      video_anchors
+    };
   }
 
   function genVideoData(videoInputs: VideoInput[], videoDict: Map<string, number>): VideoData[][] {
@@ -120,18 +118,22 @@ function buildArgs({
     const appearances: { [file: string]: number } = {};
     for (const input of videoInputs) {
       const data: VideoData[] = [];
-      input.files.map((file, i) => {
+      input.files.forEach((file, i) => {
         const layout = calculateLayout(input);
+        const id = videoDict.get(file);
+        if (id === undefined) {
+          return;
+        }
 
         appearances[file] = (appearances[file] ?? 0) + 1;
         data.push({
-          id: [ videoDict.get(file)!, appearances[file] - 1 ],
+          crop_offset: { x: 0, y: 0 },
+          crop_size: { height: layout.layout_resolutions[i].height, width: layout.layout_resolutions[i].width },
           file: file,
+          id: [ id, appearances[file] - 1 ],
           interval: input.interval,
-          position: { top: layout.video_anchors[i].y, left: layout.video_anchors[i].x },
-          resolution: { width: layout.real_resolutions[i].width, height: layout.real_resolutions[i].height },
-          crop_size: {  width: layout.layout_resolutions[i].width, height: layout.layout_resolutions[i].height },
-          crop_offset: { top: 0, left: 0 }
+          position: { x: layout.video_anchors[i].x, y: layout.video_anchors[i].y  },
+          resolution: { height: layout.real_resolutions[i].height, width: layout.real_resolutions[i].width }
         });
       });
       videoData.push(data);
@@ -155,10 +157,13 @@ function buildArgs({
     videoData.map(screen => screen.map(video => splits.set(video.file, (splits.get(video.file) ?? 0) + 1)));
 
     return [ ...splits.keys() ].flatMap(file => {
-      const id = videoDict.get(file)!;
-      const numSplits = splits.get(file)!;
+      const id = videoDict.get(file);
+      const numSplits = splits.get(file);
+      if (id === undefined || numSplits === undefined) {
+        return '';
+      }
       if (numSplits > 2) {
-        return `[${id}:v]split=${numSplits}${[ ...new Array(numSplits).keys() ].map(j => `[v${id}${j}]`).join('')}`;
+        return `[${id}:v]split=${numSplits}${[ ...Array.from({ length: numSplits }) ].map((_, i) => `[v${id}${i}]`).join('')}`;
       } else if (numSplits === 2) {
         return `[${id}:v]split[v${id}0][v${id}1]`;
       }
@@ -191,9 +196,6 @@ function buildArgs({
   //the audioInput part of the EngineOption is never used, instead, it uses the records from AudioOption
   const audioInputOptions: AudioInputOption[] = getAudioOptions();
 
-  //video effect part
-  const videoInputOptionsMap: Map<string, VideoInputOption> = getVideoOptionMap();
-
   //the filter is the main part of the arguements, it specifies the rendering type,
   //the video layout, timing and video/audio effects.
   const filter = [
@@ -221,8 +223,8 @@ function buildArgs({
     '-preset', 'ultrafast',
     '-aspect', aspectRatio,
     '-progress', '-', '-nostats', // get it to print stats
-    '-r', '1'
-    ,  'thumbs/%04d.png'
+    '-r', '1',
+    'thumbs/%04d.png'
   ] : [
     outputType === 'preview' ? '-re' : '',
     ...filter,
@@ -246,8 +248,8 @@ function buildArgs({
     '-metadata', 'description="Made with VideoBones"',
     '-probesize', '32', '-analyzeduration', '0', // optimisations, can remove if breaking
     '-progress', '-', '-nostats', // get it to print stats
-    '-stats'
-    ,  outputType === 'render' ? outputFile : previewManifest
+    '-stats',
+    outputType === 'render' ? outputFile : previewManifest
   ].filter(el => el.length > 0);
   return args;
 }
