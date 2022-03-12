@@ -54,7 +54,7 @@
           <h2 class="section-title">
             Metronome
           </h2>
-          <metronome-component ref="metronome" />
+          <metronome-component v-model="metronomeBpm" />
         </div>
         <div id="track-selection-menu">
           <h2 class="section-title">
@@ -186,7 +186,7 @@ export default defineComponent({
       activeSegment: 0,
       dir: '',
       draggingTrack: (null as null | HTMLElement),
-      metronome: { initialBpm: 80 },
+      metronomeBpm: 80,
       mouse_down: false,
       playhead: 0.6,
 
