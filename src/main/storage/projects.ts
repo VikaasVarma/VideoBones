@@ -132,6 +132,14 @@ function createProject(parentDirectory: string, projectName: string): Promise<Pr
   return projectHandlePromise;
 }
 
+
+const projectDirectoryStructure = [
+  'tmp',
+  path.join('tmp', 'thumbs'),
+  'recordings'
+];
+
+
 /**
  * Sets up the folders for a new project.
  *
@@ -150,20 +158,45 @@ function createProjectDirectory(parentDirectory: string, projectName: string): P
 
   // create project directory structure
   // chain promises so subdirs are only created once their parents are avaliable
-  return fs.mkdir(projectDirectory, { recursive: true })
-    .then(() => {
-      // make subdirs
-      return fs.mkdir(path.join(projectDirectory, recordingsDirectoryName))
-        .then(() => {
-          return fs.mkdir(path.join(projectDirectory, tempDirectoryName));
-        });
-    })
-    .then(() => {
-      return projectDirectory;
-    })
-    .catch(error => {
-      throw new Error(`Failed to create project directory, reason: ${error}`);
+  let prom = fs.mkdir(projectDirectory, { recursive: true }).then(() => {
+    return;
+  }).catch(error => {
+    throw new Error(`Failed to create project root, reason: ${error}`);
+  });
+
+  for (const p in projectDirectoryStructure) {
+    prom = prom.then(() => {
+      return fs.mkdir(path.join(projectDirectory, p));
+    }, error => {
+      throw new Error(`Failed to create project subdirectory ${p}, reason: ${error}`);
     });
+  }
+
+  return prom.then(() => projectDirectory);
+}
+
+/**
+ * Checks that all the subdirectories of the project are avaliable, and creates any that are missing.
+ *
+ * @returns A promise resolving when the directory is validated
+ * @throws Error if the project root dir doesnt exist
+ */
+function validateRepairProjectDirectory(projectHandle: ProjectHandle): Promise<void> {
+  if (!existsSync(projectHandle.projectPath)) {
+    throw new Error('Failed to validate project, path does not exist.');
+  }
+
+  let prom = Promise.resolve();
+
+  for (const p in projectDirectoryStructure) {
+    if (!existsSync(path.join(projectHandle.projectPath, p))) {
+      prom = prom.then(() => {
+        return fs.mkdir(path.join(projectHandle.projectPath, p));
+      });
+    }
+  }
+
+  return prom;
 }
 
 /**
@@ -203,5 +236,6 @@ function getTrackedProjects(): Readonly<ProjectHandle[]> {
 
 export {
   ProjectHandle, createProject,
-  trackProject, untrackProject, getTrackedProjects
+  trackProject, untrackProject, getTrackedProjects,
+  validateRepairProjectDirectory
 };

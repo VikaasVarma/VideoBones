@@ -1,5 +1,5 @@
 import { cleanProjectTempDirectory, createProjectRecordingFile, getProjectRecordingsDirectory, getProjectTempDirectory, readProjectConfig, writeDirectoryConfig, writeProjectConfig } from './storage';
-import { ProjectHandle } from './projects';
+import { ProjectHandle, validateRepairProjectDirectory } from './projects';
 
 /**
  * Holds data from .bones project config files.
@@ -170,7 +170,9 @@ function initialiseProjectConfig(projectDirectory: string, projectName: string):
  * @returns A promise which resolves when the project has been opened for this module.
  */
 function openProject(projectHandle: ProjectHandle): Promise<void> {
-  const closePromise = closeProject();
+  const closePromise = closeProject().then(() => {
+    validateRepairProjectDirectory(projectHandle);
+  });
 
   const configPromise = closePromise.then(() => {
     return readProjectConfig(projectHandle);
