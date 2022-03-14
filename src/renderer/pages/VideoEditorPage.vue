@@ -265,8 +265,8 @@ export default defineComponent({
       }
       const screenStyle = [ '....', '_..', '|..', '.' ][this.screenStyle];
       ipcRenderer.send('add-segment', {
-        cropOffsets: Array.from<Resolution>({length: screenStyle.length }).fill({height: 720, width: 1280}),
-        files: Array.from<string>({length: screenStyle.length}).fill(''),
+        cropOffsets: Array.from<Resolution>({ length: screenStyle.length }).fill({ height: 720, width: 1280 }),
+        files: Array.from<string>({ length: screenStyle.length }).fill(''),
         interval: [ time, this.projLength ],
         screenStyle
       });
