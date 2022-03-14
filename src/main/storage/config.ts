@@ -170,8 +170,9 @@ function initialiseProjectConfig(projectDirectory: string, projectName: string):
  * @returns A promise which resolves when the project has been opened for this module.
  */
 function openProject(projectHandle: ProjectHandle): Promise<void> {
+
   const closePromise = closeProject().then(() => {
-    validateRepairProjectDirectory(projectHandle);
+    return validateRepairProjectDirectory(projectHandle);
   });
 
   const configPromise = closePromise.then(() => {

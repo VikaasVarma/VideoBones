@@ -164,7 +164,7 @@ function createProjectDirectory(parentDirectory: string, projectName: string): P
     throw new Error(`Failed to create project root, reason: ${error}`);
   });
 
-  for (const p in projectDirectoryStructure) {
+  for (const p in projectDirectoryStructure.values) {
     prom = prom.then(() => {
       return fs.mkdir(path.join(projectDirectory, p));
     }, error => {
@@ -172,7 +172,9 @@ function createProjectDirectory(parentDirectory: string, projectName: string): P
     });
   }
 
-  return prom.then(() => projectDirectory);
+  return prom.then(() => {
+    return projectDirectory;
+  });
 }
 
 /**
@@ -187,8 +189,7 @@ function validateRepairProjectDirectory(projectHandle: ProjectHandle): Promise<v
   }
 
   let prom = Promise.resolve();
-
-  for (const p in projectDirectoryStructure) {
+  for (const p of projectDirectoryStructure) {
     if (!existsSync(path.join(projectHandle.projectPath, p))) {
       prom = prom.then(() => {
         return fs.mkdir(path.join(projectHandle.projectPath, p));
