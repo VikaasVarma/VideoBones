@@ -82,18 +82,18 @@ ipcMain.handle('open-project-clicked', async () => {
   const possible_projects = curr_projects?.filter((item: projects.ProjectHandle) =>
     item.projectPath === selected_attr.filePaths[0]);
 
-  if (!possible_projects || possible_projects.length <= 0) {
-    try {
-      const handle = await projects.trackProject(selected_attr.filePaths[0]);
-      await config.openProject(handle);
-      mainWindow?.setTitle(`${handle.projectName} - Video Bones`);
-    } catch {
-      return { alert: true, failed: true, output: 'Please select a Project file' };
-    }
-  } else {
-    await config.openProject(possible_projects[0]);
-    mainWindow?.setTitle(`${possible_projects[0].projectName} - Video Bones`);
+  let handle = null;
+  try {
+    handle = (!possible_projects || possible_projects.length <= 0)
+      ? await projects.trackProject(selected_attr.filePaths[0])
+      : possible_projects[0];
+  } catch {
+    return { alert: true, failed: true, output: 'Please select a Project file' };
   }
+
+  await config.openProject(handle);
+  mainWindow?.setTitle(`${handle.projectName} - Video Bones`);
+
   return { alert: false, failed: false, output: '' };
 
 });
