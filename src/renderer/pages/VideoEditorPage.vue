@@ -250,6 +250,7 @@ export default defineComponent({
     ipcRenderer.removeAllListeners('engine-done');
     ipcRenderer.removeAllListeners('render-done');
     ipcRenderer.removeAllListeners('render-progress');
+    ipcRenderer.removeAllListeners('thumbnail-reply');
   },
   methods: {
     addSegment(event: MouseEvent) {
@@ -463,6 +464,11 @@ export default defineComponent({
     updateEverythingPreview() {
       ipcRenderer.invoke('get-option', 'videoTracks').then(videoTracks => {
         this.tracks = JSON.parse(videoTracks);
+        console.log(this.tracks.length);
+        if (this.tracks.length === 0) {
+          // we have no tracks, dont try to start the preview
+          return;
+        }
 
         ipcRenderer.invoke('get-option', 'segments').then(segmentData => {
           const segments = JSON.parse(segmentData);
