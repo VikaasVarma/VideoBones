@@ -138,8 +138,8 @@ function buildArgs({
         data.push({
           cropOffset: { x: 0, y: 0 },
           cropSize: { height: layout.layout_resolutions[i].height, width: layout.layout_resolutions[i].width },
-          file: file,
-          id: [ id, appearances[file] - 1 ],
+          file: file === '' ? 'NULL' : file,
+          id: file === '' ?  [ -1, 0 ] : [ id, appearances[file] - 1 ],
           interval: input.interval,
           position: { x: layout.video_anchors[i].x, y: layout.video_anchors[i].y  },
           resolution: { height: layout.real_resolutions[i].height, width: layout.real_resolutions[i].width }
@@ -205,7 +205,7 @@ function buildArgs({
     const videoDict = new Map<string, number>();
     let i = 0;
     videoInputs.map(input => input.files.map(file => {
-      if (!videoDict.has(file)) {
+      if (file !== '' && !videoDict.has(file)) {
         videoDict.set(file, i); i++;
       }
     }));
@@ -235,6 +235,11 @@ function buildArgs({
     return videoData.flatMap(screen => screen.map(input => {
       const [ i, j, res, c_size, c_offset ]
       = [ input.id[0], input.id[1], input.resolution, input.cropSize, input.cropOffset ];
+
+      if (input.file === 'NULL') {
+        return `[null${videoData.indexOf(screen)}${screen.indexOf(input)}]${getVideoFilters(videoFilters, input.file)}scale=${res.width}x${res.height},crop=${c_size.width}:${c_size.height}:${c_offset.x}:${c_offset.y}[i${i}${j}]`;
+      }
+
       return `[v${i}${j}]${getVideoFilters(videoFilters, input.file)}scale=${res.width}x${res.height},crop=${c_size.width}:${c_size.height}:${c_offset.x}:${c_offset.y}[i${i}${j}]`;
     }));
   }
@@ -251,9 +256,29 @@ function buildArgs({
     return overlay;
   }
 
+  function genNullStreams(videoData: VideoData[][]): string {
+    const out = [ '[tmp0]' ];
+
+    for (const a in videoData) {
+      for (const b in videoData[a]) {
+        if (videoData[a][b].file === 'NULL') {
+          out.push(`[null${a}${b}]`);
+        }
+      }
+    }
+
+    return (`[null]split${out.join('')}`);
+  }
+
   const videoDict: Map<string, number> = genVideoDict(videoInputs);
   const videoData: VideoData[][] = genVideoData(videoInputs, videoDict);
 
+  let duration = 0;
+  for (const a of videoData) {
+    for (const b of a) {
+      if (b.interval[1] > duration) duration = b.interval[1];
+    }
+  }
 
   //the filter is the main part of the arguements, it specifies the rendering type,
   //the video layout, timing and video/audio effects.
@@ -262,14 +287,15 @@ function buildArgs({
     ...audioInputs.flatMap(input => [ '-i', input.file ]),
 
     '-filter_complex', [
-      `color=s=${outputResolution.width}x${outputResolution.height}:c=black[tmp0]`,
+      `color=s=${outputResolution.width}x${outputResolution.height}:c=black,trim=0:${duration}[null]`,
+      genNullStreams(videoData),
       ...splitInstr(videoData, videoDict),
       ...videoSetup(videoFilters, videoData),
       ...videoOverlay(videoData),
       outputType === 'thumbnail' ? '' : audioInputs.map((input: AudioInput, i: number) =>
-        `[${i + videoDict.size}:a]aformat=fltp:48000:stereo,volume=${input.volume / 256},${getAudioFilters(input)}[ainput${i}]`)
+        `[${i + videoDict.size}:a]aformat=fltp:48000:stereo,volume=${input.volume || 1}${getAudioFilters(input).length === 0 ? '' : ','.concat(getAudioFilters(input))}[ainput${i}]`)
         .join(';'),
-      outputType === 'thumbnail' ? '' : (audioInputs.length === 0 ? '' : `${audioInputs.map((_, i: number) => `[ainput${i}]`).join('')}amerge=inputs=${audioInputs.length}[aout]`)
+      outputType === 'thumbnail' ? '' : (audioInputs.length === 0 ? '' : `${audioInputs.map((_, i: number) => `[ainput${i}]`).join('')}amix=inputs=${audioInputs.length}:duration=longest[aout]`)
     ].filter(el => el.length > 0).join(';'),
 
     '-map', '[out]',

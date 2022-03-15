@@ -80,6 +80,7 @@
             Screen Styles
           </h2>
           <div
+            id="...."
             :class="['screen-style', screenStyle === 0 ? 'selected' : '']"
             @click="setScreenStyle(0)"
           >
@@ -89,6 +90,7 @@
             <div data-box="3" style="grid-column: 2 / 3; grid-row: 2 / 3;" />
           </div>
           <div
+            id="_.."
             :class="['screen-style', screenStyle === 1 ? 'selected' : '']"
             @click="setScreenStyle(1)"
           >
@@ -97,6 +99,7 @@
             <div data-box="2" style="grid-column: 2 / 3; grid-row: 2 / 3;" />
           </div>
           <div
+            id="|.."
             :class="['screen-style', screenStyle === 2 ? 'selected' : '']"
             @click="setScreenStyle(2)"
           >
@@ -105,6 +108,7 @@
             <div data-box="2" style="grid-column: 2 / 3; grid-row: 2 / 3;" />
           </div>
           <div
+            id="."
             :class="['screen-style', screenStyle === 3 ? 'selected' : '']"
             @click="setScreenStyle(3)"
           >
@@ -142,8 +146,8 @@ export default defineComponent({
     });
 
     ipcRenderer.addListener('engine-progress', (event, args) => {
-      // if the preview has rendered more than 2 secs, start the preview viewer
-      if (args.renderedTime > 2) {
+      // if the preview has rendered more than 5 secs, start the preview viewer
+      if (args.renderedTime > 5) {
         const port = args.port;
         if (streamUrl.value === '') {
           streamUrl.value = `http://localhost:${port.toString()}/stream.mpd`;
@@ -235,9 +239,8 @@ export default defineComponent({
     //this.$forceUpdate();
 
     ipcRenderer.addListener('engine-done', () => {
-      // if the preview has rendered more than 2 secs, start the preview viewer
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      this.previewEndTime = (this.$refs.previewPlayer as any).getEndTime();
+      //this.previewEndTime = (this.$refs.previewPlayer as any).getEndTime();
     });
 
     // feels like the leas frequent we can get away with while making the playhead still seem smooth
@@ -342,7 +345,11 @@ export default defineComponent({
           this.draggingTrack = null;
           return;
         }
-        const id = box.dataset.box;
+
+        if (!box.dataset.box) {
+          throw new Error('Mising data-box attr');
+        }
+        const id = Number.parseInt(box.dataset.box);
         for (const child of box.childNodes) {
           child.remove();
         }
@@ -352,10 +359,20 @@ export default defineComponent({
           }
 
           const segment = JSON.parse(segments)[this.activeSegment];
-          console.log(segment, this.activeSegment);
+
+          const newFiles = segment.files.length === 0
+            ? ([[ '', '', '', '' ], [ '', '', '' ], [ '', '', '' ], [ '' ]][this.screenStyle])
+            : segment.files;
+          newFiles.splice(id, 1, `${this.draggingTrack.textContent}.webm`);
+
+          const newOffsets = segment.cropOffsets.length === 0
+            ? [[{}, {}, {}, {}], [{}, {}, {}], [{}, {}, {}], [{}]][this.screenStyle]
+            : segment.cropOffsets;
+          newOffsets.splice(id, 1, { height: 720, width: 1280 });
+
           ipcRenderer.send('edit-segment', this.activeSegment, {
-            cropSizes: segment.cropSize.splice(id, 1, { height: 720, width: 1280 }),
-            files: segment.files.splice(id, 1, `${this.draggingTrack.textContent}.webm`),
+            cropOffsets: newOffsets,
+            files: newFiles,
             screenStyle: [ '....', '_..', '|..', '.' ][this.screenStyle]
           });
           this.draggingTrack = null;
@@ -377,7 +394,7 @@ export default defineComponent({
       ipcRenderer.send(
         'start-engine',
         {
-          data: JSON.parse(JSON.stringify(this.engineOpts))
+          data: { ...JSON.parse(JSON.stringify(this.engineOpts)), outputType: 'preview' }
         }
       );
     },
@@ -418,14 +435,61 @@ export default defineComponent({
         }
       }
     },
+    async updateEngineOpts() {
+      await ipcRenderer.invoke('get-option', 'videoTracks').then(async videoTracks => {
+        this.tracks = JSON.parse(videoTracks);
+        if (this.tracks.length === 0) {
+          // we have no tracks, dont try to start the preview
+          return;
+        }
+      });
+
+      await ipcRenderer.invoke('get-option', 'segments').then(segmentData => {
+        const segments = JSON.parse(segmentData);
+        if (segments === null) {
+          return;
+        }
+
+        let duration = 0;
+        for (const a of segments) {
+          if (a.interval[1] > duration) duration = a.interval[1];
+        }
+        this.previewEndTime = duration;
+
+        this.engineOpts.videoInputs = [];
+        for (const segment of segments) {
+          this.engineOpts.videoInputs.push({
+            cropOffsets: segment.cropOffsets as Resolution[],
+            files: segment.files
+              .map((f: string) => f === '' ? f : join(this.dir, f)),
+            interval: segment.interval,
+            // eslint-disable-next-line unicorn/prefer-spread
+            resolutions: segment.cropOffsets,
+            screenStyle: segment.screenStyle,
+            zoomLevels: [] // Not implemented
+          });
+        }
+      });
+
+      await ipcRenderer.invoke('get-option', 'audioTracks').then(tracks => {
+        this.engineOpts.audioInputs = [];
+
+        const audioTracks = JSON.parse(tracks);
+
+        this.engineOpts.audioInputs = audioTracks
+          .map((t: any) => {
+            return { ...t, file: join(this.dir, t.trackName) };
+          });
+      });
+    },
     render() {
       if (this.isRendering) return;
       console.log('Starting render!');
-      console.log(JSON.parse(JSON.stringify(this.engineOpts)));
+      this.updateEngineOpts();
       this.isRendering = true;
       this.renderPct = 0;
       ipcRenderer.send('export-render', {
-        data: JSON.parse(JSON.stringify(this.engineOpts))
+        data: { ...JSON.parse(JSON.stringify(this.engineOpts)), outputType: 'render' }
       });
     },
     seekToPlayhead() {
@@ -437,6 +501,32 @@ export default defineComponent({
       vidPlayer.seekToTime(newPlaybackTime);
     },
     selectSegment(id: number) {
+      ipcRenderer.invoke('get-option', 'segments').then(segs  => {
+        const parsedSegs = JSON.parse(segs);
+        this.setScreenStyle(id);
+
+        const screenStyle = parsedSegs[id].screenStyle;
+
+        const boxes = [ ...document.querySelectorAll('.screen-style.selected > div') ];
+
+        for (const i in parsedSegs[id].files) {
+          const child = boxes.find(box => (box as HTMLElement).dataset.box === `${i}`) as HTMLElement | undefined;
+
+          if (!child) {
+            throw new Error(`Cannot find child of screen style ${screenStyle} with data-box=${i}`);
+          }
+
+          for (const c of child.childNodes) {
+            c.remove();
+          }
+
+          const indicator = document.createElement('p');
+          indicator.textContent = parsedSegs[id].files[i].replace('.webm', '');
+          indicator.classList.add('track-inserted');
+          child.append(indicator);
+        }
+      });
+
       this.activeSegment = id;
     },
     setScreenStyle(style: number) {
@@ -448,8 +538,8 @@ export default defineComponent({
         this.screenStyle = style;
 
         ipcRenderer.send('edit-segment', this.activeSegment, {
-          cropSizes: [],
-          files: [],
+          cropOffsets: [[{}, {}, {}, {}], [{}, {}, {}], [{}, {}, {}], [{}]][this.screenStyle],
+          files: [[ '', '', '', '' ], [ '', '', '' ], [ '', '', '' ], [ '' ]][this.screenStyle],
           screenStyle: [ '....', '_..', '|..', '.' ][this.screenStyle]
         });
 
@@ -461,40 +551,12 @@ export default defineComponent({
       this.previewPausedBeforeSeek = this.previewPaused;
       this.previewPlay(true);
     },
-    updateEverythingPreview() {
-      ipcRenderer.invoke('get-option', 'videoTracks').then(videoTracks => {
-        this.tracks = JSON.parse(videoTracks);
-        console.log(this.tracks.length);
-        if (this.tracks.length === 0) {
-          // we have no tracks, dont try to start the preview
-          return;
-        }
+    async updateEverythingPreview() {
+      await this.updateEngineOpts();
+      console.log(this.engineOpts);
 
-        ipcRenderer.invoke('get-option', 'segments').then(segmentData => {
-          const segments = JSON.parse(segmentData);
-          if (segments === null) {
-            return;
-          }
-
-          this.engineOpts.videoInputs = [];
-          for (const segment of segments) {
-            this.engineOpts.videoInputs.push({
-              cropOffsets: segment.cropOffsets as Resolution[],
-              files: segment.files
-                .map((f: number) => this.tracks.find(t => t.trackId === f))
-                .map((t: { trackId: number; trackName: string }) => t !== undefined ? t.trackName : '')
-                .map((f: string) => join(this.dir, f)),
-              interval: segment.interval,
-              // eslint-disable-next-line unicorn/prefer-spread
-              resolutions: Array.from<Resolution>(segment.cropOffsets.length).fill({ height: 720, width: 1280 }),
-              screenStyle: segment.screenStyle,
-              zoomLevels: [] // Not implemented
-            });
-          }
-          this.getThumbnails();
-          this.getPreview();
-        });
-      });
+      this.getThumbnails();
+      this.getPreview();
     }
   }
 });
