@@ -243,7 +243,7 @@ export default defineComponent({
       //this.previewEndTime = (this.$refs.previewPlayer as any).getEndTime();
     });
 
-    // feels like the leas frequent we can get away with while making the playhead still seem smooth
+    // feels like the least frequent we can get away with while making the playhead still seem smooth
     window.setInterval(this.playheadUpdate, 0.1);
 
     this.previewPlay(false);
@@ -424,6 +424,7 @@ export default defineComponent({
       }
     },
     previewPlay(playing: boolean) {
+      console.log(playing)
       this.previewPaused = !playing;
       if (this.$refs.previewPlayer) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -440,7 +441,7 @@ export default defineComponent({
         this.tracks = JSON.parse(videoTracks);
         if (this.tracks.length === 0) {
           // we have no tracks, dont try to start the preview
-          return;
+          return false;
         }
       });
 
@@ -449,6 +450,8 @@ export default defineComponent({
         if (segments === null) {
           return;
         }
+
+        console.log(segments)
 
         let duration = 0;
         for (const a of segments) {
@@ -469,6 +472,7 @@ export default defineComponent({
             zoomLevels: [] // Not implemented
           });
         }
+        console.log(this.engineOpts.videoInputs);
       });
 
       await ipcRenderer.invoke('get-option', 'audioTracks').then(tracks => {
@@ -552,6 +556,14 @@ export default defineComponent({
       this.previewPlay(true);
     },
     async updateEverythingPreview() {
+      await ipcRenderer.invoke('get-option', 'videoTracks').then(async videoTracks => {
+        this.tracks = JSON.parse(videoTracks);
+        if (this.tracks.length === 0) {
+          // we have no tracks, dont try to start the preview
+          return false;
+        }
+      });
+
       await this.updateEngineOpts();
       console.log(this.engineOpts);
 

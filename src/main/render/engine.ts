@@ -295,11 +295,11 @@ function buildArgs({
       outputType === 'thumbnail' ? '' : audioInputs.map((input: AudioInput, i: number) =>
         `[${i + videoDict.size}:a]aformat=fltp:48000:stereo,volume=${input.volume || 1}${getAudioFilters(input).length === 0 ? '' : ','.concat(getAudioFilters(input))}[ainput${i}]`)
         .join(';'),
-      outputType === 'thumbnail' ? '' : (audioInputs.length === 0 ? '' : `${audioInputs.map((_, i: number) => `[ainput${i}]`).join('')}amix=inputs=${audioInputs.length}:duration=longest[aout]`)
+      outputType === 'thumbnail' ? '' : (audioInputs.length === 0 ? '' : `${audioInputs.map((_, i: number) => `[ainput${i}]`).join('')}amix=inputs=${audioInputs.length}:duration=longest,apad[aout]`)
     ].filter(el => el.length > 0).join(';'),
 
-    '-map', '[out]',
-    (outputType === 'thumbnail' || audioInputs.length === 0) ? '' : '-map', (outputType === 'thumbnail' || audioInputs.length === 0) ? '' : '[aout]'
+    '-map', '[out]:v:0',
+    (outputType === 'thumbnail' || audioInputs.length === 0) ? '' : '-map', (outputType === 'thumbnail' || audioInputs.length === 0) ? '' : '[aout]:a:0'
 
   ].filter(el => el.length > 0);
 
